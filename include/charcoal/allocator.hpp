@@ -19,7 +19,12 @@ namespace ccl {
         /**
          * Allocate space in permanent memory. This cannot be freed.
          */
-        CCL_VALUE(PERMANENT, 0)
+        CCL_VALUE(PERMANENT, 0),
+
+        /**
+         * Allocate space for a short-lived object.
+         */
+        CCL_VALUE(TEMPORARY, 1)
 
         #undef CCL_VALUE
     };
