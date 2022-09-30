@@ -33,6 +33,12 @@ namespace ccl {
             ) : allocator{allocator ? allocator : get_default_allocator<value_type>()}
             {}
 
+            // TODO: Use iterators
+            // constexpr vector(const vector &other)
+            // : size{other.size}, allocator{other.allocator} {
+            //     reserve(other.capacity);
+            // }
+
             void reserve(const size_t new_capacity) {
                 if(new_capacity > capacity) {
                     value_type * const new_data = allocator->template allocate<value_type>(new_capacity);
