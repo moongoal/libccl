@@ -130,7 +130,7 @@ namespace ccl {
             value_type * data = nullptr;
             allocator_type * allocator = nullptr;
 
-            static void move_or_copy_item(T& destination, T& source) {
+            static void move_or_copy_item(T& destination, T& source) noexcept {
                 if constexpr(std::is_move_assignable_v<T>) {
                     destination = std::move(source);
                 } else {
@@ -138,7 +138,7 @@ namespace ccl {
                 }
             }
 
-            static void move_or_copy_slice(T* const destination, T* const source, const size_type count) {
+            static void move_or_copy_slice(T* const destination, T* const source, const size_type count) noexcept {
                 if constexpr(std::is_trivially_copyable_v<T>) {
                     ::memmove(destination, source, sizeof(T) * count);
                 } else {
@@ -157,7 +157,7 @@ namespace ccl {
                 const size_type index,
                 Tref item,
                 std::function<void()> assign
-            ) {
+            ) noexcept {
                 assert(index >= 0 && index <= length);
                 reserve(capacity += 1);
 
@@ -176,7 +176,7 @@ namespace ccl {
         public:
             explicit constexpr vector(
                 allocator_type * const allocator = nullptr
-            ) : allocator{allocator ? allocator : get_default_allocator<value_type>()}
+            ) noexcept : allocator{allocator ? allocator : get_default_allocator<value_type>()}
             {}
 
             // TODO: Use iterators
@@ -185,11 +185,11 @@ namespace ccl {
             //     reserve(other.capacity);
             // }
 
-            constexpr size_type get_length() const { return length; }
-            constexpr size_type get_capacity() const { return capacity; }
-            constexpr void* get_data() const { return data; }
+            constexpr size_type get_length() const noexcept { return length; }
+            constexpr size_type get_capacity() const noexcept { return capacity; }
+            constexpr void* get_data() const noexcept { return data; }
 
-            void reserve(const size_type new_capacity) {
+            void reserve(const size_type new_capacity) noexcept {
                 if(new_capacity > capacity) {
                     value_type * const new_data = allocator->template allocate<value_type>(new_capacity);
 
@@ -202,7 +202,7 @@ namespace ccl {
                 }
             }
 
-            void insert(const size_type index, const T& item) {
+            void insert(const size_type index, const T& item) noexcept {
                 insert_w_assign(
                     index,
                     item,
@@ -210,7 +210,7 @@ namespace ccl {
                 );
             }
 
-            void insert(const size_type index, T&& item) {
+            void insert(const size_type index, T&& item) noexcept {
                 insert_w_assign(
                     index,
                     item,
@@ -218,16 +218,16 @@ namespace ccl {
                 );
             }
 
-            void append(const T& item) { insert(length, item); }
-            void append(T&& item) { insert(length, std::move(item)); }
+            void append(const T& item) noexcept { insert(length, item); }
+            void append(T&& item) noexcept { insert(length, std::move(item)); }
 
-            constexpr value_type& operator[](const size_type index) {
+            constexpr value_type& operator[](const size_type index) noexcept {
                 assert(index >= 0 && index < length);
 
                 return data[index];
             }
 
-            constexpr const value_type& operator[](const size_type index) const {
+            constexpr const value_type& operator[](const size_type index) const noexcept {
                 assert(index >= 0 && index < length);
 
                 return data[index];
