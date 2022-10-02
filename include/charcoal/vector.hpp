@@ -123,6 +123,18 @@ namespace ccl {
 
             void append(const T& item) { insert(length, item); }
             void append(T&& item) { insert(length, std::move(item)); }
+
+            constexpr value_type& operator[](const size_type index) {
+                assert(index >= 0 && index < length);
+
+                return data[index];
+            }
+
+            constexpr const value_type& operator[](const size_type index) const {
+                assert(index >= 0 && index < length);
+
+                return data[index];
+            }
     };
 }
 
