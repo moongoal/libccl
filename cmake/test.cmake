@@ -1,13 +1,17 @@
 include_guard()
 
-add_executable(test_vector test/vector.cpp)
-target_link_libraries(test_vector libcharcoal)
-set_target_properties(
-    test_vector
-    PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY test
-)
-add_test(
-    NAME test_vector
-    COMMAND test_vector
-)
+function(add_ccl_test test_name test_file_path)
+    add_executable(${test_name} ${test_file_path})
+    target_link_libraries(${test_name} libcharcoal)
+    set_target_properties(
+        ${test_name}
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY test
+    )
+    add_test(
+        NAME ${test_name}
+        COMMAND ${test_name}
+    )
+endfunction(add_ccl_test)
+
+add_ccl_test(test_vector test/vector.cpp)

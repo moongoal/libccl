@@ -1,4 +1,5 @@
 #include <charcoal/test.hpp>
+#include <charcoal/vector.hpp>
 
 using namespace ccl;
 
