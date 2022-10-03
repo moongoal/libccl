@@ -70,7 +70,7 @@ namespace ccl {
                         all_success = false;
                     }
 
-                    std::cout << state_tag << t->get_name() << std::endl;
+                    std::cout << state_tag << ' ' << t->get_name() << std::endl;
                 }
 
                 return all_success;
@@ -80,7 +80,7 @@ namespace ccl {
                 const std::string_view name,
                 const test_function test_func
             ) {
-                tests.push_back(std::make_shared<test>(name, test_func));
+                return tests.emplace_back(std::make_shared<test>(name, test_func));
             }
 
             int main(int argc, char **argv) {

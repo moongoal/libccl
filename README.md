@@ -23,3 +23,13 @@ To build the project:
 ```
 cmake --build build
 ```
+
+## Testing
+
+To run the tests:
+
+```
+ctest
+```
+
+This command **must be run from the build directory**.

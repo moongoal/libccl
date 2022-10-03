@@ -1,4 +1,7 @@
+cmake_minimum_required(VERSION 3.24)
 project(Charcoal)
+
+enable_testing()
 
 add_library(
     libcharcoal
@@ -19,3 +22,5 @@ target_compile_definitions(
 )
 
 target_include_directories(libcharcoal PUBLIC include)
+
+include(cmake/test.cmake)
