@@ -8,6 +8,10 @@ int main(int argc, char **argv) {
         "ctor",
         []() {
             vector<int> v;
+
+            assert(v.get_capacity() == 0);
+            assert(v.get_length() == 0);
+            assert(v.get_data() == nullptr);
         }
     );
 

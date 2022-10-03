@@ -35,14 +35,6 @@ namespace ccl {
             {}
 
             const std::string& get_name() const { return name; }
-
-            void fail() const { throw test_failed_exception(); }
-
-            void assert(const bool condition) const {
-                if(!condition) {
-                    fail();
-                }
-            }
     };
 
     class test_suite {
@@ -87,6 +79,14 @@ namespace ccl {
                 return 1 - execute();
             }
     };
+
+    inline void fail() { throw test_failed_exception(); }
+
+    inline void assert(const bool condition) {
+        if(!condition) {
+            fail();
+        }
+    }
 
     static test_suite suite;
 }
