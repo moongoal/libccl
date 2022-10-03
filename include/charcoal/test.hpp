@@ -11,6 +11,7 @@
 #include <string>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <charcoal/api.hpp>
 
 namespace ccl {
@@ -45,7 +46,11 @@ namespace ccl {
     };
 
     class test_suite {
-        std::vector<test> tests;
+        public:
+            using test_ptr = std::shared_ptr<test>;
+
+        private:
+            std::vector<test_ptr> tests;
 
         public:
             test_suite() {
@@ -59,24 +64,31 @@ namespace ccl {
                     std::string state_tag = "[ PASS ]";
 
                     try {
-                        t.execute();
+                        t->execute();
                     } catch (test_failed_exception exc) {
                         state_tag = "[*FAIL*]";
                         all_success = false;
                     }
 
-                    std::cout << state_tag << t.get_name() << std::endl;
+                    std::cout << state_tag << t->get_name() << std::endl;
                 }
 
                 return all_success;
             }
+
+            test_ptr add_test(
+                const std::string_view name,
+                const test_function test_func
+            ) {
+                tests.push_back(std::make_shared<test>(name, test_func));
+            }
+
+            int main(int argc, char **argv) {
+                return 1 - execute();
+            }
     };
 
     static test_suite suite;
-}
-
-int main(int argc, char **argv) {
-    return 1 - ccl::suite.execute();
 }
 
 #endif // CCL_TEST_HPP
