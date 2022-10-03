@@ -44,7 +44,7 @@ namespace ccl {
     concept typed_allocator = requires(Allocator allocator, const size_t n, const int flags) {
         requires basic_allocator<Allocator>;
 
-        { allocator.allocate(n, flags) } -> std::convertible_to<T*>;
+        { allocator.template allocate<T>(n, flags) } -> std::convertible_to<T*>;
     };
 }
 

@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "ctor",
         []() {
-
+            vector<int> v;
         }
     );
 

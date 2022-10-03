@@ -109,7 +109,7 @@ namespace ccl {
 
     template<
         typename T,
-        typed_allocator<T> Allocator
+        typed_allocator<T> Allocator = allocator
     >
     class vector {
         static_assert(std::is_default_constructible_v<T>);
@@ -176,7 +176,7 @@ namespace ccl {
         public:
             explicit constexpr vector(
                 allocator_type * const allocator = nullptr
-            ) noexcept : allocator{allocator ? allocator : get_default_allocator<value_type>()}
+            ) noexcept : allocator{allocator ? allocator : get_default_allocator<allocator_type>()}
             {}
 
             // TODO: Use iterators
