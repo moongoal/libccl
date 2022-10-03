@@ -15,3 +15,4 @@ function(add_ccl_test test_name test_file_path)
 endfunction(add_ccl_test)
 
 add_ccl_test(test_vector test/vector.cpp)
+add_ccl_test(test_self_test test/test.cpp)

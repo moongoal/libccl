@@ -43,9 +43,10 @@ namespace ccl {
 
         private:
             std::vector<test_ptr> tests;
+            std::ostream *ostream;
 
         public:
-            test_suite() {
+            explicit test_suite(std::ostream * const ostream = &std::cout) : ostream{ostream} {
                 tests.reserve(32);
             }
 
@@ -62,7 +63,9 @@ namespace ccl {
                         all_success = false;
                     }
 
-                    std::cout << state_tag << ' ' << t->get_name() << std::endl;
+                    if(ostream) {
+                        *ostream << state_tag << ' ' << t->get_name() << std::endl;
+                    }
                 }
 
                 return all_success;
