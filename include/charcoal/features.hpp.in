@@ -1,0 +1,11 @@
+/**
+ * @file
+ *
+ * Enabled features.
+ */
+#ifndef CCL_FEATURES_HPP
+#define CCL_FEATURES_HPP
+
+#cmakedefine CCL_FEATURE_BUILD_SHARED
+
+#endif // CCL_FEATURES_HPP
