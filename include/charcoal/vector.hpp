@@ -8,6 +8,7 @@
 
 #include <type_traits>
 #include <memory>
+#include <cstring>
 #include <cassert>
 #include <functional>
 #include <iterator>
