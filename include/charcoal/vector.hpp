@@ -9,7 +9,6 @@
 #include <type_traits>
 #include <memory>
 #include <cstring>
-#include <cassert>
 #include <functional>
 #include <iterator>
 #include <algorithm>
@@ -137,16 +136,19 @@ namespace ccl {
                 reference item,
                 std::function<void(iterator where, reference item)> assign
             ) noexcept {
-                assert(it >= begin() && it <= end());
+                THROW_IF(it < begin() || it > end(), std::out_of_range{"Iterator out of range."});
 
                 const size_type index = std::to_address(it) - data;
                 reserve(capacity + 1);
                 it = { data + index };
 
                 if(it < end()) {
+                    auto it_begin = it + 1;
+                    auto it_end = end() - 1;
+
                     std::move_backward(
-                        it + 1,
-                        end() - 1,
+                        it_begin,
+                        it_end,
                         end()
                     );
                 }
@@ -207,13 +209,13 @@ namespace ccl {
             void append(T&& item) noexcept { insert(end(), std::move(item)); }
 
             constexpr value_type& operator[](const size_type index) noexcept {
-                assert(index >= 0 && index < length);
+                THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
 
             constexpr const value_type& operator[](const size_type index) const noexcept {
-                assert(index >= 0 && index < length);
+                THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }

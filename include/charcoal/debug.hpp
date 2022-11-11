@@ -11,10 +11,14 @@
 
 #ifdef CCL_FEATURE_ASSERTIONS
     #define CCL_ASSERT(cond) do { if(!(cond)) { ::abort(); } } while(false)
-    #define THROW_IF(cond, exc) do { if((cond)) { throw (exc); } } while(false)
-#else
+#else // CCL_FEATURE_ASSERTIONS
     #define CCL_ASSERT(cond) ((void)0)
-    #define THROW_IF(cond) ((void)0)
 #endif // CCL_FEATURE_ASSERTIONS
+
+#ifdef CCL_FEATURE_EXCEPTIONS
+    #define THROW_IF(cond, exc) do { if((cond)) { throw (exc); } } while(false)
+#else // CCL_FEATURE_EXCEPTIONS
+    #define THROW_IF(cond) ((void)0)
+#endif // CCL_FEATURE_EXCEPTIONS
 
 #endif // CCL_DEBUG_HPP

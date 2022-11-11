@@ -8,5 +8,6 @@
 
 #cmakedefine CCL_FEATURE_BUILD_SHARED
 #cmakedefine CCL_FEATURE_ASSERTIONS
+#cmakedefine CCL_FEATURE_EXCEPTIONS
 
 #endif // CCL_FEATURES_HPP
