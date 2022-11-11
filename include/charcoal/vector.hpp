@@ -135,7 +135,7 @@ namespace ccl {
                 iterator it,
                 reference item,
                 std::function<void(iterator where, reference item)> assign
-            ) noexcept {
+            ) {
                 THROW_IF(it < begin() || it > end(), std::out_of_range{"Iterator out of range."});
 
                 const size_type index = std::to_address(it) - data;
@@ -143,13 +143,10 @@ namespace ccl {
                 it = { data + index };
 
                 if(it < end()) {
-                    auto it_begin = it + 1;
-                    auto it_end = end() - 1;
-
                     std::move_backward(
-                        it_begin,
-                        it_end,
-                        end()
+                        it,
+                        end(),
+                        end() + 1
                     );
                 }
 
@@ -160,7 +157,7 @@ namespace ccl {
         public:
             explicit constexpr vector(
                 allocator_type * const allocator = nullptr
-            ) noexcept : allocator{allocator ? allocator : get_default_allocator<allocator_type>()}
+            ) : allocator{allocator ? allocator : get_default_allocator<allocator_type>()}
             {}
 
             // TODO: Use iterators
@@ -186,7 +183,7 @@ namespace ccl {
                 }
             }
 
-            void insert(const iterator where, const T& item) noexcept {
+            void insert(const iterator where, const T& item) {
                 insert_w_assign(
                     where,
                     item,
@@ -194,7 +191,7 @@ namespace ccl {
                 );
             }
 
-            void insert(const iterator where, T&& item) noexcept {
+            void insert(const iterator where, T&& item) {
                 insert_w_assign(
                     where,
                     item,
@@ -202,25 +199,25 @@ namespace ccl {
                 );
             }
 
-            void prepend(const T& item) noexcept { insert(begin(), item); }
-            void prepend(T&& item) noexcept { insert(begin(), std::move(item)); }
+            void prepend(const T& item) { insert(begin(), item); }
+            void prepend(T&& item) { insert(begin(), std::move(item)); }
 
-            void append(const T& item) noexcept { insert(end(), item); }
-            void append(T&& item) noexcept { insert(end(), std::move(item)); }
+            void append(const T& item) { insert(end(), item); }
+            void append(T&& item) { insert(end(), std::move(item)); }
 
-            constexpr value_type& operator[](const size_type index) noexcept {
+            constexpr value_type& operator[](const size_type index) {
                 THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
 
-            constexpr const value_type& operator[](const size_type index) const noexcept {
+            constexpr const value_type& operator[](const size_type index) const {
                 THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
 
-            constexpr void clear() noexcept {
+            constexpr void clear() {
                 if constexpr(std::is_destructible_v<T>) {
                     std::for_each(begin(), end(), [](reference item) { item.~T(); });
                 }
