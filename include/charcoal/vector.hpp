@@ -168,7 +168,7 @@ namespace ccl {
 
             constexpr size_type get_length() const noexcept { return length; }
             constexpr size_type get_capacity() const noexcept { return capacity; }
-            constexpr void* get_data() const noexcept { return data; }
+            constexpr pointer get_data() const noexcept { return data; }
 
             void reserve(const size_type new_capacity) {
                 if(new_capacity > capacity) {

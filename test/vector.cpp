@@ -51,5 +51,63 @@ int main(int argc, char **argv) {
         }
     );
 
+    suite.add_test(
+        "reserve_less", [] () {
+            vector<int> v;
+
+            v.prepend(1);
+            v.prepend(2);
+            v.prepend(3);
+
+            int * const old_data = v.get_data();
+
+            v.reserve(1);
+
+            check(v.get_length() == 3);
+            check(v.get_capacity() == 4);
+            check(v.get_data() == old_data);
+        }
+    );
+
+    suite.add_test(
+        "reserve_same", [] () {
+            vector<int> v;
+
+            v.prepend(1);
+            v.prepend(2);
+            v.prepend(3);
+
+            int * const old_data = v.get_data();
+
+            v.reserve(v.get_capacity());
+
+            check(v.get_length() == 3);
+            check(v.get_capacity() == 4);
+            check(v.get_data() == old_data);
+        }
+    );
+
+    suite.add_test(
+        "reserve_more", [] () {
+            vector<int> v;
+
+            v.prepend(1);
+            v.prepend(2);
+            v.prepend(3);
+
+            int * const old_data = v.get_data();
+
+            v.reserve(5);
+
+            check(v.get_length() == 3);
+            check(v.get_capacity() == 8);
+            check(v.get_data() != old_data);
+
+            check(v[0] == 3);
+            check(v[1] == 2);
+            check(v[2] == 1);
+        }
+    );
+
     return suite.main(argc, argv);
 }
