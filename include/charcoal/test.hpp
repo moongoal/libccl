@@ -85,7 +85,7 @@ namespace ccl {
 
     inline void fail() { throw test_failed_exception(); }
 
-    inline void assert(const bool condition) {
+    inline void check(const bool condition) {
         if(!condition) {
             fail();
         }

@@ -12,10 +12,11 @@
 #include <cassert>
 #include <functional>
 #include <iterator>
-#include <vector>
+#include <algorithm>
 #include <charcoal/api.hpp>
 #include <charcoal/allocator.hpp>
 #include <charcoal/concepts.hpp>
+#include <charcoal/util.hpp>
 
 namespace ccl {
     template<typename Vector>
@@ -71,12 +72,12 @@ namespace ccl {
             return ptr[i];
         }
 
-        constexpr bool operator ==(const vector_iterator other) const noexcept { return ptr == other.ptr;}
-        constexpr bool operator !=(const vector_iterator other) const noexcept { return ptr != other.ptr;}
-        constexpr bool operator >(const vector_iterator other) const noexcept { return ptr > other.ptr;}
-        constexpr bool operator <(const vector_iterator other) const noexcept { return ptr < other.ptr;}
-        constexpr bool operator >=(const vector_iterator other) const noexcept { return ptr >= other.ptr;}
-        constexpr bool operator <=(const vector_iterator other) const noexcept { return ptr <= other.ptr;}
+        constexpr bool operator ==(const vector_iterator other) const noexcept { return ptr == other.ptr; }
+        constexpr bool operator !=(const vector_iterator other) const noexcept { return ptr != other.ptr; }
+        constexpr bool operator >(const vector_iterator other) const noexcept { return ptr > other.ptr; }
+        constexpr bool operator <(const vector_iterator other) const noexcept { return ptr < other.ptr; }
+        constexpr bool operator >=(const vector_iterator other) const noexcept { return ptr >= other.ptr; }
+        constexpr bool operator <=(const vector_iterator other) const noexcept { return ptr <= other.ptr; }
 
         constexpr vector_iterator& operator --() const noexcept {
             --ptr;
@@ -131,46 +132,23 @@ namespace ccl {
             value_type * data = nullptr;
             allocator_type * allocator = nullptr;
 
-            static void move_or_copy_item(T& destination, T& source) noexcept {
-                if constexpr(std::is_move_assignable_v<T>) {
-                    destination = std::move(source);
-                } else {
-                    destination = source;
-                }
-            }
-
-            static void move_or_copy_slice(T* const destination, T* const source, const size_type count) noexcept {
-                if constexpr(std::is_trivially_copyable_v<T>) {
-                    ::memmove(destination, source, sizeof(T) * count);
-                } else {
-                    for(
-                        T* ptr_src = source + count - 1, ptr_dst = destination + count - 1;
-                        ptr_src >= source;
-                        --ptr_src, --ptr_dst
-                    ) {
-                        *ptr_dst = *ptr_src;
-                    }
-                }
-            }
-
-            template<typename Tref>
             void insert_w_assign(
-                const size_type index,
-                Tref item,
-                std::function<void()> assign
+                const iterator it,
+                reference item,
+                std::function<void(reference item)> assign
             ) noexcept {
-                assert(index >= 0 && index <= length);
+                assert(it >= begin() && it <= end());
                 reserve(capacity += 1);
 
-                if(index < length) {
-                    move_or_copy_slice(
-                        data + index + 1,
-                        data + index,
-                        length - index
+                if(it < end()) {
+                    std::move_backward(
+                        it + 1,
+                        end() - 1,
+                        end()
                     );
                 }
 
-                assign();
+                assign(item);
                 length += 1;
             }
 
@@ -192,35 +170,38 @@ namespace ccl {
 
             void reserve(const size_type new_capacity) noexcept {
                 if(new_capacity > capacity) {
-                    value_type * const new_data = allocator->template allocate<value_type>(new_capacity);
+                    const size_type actual_new_capacity = increase_capacity(capacity, new_capacity);
+                    value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
 
-                    for(size_t i = 0; i < length; ++i) {
-                        move_or_copy_item(new_data[i], data[i]);
-                    }
-
+                    std::uninitialized_move(begin(), last(), new_data);
                     allocator->free(data);
+
                     data = new_data;
+                    capacity = actual_new_capacity;
                 }
             }
 
-            void insert(const size_type index, const T& item) noexcept {
+            void insert(const iterator where, const T& item) noexcept {
                 insert_w_assign(
-                    index,
+                    where,
                     item,
-                    [this, index, &item]() { data[index] = item; }
+                    [this, where](reference item) { *where = item; }
                 );
             }
 
-            void insert(const size_type index, T&& item) noexcept {
+            void insert(const iterator where, T&& item) noexcept {
                 insert_w_assign(
-                    index,
+                    where,
                     item,
-                    [this, index, &item]() { data[index] = std::move(item); }
+                    [this, where](reference item) { *where = std::move(item); }
                 );
             }
 
-            void append(const T& item) noexcept { insert(length, item); }
-            void append(T&& item) noexcept { insert(length, std::move(item)); }
+            void prepend(const T& item) noexcept { insert(begin(), item); }
+            void prepend(T&& item) noexcept { insert(begin(), std::move(item)); }
+
+            void append(const T& item) noexcept { insert(end(), item); }
+            void append(T&& item) noexcept { insert(end(), std::move(item)); }
 
             constexpr value_type& operator[](const size_type index) noexcept {
                 assert(index >= 0 && index < length);
@@ -232,6 +213,14 @@ namespace ccl {
                 assert(index >= 0 && index < length);
 
                 return data[index];
+            }
+
+            constexpr void clear() noexcept {
+                if constexpr(std::is_destructible_v<T>) {
+                    std::for_each(begin(), end(), [](reference item) { item.~T(); });
+                }
+
+                length = 0;
             }
 
             constexpr iterator begin() const noexcept { return data; }

@@ -14,8 +14,8 @@ int main(int argc, char **argv) {
             my_test_suite.add_test("execute2", run_increment);
             my_test_suite.add_test("execute3", run_increment);
 
-            assert(my_test_suite.execute() == true);
-            assert(test_run_count == 3);
+            check(my_test_suite.execute() == true);
+            check(test_run_count == 3);
         }
     );
 
@@ -29,31 +29,31 @@ int main(int argc, char **argv) {
             my_test_suite.add_test("fail", run_fail);
             my_test_suite.add_test("succeed", run_success);
 
-            assert(my_test_suite.execute() == false);
+            check(my_test_suite.execute() == false);
         }
     );
 
     suite.add_test(
-        "assert_fail",
+        "check_fail",
         []() {
             test_suite my_test_suite{nullptr}; // Test subject.
-            const test_function run_test = []() { assert(false); };
+            const test_function run_test = []() { check(false); };
 
             my_test_suite.add_test("fail", run_test);
 
-            assert(my_test_suite.execute() == false);
+            check(my_test_suite.execute() == false);
         }
     );
 
     suite.add_test(
-        "assert_success",
+        "check_success",
         []() {
             test_suite my_test_suite{nullptr}; // Test subject.
-            const test_function run_test = []() { assert(true); };
+            const test_function run_test = []() { check(true); };
 
             my_test_suite.add_test("success", run_test);
 
-            assert(my_test_suite.execute() == true);
+            check(my_test_suite.execute() == true);
         }
     );
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
             my_test_suite.add_test("success", run_test);
 
-            assert(my_test_suite.main(0, nullptr) == 0);
+            check(my_test_suite.main(0, nullptr) == 0);
         }
     );
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 
             my_test_suite.add_test("fail", run_test);
 
-            assert(my_test_suite.main(0, nullptr) != 0);
+            check(my_test_suite.main(0, nullptr) != 0);
         }
     );
 

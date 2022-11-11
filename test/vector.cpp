@@ -9,9 +9,20 @@ int main(int argc, char **argv) {
         []() {
             vector<int> v;
 
-            assert(v.get_capacity() == 0);
-            assert(v.get_length() == 0);
-            assert(v.get_data() == nullptr);
+            check(v.get_capacity() == 0);
+            check(v.get_length() == 0);
+            check(v.get_data() == nullptr);
+        }
+    );
+
+    suite.add_test(
+        "append",
+        []() {
+            vector<int> v;
+
+            v.append(1);
+            v.append(2);
+            v.append(3);
         }
     );
 
