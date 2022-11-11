@@ -10,8 +10,8 @@
 #include <charcoal/api.hpp>
 
 #ifdef CCL_FEATURE_ASSERTIONS
-    #define CCL_ASSERT(cond) do { ::abort(); } while(!(cond))
-    #define THROW_IF(cond, exc) do { throw (exc); } while((cond))
+    #define CCL_ASSERT(cond) do { if(!(cond)) { ::abort(); } } while(false)
+    #define THROW_IF(cond, exc) do { if((cond)) { throw (exc); } } while(false)
 #else
     #define CCL_ASSERT(cond) ((void)0)
     #define THROW_IF(cond) ((void)0)

@@ -4,6 +4,11 @@
 using namespace ccl;
 
 int main(int argc, char ** argv) {
+    suite.add_test("choose", [] () {
+        check(choose(1, 2, true) == 1);
+        check(choose(1, 2, false) == 2);
+    });
+
     suite.add_test("is_power_2", [] () {
         check(is_power_2(5) == false);
         check(is_power_2(1) == true);

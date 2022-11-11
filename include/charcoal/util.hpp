@@ -27,6 +27,22 @@ namespace ccl {
     }
 
     /**
+     * Choose between two values.
+     *
+     * @param a The first value.
+     * @param b The second value.
+     * @param cond The condition.
+     *
+     * @return The value of `a` if `cond` evaluates to true or that of `b` if it evaluates to false.
+     */
+    template<typename T>
+    constexpr T choose(const T a, const T b, const bool cond) noexcept {
+        const T choices[2] { b, a };
+
+        return choices[cond];
+    }
+
+    /**
      * Increase capacity until it reaches or surpasses the value of
      * `threshold`.
      *
@@ -40,7 +56,10 @@ namespace ccl {
     template<typename T>
     requires std::integral<T>
     constexpr T increase_capacity(T capacity, const T threshold) {
-        CCL_ASSERT(capacity > 0);
+        CCL_ASSERT(capacity >= 0);
+
+        capacity = choose<T>(1, capacity, capacity == 0);
+
         THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
 
         while(capacity < threshold) {

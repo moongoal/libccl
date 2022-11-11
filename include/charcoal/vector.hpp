@@ -133,12 +133,15 @@ namespace ccl {
             allocator_type * allocator = nullptr;
 
             void insert_w_assign(
-                const iterator it,
+                iterator it,
                 reference item,
-                std::function<void(reference item)> assign
+                std::function<void(iterator where, reference item)> assign
             ) noexcept {
                 assert(it >= begin() && it <= end());
-                reserve(capacity += 1);
+
+                const size_type index = std::to_address(it) - data;
+                reserve(capacity + 1);
+                it = { data + index };
 
                 if(it < end()) {
                     std::move_backward(
@@ -148,7 +151,7 @@ namespace ccl {
                     );
                 }
 
-                assign(item);
+                assign(it, item);
                 length += 1;
             }
 
@@ -168,7 +171,7 @@ namespace ccl {
             constexpr size_type get_capacity() const noexcept { return capacity; }
             constexpr void* get_data() const noexcept { return data; }
 
-            void reserve(const size_type new_capacity) noexcept {
+            void reserve(const size_type new_capacity) {
                 if(new_capacity > capacity) {
                     const size_type actual_new_capacity = increase_capacity(capacity, new_capacity);
                     value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
@@ -185,7 +188,7 @@ namespace ccl {
                 insert_w_assign(
                     where,
                     item,
-                    [this, where](reference item) { *where = item; }
+                    [](iterator where, reference item) { *where = item; }
                 );
             }
 
@@ -193,7 +196,7 @@ namespace ccl {
                 insert_w_assign(
                     where,
                     item,
-                    [this, where](reference item) { *where = std::move(item); }
+                    [](iterator where, reference item) { *where = std::move(item); }
                 );
             }
 

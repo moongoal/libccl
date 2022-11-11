@@ -23,6 +23,13 @@ int main(int argc, char **argv) {
             v.append(1);
             v.append(2);
             v.append(3);
+
+            check(v[0] == 1);
+            check(v[1] == 2);
+            check(v[2] == 3);
+
+            check(v.get_length() == 3);
+            check(v.get_capacity() == 4);
         }
     );
 
