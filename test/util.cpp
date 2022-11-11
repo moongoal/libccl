@@ -4,6 +4,14 @@
 using namespace ccl;
 
 int main(int argc, char ** argv) {
+    suite.add_test("is_power_2", [] () {
+        check(is_power_2(5) == false);
+        check(is_power_2(1) == true);
+        check(is_power_2(2) == true);
+        check(is_power_2(0) == true);
+        check(is_power_2(64) == true);
+    });
+
     suite.add_test(
         "increase_capacity",
         [] () {

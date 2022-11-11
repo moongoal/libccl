@@ -44,7 +44,7 @@ namespace ccl {
         }
 
         constexpr reference operator*() const noexcept { return *ptr; }
-        constexpr reference operator->() const noexcept { return *ptr; }
+        constexpr pointer operator->() const noexcept { return ptr; }
 
         constexpr vector_iterator& operator +=(const difference_type n) noexcept {
             ptr += n;
@@ -79,21 +79,21 @@ namespace ccl {
         constexpr bool operator >=(const vector_iterator other) const noexcept { return ptr >= other.ptr; }
         constexpr bool operator <=(const vector_iterator other) const noexcept { return ptr <= other.ptr; }
 
-        constexpr vector_iterator& operator --() const noexcept {
+        constexpr vector_iterator& operator --() noexcept {
             --ptr;
             return *this;
         }
 
-        constexpr vector_iterator operator --(int) const noexcept {
+        constexpr vector_iterator operator --(int) noexcept {
             return ptr--;
         }
 
-        constexpr vector_iterator& operator ++() const noexcept {
+        constexpr vector_iterator& operator ++() noexcept {
             ++ptr;
             return *this;
         }
 
-        constexpr vector_iterator operator ++(int) const noexcept {
+        constexpr vector_iterator operator ++(int) noexcept {
             return ptr++;
         }
 
@@ -173,7 +173,7 @@ namespace ccl {
                     const size_type actual_new_capacity = increase_capacity(capacity, new_capacity);
                     value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
 
-                    std::uninitialized_move(begin(), last(), new_data);
+                    std::uninitialized_move(begin(), end(), new_data);
                     allocator->free(data);
 
                     data = new_data;

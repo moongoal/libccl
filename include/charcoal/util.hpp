@@ -6,11 +6,26 @@
 #ifndef CCL_UTIL_HPP
 #define CCL_UTIL_HPP
 
-#include <cassert>
-#include <concepts>
+#include <cmath>
 #include <charcoal/api.hpp>
+#include <charcoal/debug.hpp>
+#include <charcoal/concepts.hpp>
+#include <charcoal/exceptions.hpp>
 
 namespace ccl {
+    /**
+     * Check whether a number is a power of 2.
+     *
+     * @param n The integral value to check.
+     *
+     * @return True if the number is a power of two, false if not.
+     */
+    constexpr bool is_power_2(std::integral auto n) noexcept {
+        CCL_ASSERT(n >= 0);
+
+        return !(n & (n - 1));
+    }
+
     /**
      * Increase capacity until it reaches or surpasses the value of
      * `threshold`.
@@ -25,9 +40,8 @@ namespace ccl {
     template<typename T>
     requires std::integral<T>
     constexpr T increase_capacity(T capacity, const T threshold) {
-        assert(capacity > 0);
-
-        // TODO: Add exception to ensure capacity is a power of 2
+        CCL_ASSERT(capacity > 0);
+        THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
 
         while(capacity < threshold) {
             capacity <<= 1;

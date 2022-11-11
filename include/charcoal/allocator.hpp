@@ -62,7 +62,7 @@ namespace ccl {
              */
             template<typename T>
             CCLNODISCARD T* allocate(const size_t n, const int flags = 0) {
-                return allocate(sizeof(T) * n, alignof(T), flags);
+                return reinterpret_cast<T*>(allocate(sizeof(T) * n, alignof(T), flags));
             }
 
             /**
