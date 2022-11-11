@@ -131,10 +131,14 @@ namespace ccl {
             value_type * data = nullptr;
             allocator_type * allocator = nullptr;
 
-            void insert_w_assign(
+            /**
+             * Make room for insertion.
+             *
+             * @return The iterator where to place the new item.
+             */
+            iterator make_room(
                 iterator it,
-                reference item,
-                std::function<void(iterator where, reference item)> assign
+                reference item
             ) {
                 THROW_IF(it < begin() || it > end(), std::out_of_range{"Iterator out of range."});
 
@@ -150,8 +154,9 @@ namespace ccl {
                     );
                 }
 
-                assign(it, item);
                 length += 1;
+
+                return it;
             }
 
         public:
@@ -183,19 +188,24 @@ namespace ccl {
                 }
             }
 
-            void insert(const iterator where, const T& item) {
-                insert_w_assign(
+            void insert(iterator where, const T& item) {
+                where = make_room(
                     where,
-                    item,
-                    [](iterator where, reference item) { *where = item; }
+                    item
                 );
+
+                *where = item;
             }
 
-            void insert(const iterator where, T&& item) {
-                insert_w_assign(
+            void insert(iterator where, T&& item) {
+                where = make_room(
                     where,
-                    item,
-                    [](iterator where, reference item) { *where = std::move(item); }
+                    item
+                );
+
+                std::construct_at(
+                    std::to_address(where),
+                    item
                 );
             }
 
@@ -223,6 +233,26 @@ namespace ccl {
                 }
 
                 length = 0;
+            }
+
+            void resize(const size_type new_length) {
+                THROW_IF(new_length < 1, std::invalid_argument{"Size can't be less than 1."});
+
+                if(new_length > length) {
+                    reserve(new_length);
+
+                    std::uninitialized_default_construct(
+                        begin() + length,
+                        begin() + new_length
+                    );
+                } else if(new_length < length) {
+                    std::destroy(
+                        begin() + new_length,
+                        begin() + length
+                    );
+                }
+
+                length = new_length;
             }
 
             constexpr iterator begin() const noexcept { return data; }
