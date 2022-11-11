@@ -109,5 +109,37 @@ int main(int argc, char **argv) {
         }
     );
 
+    suite.add_test(
+        "insert", []() {
+            vector<int> v;
+
+            v.insert(v.begin(), 1);
+            v.insert(v.end(), 2);
+            v.insert(v.begin() + 1, 3);
+
+            check(v[0] == 1);
+            check(v[1] == 3);
+            check(v[2] == 2);
+        }
+    );
+
+    suite.add_test(
+        "clear", []() {
+            vector<int> v;
+
+            v.append(1);
+            v.append(2);
+            v.append(3);
+
+            int * const old_data = v.get_data();
+
+            v.clear();
+
+            check(v.get_length() == 0);
+            check(v.get_capacity() == 4);
+            check(old_data == v.get_data());
+        }
+    );
+
     return suite.main(argc, argv);
 }
