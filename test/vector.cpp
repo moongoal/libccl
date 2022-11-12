@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
         check(destruction_counter == 3);
     });
 
-    suite.add_test("insert (invalid iterator)", [] () {
+    suite.add_test("insert rvalue (invalid iterator)", [] () {
         vector<int> v;
 
         throws<std::out_of_range>(
@@ -296,6 +296,50 @@ int main(int argc, char **argv) {
         throws<std::out_of_range>(
             [&v] () {
                 v.insert(v.end() + 1, 0);
+            }
+        );
+    });
+
+    suite.add_test("insert rvalue (invalid iterator)", [] () {
+        struct test_struct { int i; };
+        vector<test_struct> v;
+        test_struct x;
+
+        throws<std::out_of_range>(
+            [&] () {
+                v.insert(v.begin() - 1, x);
+            }
+        );
+
+        throws<std::out_of_range>(
+            [&] () {
+                v.insert(v.end() + 1, x);
+            }
+        );
+    });
+
+    suite.add_test("operator [] (invalid index)", []() {
+        vector<int> v;
+
+        throws<std::out_of_range>(
+            [&] () {
+                v[0];
+            }
+        );
+
+        throws<std::out_of_range>(
+            [&] () {
+                (*const_cast<const vector<int>*>(&v))[0];
+            }
+        );
+    });
+
+    suite.add_test("resize (length 0)", [] () {
+        vector<int> v;
+
+        throws<std::invalid_argument>(
+            [&] () {
+                v.resize(0);
             }
         );
     });
