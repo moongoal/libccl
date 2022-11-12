@@ -137,8 +137,8 @@ namespace ccl {
              *
              * @return The iterator where to place the new item.
              */
-            iterator make_room(iterator it) {
-                THROW_IF(it < begin() || it > end(), std::out_of_range{"Iterator out of range."});
+            constexpr iterator make_room(iterator it) {
+                CCL_ASSERT(it >= begin() || it <= end());
 
                 const size_type index = std::to_address(it) - data;
                 reserve(length + 1);
@@ -163,7 +163,7 @@ namespace ccl {
             ) : allocator{allocator ? allocator : get_default_allocator<allocator_type>()}
             {}
 
-            vector(const vector &other) : vector{other.allocator} {
+            constexpr vector(const vector &other) : vector{other.allocator} {
                 const auto end_it = other.end();
 
                 reserve(other.length);
@@ -173,7 +173,7 @@ namespace ccl {
                 }
             }
 
-            vector(vector &&other)
+            constexpr vector(vector &&other)
                 : length{other.length},
                 capacity{other.capacity},
                 data{other.data},
@@ -198,7 +198,7 @@ namespace ccl {
             constexpr size_type get_capacity() const noexcept { return capacity; }
             constexpr pointer get_data() const noexcept { return data; }
 
-            void reserve(const size_type new_capacity) {
+            constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity > capacity) {
                     const size_type actual_new_capacity = increase_capacity(capacity, new_capacity);
                     value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
@@ -211,8 +211,12 @@ namespace ccl {
                 }
             }
 
-            void insert(iterator where, const_reference item) {
+            constexpr void insert(iterator where, const_reference item) {
+                THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
                 where = make_room(where);
+
+                CCL_ASSERT(where >= begin() || where <= end());
 
                 std::construct_at(
                     std::to_address(where),
@@ -220,8 +224,12 @@ namespace ccl {
                 );
             }
 
-            void insert(iterator where, rvalue_reference item) {
+            constexpr void insert(iterator where, rvalue_reference item) {
+                THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
                 where = make_room(where);
+
+                CCL_ASSERT(where >= begin() || where <= end());
 
                 std::construct_at(
                     std::to_address(where),
@@ -229,11 +237,11 @@ namespace ccl {
                 );
             }
 
-            void prepend(const_reference item) { insert(begin(), item); }
-            void prepend(rvalue_reference item) { insert(begin(), std::move(item)); }
+            constexpr void prepend(const_reference item) { insert(begin(), item); }
+            constexpr void prepend(rvalue_reference item) { insert(begin(), std::move(item)); }
 
-            void append(const_reference item) { insert(end(), item); }
-            void append(rvalue_reference item) { insert(end(), std::move(item)); }
+            constexpr void append(const_reference item) { insert(end(), item); }
+            constexpr void append(rvalue_reference item) { insert(end(), std::move(item)); }
 
             constexpr reference operator[](const size_type index) {
                 THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
@@ -247,7 +255,7 @@ namespace ccl {
                 return data[index];
             }
 
-            constexpr void clear() {
+            constexpr void clear() noexcept {
                 if constexpr(std::is_destructible_v<T>) {
                     std::for_each(begin(), end(), [](reference item) { item.~T(); });
                 }
@@ -255,7 +263,7 @@ namespace ccl {
                 length = 0;
             }
 
-            void resize(const size_type new_length) {
+            constexpr void resize(const size_type new_length) {
                 THROW_IF(new_length < 1, std::invalid_argument{"Size can't be less than 1."});
 
                 if(new_length > length) {
