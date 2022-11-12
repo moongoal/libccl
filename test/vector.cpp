@@ -284,5 +284,21 @@ int main(int argc, char **argv) {
         check(destruction_counter == 3);
     });
 
+    suite.add_test("insert (invalid iterator)", [] () {
+        vector<int> v;
+
+        throws<std::out_of_range>(
+            [&v] () {
+                v.insert(v.begin() - 1, 0);
+            }
+        );
+
+        throws<std::out_of_range>(
+            [&v] () {
+                v.insert(v.end() + 1, 0);
+            }
+        );
+    });
+
     return suite.main(argc, argv);
 }

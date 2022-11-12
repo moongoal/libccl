@@ -81,5 +81,35 @@ int main(int argc, char **argv) {
         }
     );
 
+    suite.add_test("throws", []() {
+        throws([] () {
+            throw std::exception{};
+        });
+    });
+
+    suite.add_test("throws (no throw)", []() {
+        try {
+            throws([] () {});
+        } catch(test_failed_exception &) {
+            return;
+        }
+
+        fail();
+    });
+
+    suite.add_test("throws (other exception)", []() {
+        try {
+            throws<int>([] () {
+                throw std::exception{};
+            });
+        } catch(test_failed_exception &) {
+            fail();
+        } catch (std::exception &) {
+            return;
+        }
+
+        fail();
+    });
+
     return suite.main(argc, argv);
 }

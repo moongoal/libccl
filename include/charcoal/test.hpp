@@ -91,6 +91,17 @@ namespace ccl {
         }
     }
 
+    template<typename Exception = std::exception>
+    inline void throws(std::function<void()> code) {
+        try {
+            code();
+        } catch (Exception &) {
+            return;
+        }
+
+        fail();
+    }
+
     static test_suite suite;
 }
 
