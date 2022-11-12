@@ -212,7 +212,7 @@ namespace ccl {
             }
 
             constexpr void insert(iterator where, const_reference item) {
-                THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
                 where = make_room(where);
 
@@ -225,7 +225,7 @@ namespace ccl {
             }
 
             constexpr void insert(iterator where, rvalue_reference item) {
-                THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
                 where = make_room(where);
 
@@ -244,13 +244,13 @@ namespace ccl {
             constexpr void append(rvalue_reference item) { insert(end(), std::move(item)); }
 
             constexpr reference operator[](const size_type index) {
-                THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
 
             constexpr const_reference operator[](const size_type index) const {
-                THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
@@ -264,7 +264,7 @@ namespace ccl {
             }
 
             constexpr void resize(const size_type new_length) {
-                THROW_IF(new_length < 1, std::invalid_argument{"Size can't be less than 1."});
+                CCL_THROW_IF(new_length < 1, std::invalid_argument{"Size can't be less than 1."});
 
                 if(new_length > length) {
                     reserve(new_length);

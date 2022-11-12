@@ -60,7 +60,7 @@ namespace ccl {
 
         capacity = choose<T>(1, capacity, capacity == 0);
 
-        THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
+        CCL_THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
 
         while(capacity < threshold) {
             capacity <<= 1;
