@@ -12,6 +12,7 @@
 #include <functional>
 #include <iterator>
 #include <algorithm>
+#include <initializer_list>
 #include <charcoal/api.hpp>
 #include <charcoal/allocator.hpp>
 #include <charcoal/concepts.hpp>
@@ -167,10 +168,8 @@ namespace ccl {
                 const auto end_it = other.end();
 
                 reserve(other.length);
-
-                for(auto it = other.begin(); it != end_it; ++it) {
-                    append(*it);
-                }
+                std::uninitialized_copy(other.begin(), other.end(), begin());
+                length = other.length;
             }
 
             constexpr vector(vector &&other)
@@ -180,6 +179,15 @@ namespace ccl {
                 allocator{other.allocator}
             {
                 other.data = nullptr;
+            }
+
+            explicit vector(
+                std::initializer_list<T> values,
+                allocator_type * const allocator = nullptr
+            ) : vector{allocator} {
+                reserve(values.size());
+                std::uninitialized_copy(values.begin(), values.end(), begin());
+                length = values.size();
             }
 
             ~vector() {
