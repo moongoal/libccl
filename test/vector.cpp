@@ -334,7 +334,7 @@ int main(int argc, char **argv) {
         );
     });
 
-    suite.add_test("resize (length 0)", [] () {
+    suite.add_test("resize (invalid length)", [] () {
         vector<int> v;
 
         throws<std::invalid_argument>(
@@ -351,6 +351,34 @@ int main(int argc, char **argv) {
         check(v[1] == 2);
         check(v[2] == 3);
         check(v.get_length() == 3);
+    });
+
+    suite.add_test("operator = (copy - uninitialized)", [] () {
+        vector v{1, 2, 3};
+        vector<int> v2;
+
+        v2 = v;
+
+        check(v2.get_length() == 3);
+        check(v2.get_capacity() == 4);
+
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
+    });
+
+    suite.add_test("operator = (copy - initialized)", [] () {
+        vector v{1, 2, 3};
+        vector<int> v2{5, 6, 7};
+
+        v2 = v;
+
+        check(v2.get_length() == 3);
+        check(v2.get_capacity() == 4);
+
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
     });
 
     return suite.main(argc, argv);

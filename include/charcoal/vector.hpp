@@ -191,6 +191,10 @@ namespace ccl {
             }
 
             ~vector() {
+                destroy();
+            }
+
+            void destroy() noexcept {
                 if constexpr(std::is_destructible_v<T>) {
                     const auto it_end = end();
 
@@ -200,6 +204,25 @@ namespace ccl {
                 }
 
                 allocator->free(data);
+
+                length = 0;
+                capacity = 0;
+                data = nullptr;
+            }
+
+            constexpr vector& operator =(const vector &other) {
+                if(other.length > length) {
+                    destroy();
+                    reserve(other.length);
+                    std::uninitialized_copy(other.begin(), other.end(), begin());
+                } else {
+                    std::copy(other.begin(), other.end(), begin());
+                    std::destroy(begin() + other.get_length(), end());
+                }
+
+                length = other.get_length();
+
+                return *this;
             }
 
             constexpr size_type get_length() const noexcept { return length; }
