@@ -179,6 +179,8 @@ namespace ccl {
                 allocator{other.allocator}
             {
                 other.data = nullptr;
+                other.length = 0;
+                other.capacity = 0;
             }
 
             explicit vector(
@@ -195,17 +197,9 @@ namespace ccl {
             }
 
             void destroy() noexcept {
-                if constexpr(std::is_destructible_v<T>) {
-                    const auto it_end = end();
-
-                    if(data) {
-                        std::destroy(begin(), end());
-                    }
-                }
+                clear();
 
                 allocator->free(data);
-
-                length = 0;
                 capacity = 0;
                 data = nullptr;
             }
@@ -221,6 +215,21 @@ namespace ccl {
                 }
 
                 length = other.get_length();
+
+                return *this;
+            }
+
+            constexpr vector& operator =(vector &&other) {
+                clear();
+
+                length = other.length;
+                capacity = other.capacity;
+                data = other.data;
+                allocator = other.allocator;
+
+                other.data = nullptr;
+                other.length = 0;
+                other.capacity = 0;
 
                 return *this;
             }

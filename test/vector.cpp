@@ -381,5 +381,22 @@ int main(int argc, char **argv) {
         check(v2[2] == 3);
     });
 
+    suite.add_test("operator = (move)", [] () {
+        vector v{1, 2, 3};
+        vector<int> v2{5, 6, 7};
+
+        v2 = std::move(v);
+
+        check(v.get_data() == nullptr);
+
+        check(v2.get_length() == 3);
+        check(v2.get_capacity() == 4);
+        check(v2.get_data() != nullptr);
+
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
+    });
+
     return suite.main(argc, argv);
 }
