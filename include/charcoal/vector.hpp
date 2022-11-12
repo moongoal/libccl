@@ -120,6 +120,7 @@ namespace ccl {
             using value_type = T;
             using pointer = T*;
             using reference = T&;
+            using rvalue_reference = T&&;
             using const_reference = const T&;
             using allocator_type = Allocator;
             using iterator = vector_iterator<vector>;
@@ -136,14 +137,11 @@ namespace ccl {
              *
              * @return The iterator where to place the new item.
              */
-            iterator make_room(
-                iterator it,
-                reference item
-            ) {
+            iterator make_room(iterator it) {
                 THROW_IF(it < begin() || it > end(), std::out_of_range{"Iterator out of range."});
 
                 const size_type index = std::to_address(it) - data;
-                reserve(capacity + 1);
+                reserve(length + 1);
                 it = { data + index };
 
                 if(it < end()) {
@@ -165,11 +163,36 @@ namespace ccl {
             ) : allocator{allocator ? allocator : get_default_allocator<allocator_type>()}
             {}
 
-            // TODO: Use iterators
-            // constexpr vector(const vector &other)
-            // : size{other.size}, allocator{other.allocator} {
-            //     reserve(other.capacity);
-            // }
+            vector(const vector &other) : vector{other.allocator} {
+                const auto end_it = other.end();
+
+                reserve(other.length);
+
+                for(auto it = other.begin(); it != end_it; ++it) {
+                    append(*it);
+                }
+            }
+
+            vector(vector &&other)
+                : length{other.length},
+                capacity{other.capacity},
+                data{other.data},
+                allocator{other.allocator}
+            {
+                other.data = nullptr;
+            }
+
+            ~vector() {
+                if constexpr(std::is_destructible_v<T>) {
+                    const auto it_end = end();
+
+                    if(data) {
+                        std::destroy(begin(), end());
+                    }
+                }
+
+                allocator->free(data);
+            }
 
             constexpr size_type get_length() const noexcept { return length; }
             constexpr size_type get_capacity() const noexcept { return capacity; }
@@ -188,20 +211,8 @@ namespace ccl {
                 }
             }
 
-            void insert(iterator where, const T& item) {
-                where = make_room(
-                    where,
-                    item
-                );
-
-                *where = item;
-            }
-
-            void insert(iterator where, T&& item) {
-                where = make_room(
-                    where,
-                    item
-                );
+            void insert(iterator where, const_reference item) {
+                where = make_room(where);
 
                 std::construct_at(
                     std::to_address(where),
@@ -209,19 +220,28 @@ namespace ccl {
                 );
             }
 
-            void prepend(const T& item) { insert(begin(), item); }
-            void prepend(T&& item) { insert(begin(), std::move(item)); }
+            void insert(iterator where, rvalue_reference item) {
+                where = make_room(where);
 
-            void append(const T& item) { insert(end(), item); }
-            void append(T&& item) { insert(end(), std::move(item)); }
+                std::construct_at(
+                    std::to_address(where),
+                    std::move(item)
+                );
+            }
 
-            constexpr value_type& operator[](const size_type index) {
+            void prepend(const_reference item) { insert(begin(), item); }
+            void prepend(rvalue_reference item) { insert(begin(), std::move(item)); }
+
+            void append(const_reference item) { insert(end(), item); }
+            void append(rvalue_reference item) { insert(end(), std::move(item)); }
+
+            constexpr reference operator[](const size_type index) {
                 THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
 
-            constexpr const value_type& operator[](const size_type index) const {
+            constexpr const_reference operator[](const size_type index) const {
                 THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
