@@ -468,6 +468,18 @@ int main(int argc, char **argv) {
         check(v.get_length() == 4);
     });
 
+    suite.add_test("emplace (invalid iterator)", [] () {
+        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+
+        throws<std::out_of_range>([&] () {
+            v.emplace(v.begin() - 1, dummy{4});
+        });
+
+        throws<std::out_of_range>([&] () {
+            v.emplace(v.end() + 1, dummy{4});
+        });
+    });
+
     suite.add_test("append_emplace", [] () {
         vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
 
