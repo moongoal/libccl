@@ -2,7 +2,7 @@ include_guard()
 
 function(add_ccl_test test_name test_file_path)
     add_executable(${test_name} ${test_file_path})
-    target_link_libraries(${test_name} charcoal)
+    target_link_libraries(${test_name} ccl)
     set_target_properties(
         ${test_name}
         PROPERTIES

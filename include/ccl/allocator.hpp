@@ -6,7 +6,7 @@
 #ifndef CCL_ALLOCATOR_HPP
 #define CCL_ALLOCATOR_HPP
 
-#include <charcoal/api.hpp>
+#include <ccl/api.hpp>
 
 #ifndef CCL_USER_DEFINED_ALLOCATOR
     #include <memory>

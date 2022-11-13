@@ -1,13 +1,13 @@
 /**
  * @file
  *
- * Charcoal API definitions.
+ * Ccl API definitions.
  */
 #ifndef CCL_API_HPP
 #define CCL_API_HPP
 
 #include <cstdint>
-#include <charcoal/features.hpp>
+#include <ccl/features.hpp>
 
 #ifdef CCL_FEATURE_BUILD_SHARED
     #ifdef CCL_IMPL

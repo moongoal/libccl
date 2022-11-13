@@ -12,7 +12,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
-#include <charcoal/api.hpp>
+#include <ccl/api.hpp>
 
 namespace ccl {
     using test_function = std::function<void()>;

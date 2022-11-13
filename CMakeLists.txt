@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(Charcoal)
+project(ccl)
 
 include(cmake/features.cmake)
 enable_testing()
@@ -11,25 +11,25 @@ else()
 endif()
 
 add_library(
-    charcoal
+    ccl
     ${CCL_BUILD_MODE}
         src/allocator.cpp
 )
 
 target_compile_features(
-    charcoal
+    ccl
     PUBLIC
         cxx_std_20
 )
 
 target_compile_definitions(
-    charcoal
+    ccl
     PRIVATE
         CCL_IMPL
 )
 
 target_include_directories(
-    charcoal
+    ccl
     PUBLIC
         include
         build/include
@@ -38,7 +38,7 @@ target_include_directories(
 include(cmake/test.cmake)
 
 configure_file(
-    include/charcoal/features.hpp.in
-    include/charcoal/features.hpp
+    include/ccl/features.hpp.in
+    include/ccl/features.hpp
     NEWLINE_STYLE UNIX
 )

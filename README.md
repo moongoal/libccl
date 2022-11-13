@@ -1,4 +1,4 @@
-# Charcoal C++ base library
+# Ccl C++ base library
 
 ## Dependencies
 

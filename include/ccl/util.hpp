@@ -7,10 +7,10 @@
 #define CCL_UTIL_HPP
 
 #include <cmath>
-#include <charcoal/api.hpp>
-#include <charcoal/debug.hpp>
-#include <charcoal/concepts.hpp>
-#include <charcoal/exceptions.hpp>
+#include <ccl/api.hpp>
+#include <ccl/debug.hpp>
+#include <ccl/concepts.hpp>
+#include <ccl/exceptions.hpp>
 
 namespace ccl {
     /**

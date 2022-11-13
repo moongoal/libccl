@@ -7,7 +7,7 @@
 #define CCL_DEBUG_HPP
 
 #include <cstdlib>
-#include <charcoal/api.hpp>
+#include <ccl/api.hpp>
 
 #ifdef CCL_FEATURE_ASSERTIONS
     #define CCL_ASSERT(cond) do { if(!(cond)) { ::abort(); } } while(false)
