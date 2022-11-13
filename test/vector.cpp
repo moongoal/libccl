@@ -409,5 +409,24 @@ int main(int argc, char **argv) {
         check(v[4] == 5);
     });
 
+    suite.add_test("insert (iterators)", [] () {
+        std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        vector<int> v { 123 };
+
+        v.insert(
+            v.begin(),
+            my_list.begin(),
+            my_list.end()
+        );
+
+        check(v.get_length() == 6);
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+        check(v[3] == 4);
+        check(v[4] == 5);
+        check(v[5] == 123);
+    });
+
     return suite.main(argc, argv);
 }

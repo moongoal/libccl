@@ -134,26 +134,30 @@ namespace ccl {
             allocator_type * allocator = nullptr;
 
             /**
-             * Make room for insertion.
+             * Make room for insertion by displacing existing items forward.
+             *
+             * @param it Iterator of the first item to displace forward.
+             * @param n The number of items to displace.
              *
              * @return The iterator where to place the new item.
              */
-            constexpr iterator make_room(iterator it) {
+            constexpr iterator make_room(iterator it, const size_type n = 1) {
                 CCL_ASSERT(it >= begin() || it <= end());
+                CCL_ASSERT(n >= 1);
 
                 const size_type index = std::to_address(it) - data;
-                reserve(length + 1);
+                reserve(length + n);
                 it = { data + index };
 
                 if(it < end()) {
                     std::move_backward(
                         it,
                         end(),
-                        end() + 1
+                        end() + n
                     );
                 }
 
-                length += 1;
+                length += n;
 
                 return it;
             }
@@ -288,6 +292,20 @@ namespace ccl {
                     std::to_address(where),
                     std::move(item)
                 );
+            }
+
+            template <typename InputIterator>
+            requires std::input_iterator<InputIterator>
+            constexpr void insert(iterator where, InputIterator input_begin, InputIterator input_end) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                const size_type input_length = ::abs(std::distance(input_begin, input_end));
+
+                if(input_length > 0) {
+                    where = make_room(where, input_length);
+
+                    std::copy(input_begin, input_end, begin());
+                }
             }
 
             constexpr void prepend(const_reference item) { insert(begin(), item); }
