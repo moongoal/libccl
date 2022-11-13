@@ -330,13 +330,13 @@ namespace ccl {
             constexpr void append_emplace(Args&& ...args) { emplace(end(), std::forward<Args...>(args...)); }
 
             constexpr reference operator[](const size_type index) {
-                CCL_THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }
 
             constexpr const_reference operator[](const size_type index) const {
-                CCL_THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= length, std::out_of_range{"Index out of range."});
 
                 return data[index];
             }

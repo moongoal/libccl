@@ -31,7 +31,5 @@ cmake --build build
 To run the tests:
 
 ```
-ctest
+ctest --test-dir build
 ```
-
-This command **must be run from the build directory**.

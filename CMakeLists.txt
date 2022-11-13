@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.23)
 project(ccl)
 
 include(cmake/features.cmake)
@@ -24,6 +24,17 @@ target_compile_options(
     ccl
     PUBLIC
         -Wall -Wextra -pedantic -Werror
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_MEMORY}>:-fsanitize=memory>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize=address>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fno-omit-frame-pointer>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize-recover=address>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_UNDEFINED_BEHAVIOR}>:-fsanitize=undefined>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_STACK}>:-fsanitize=safe-stack>
+)
+
+target_link_options(
+    ccl
+    PUBLIC
         $<$<BOOL:${CCL_FEATURE_SANITIZE_MEMORY}>:-fsanitize=memory>
         $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize=address>
         $<$<BOOL:${CCL_FEATURE_SANITIZE_UNDEFINED_BEHAVIOR}>:-fsanitize=undefined>

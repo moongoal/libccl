@@ -67,7 +67,7 @@ namespace ccl {
                     if(!t->should_skip()) {
                         try {
                             t->execute();
-                        } catch (test_failed_exception exc) {
+                        } catch (test_failed_exception& exc) {
                             state_tag = "[*FAIL*]";
                             all_success = false;
                         }
