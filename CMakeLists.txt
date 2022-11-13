@@ -20,7 +20,15 @@ add_library(
         src/allocator.cpp
 )
 
-target_compile_options(ccl PUBLIC -Wall -Wextra -pedantic -Werror)
+target_compile_options(
+    ccl
+    PUBLIC
+        -Wall -Wextra -pedantic -Werror
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_MEMORY}>:-fsanitize=memory>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize=address>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_UNDEFINED_BEHAVIOR}>:-fsanitize=undefined>
+        $<$<BOOL:${CCL_FEATURE_SANITIZE_STACK}>:-fsanitize=safe-stack>
+)
 
 target_compile_features(
     ccl
