@@ -24,6 +24,13 @@ struct spy {
     }
 };
 
+struct dummy {
+    int value;
+
+    dummy() : value{999} {}
+    dummy(int value) : value{value + 1} {}
+};
+
 int main(int argc, char **argv) {
     suite.add_test(
         "ctor",
@@ -426,6 +433,51 @@ int main(int argc, char **argv) {
         check(v[3] == 4);
         check(v[4] == 5);
         check(v[5] == 123);
+    });
+
+    suite.add_test("insert (iterators - invalid)", [] () {
+        std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        vector<int> v { 123 };
+
+        throws<std::out_of_range>([&] () {
+            v.insert(
+                v.begin() - 1,
+                my_list.begin(),
+                my_list.end()
+            );
+        });
+
+        throws<std::out_of_range>([&] () {
+            v.insert(
+                v.end() + 1,
+                my_list.begin(),
+                my_list.end()
+            );
+        });
+    });
+
+    suite.add_test("emplace", [] () {
+        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+        v.emplace(v.begin() + 1, dummy{4});
+
+
+        check(v[0].value == 2);
+        check(v[1].value == 5);
+        check(v[2].value == 3);
+        check(v[3].value == 4);
+        check(v.get_length() == 4);
+    });
+
+    suite.add_test("append_emplace", [] () {
+        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+
+        v.append_emplace(dummy{4});
+
+        check(v[0].value == 2);
+        check(v[1].value == 3);
+        check(v[2].value == 4);
+        check(v[3].value == 5);
+        check(v.get_length() == 4);
     });
 
     return suite.main(argc, argv);

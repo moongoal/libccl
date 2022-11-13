@@ -308,11 +308,28 @@ namespace ccl {
                 }
             }
 
+            template<typename ...Args>
+            constexpr void emplace(iterator where, Args&& ...args) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                where = make_room(where);
+
+                CCL_ASSERT(where >= begin() || where <= end());
+
+                std::construct_at(
+                    std::to_address(where),
+                    std::forward<Args...>(args...)
+                );
+            }
+
             constexpr void prepend(const_reference item) { insert(begin(), item); }
             constexpr void prepend(rvalue_reference item) { insert(begin(), std::move(item)); }
 
             constexpr void append(const_reference item) { insert(end(), item); }
             constexpr void append(rvalue_reference item) { insert(end(), std::move(item)); }
+
+            template<typename ...Args>
+            constexpr void append_emplace(Args&& ...args) { emplace(end(), std::forward<Args...>(args...)); }
 
             constexpr reference operator[](const size_type index) {
                 CCL_THROW_IF(index < 0 || index >= length, std::out_of_range{"Index out of range."});
