@@ -111,5 +111,19 @@ int main(int argc, char **argv) {
         fail();
     });
 
+    suite.add_test(
+        "skip",
+        []() {
+            test_suite my_test_suite{nullptr}; // Test subject.
+            int exec_count = 0;
+
+            my_test_suite.add_test("skip", [&exec_count] () { exec_count += 1; }, []() { return true; });
+            my_test_suite.add_test("no skip", [&exec_count] () { exec_count += 1; });
+            my_test_suite.execute();
+
+            check(exec_count == 1);
+        }
+    );
+
     return suite.main(argc, argv);
 }
