@@ -183,13 +183,26 @@ namespace ccl {
                 other.capacity = 0;
             }
 
-            explicit vector(
+            constexpr vector(
                 std::initializer_list<T> values,
                 allocator_type * const allocator = nullptr
             ) : vector{allocator} {
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
                 length = values.size();
+            }
+
+            template<typename InputIterator>
+            requires std::input_iterator<InputIterator>
+            constexpr vector(InputIterator input_begin, InputIterator input_end, allocator_type * const allocator = nullptr)
+            : vector{allocator} {
+                const size_type input_length = ::abs(std::distance(input_begin, input_end));
+
+                if(input_length > 0) {
+                    reserve(input_length);
+                    std::uninitialized_copy(input_begin, input_end, begin());
+                    length = input_length;
+                }
             }
 
             ~vector() {
@@ -304,8 +317,6 @@ namespace ccl {
             }
 
             constexpr void resize(const size_type new_length) {
-                CCL_THROW_IF(new_length < 1, std::invalid_argument{"Size can't be less than 1."});
-
                 if(new_length > length) {
                     reserve(new_length);
 
@@ -313,6 +324,8 @@ namespace ccl {
                         begin() + length,
                         begin() + new_length
                     );
+                } else if(new_length == 0) {
+                    clear();
                 } else if(new_length < length) {
                     std::destroy(
                         begin() + new_length,

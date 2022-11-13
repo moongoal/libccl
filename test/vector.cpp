@@ -1,3 +1,4 @@
+#include <forward_list>
 #include <functional>
 #include <charcoal/test.hpp>
 #include <charcoal/vector.hpp>
@@ -334,14 +335,12 @@ int main(int argc, char **argv) {
         );
     });
 
-    suite.add_test("resize (invalid length)", [] () {
-        vector<int> v;
+    suite.add_test("resize (0)", [] () {
+        vector<int> v{1, 2, 3};
 
-        throws<std::invalid_argument>(
-            [&] () {
-                v.resize(0);
-            }
-        );
+        v.resize(0);
+
+        check(v.get_length() == 0);
     });
 
     suite.add_test("ctor (initializer list)", []() {
@@ -396,6 +395,18 @@ int main(int argc, char **argv) {
         check(v2[0] == 1);
         check(v2[1] == 2);
         check(v2[2] == 3);
+    });
+
+    suite.add_test("ctor (iterators)", [] () {
+        std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        vector<int> v{my_list.begin(), my_list.end()};
+
+        check(v.get_length() == 5);
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+        check(v[3] == 4);
+        check(v[4] == 5);
     });
 
     return suite.main(argc, argv);
