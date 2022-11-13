@@ -198,7 +198,7 @@ namespace ccl {
             requires std::input_iterator<InputIterator>
             constexpr vector(InputIterator input_begin, InputIterator input_end, allocator_type * const allocator = nullptr)
             : vector{allocator} {
-                const size_type input_length = ::abs(std::distance(input_begin, input_end));
+                const size_type input_length = std::abs(std::distance(input_begin, input_end));
 
                 if(input_length > 0) {
                     reserve(input_length);
@@ -297,7 +297,7 @@ namespace ccl {
             constexpr void insert(iterator where, InputIterator input_begin, InputIterator input_end) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
-                const size_type input_length = ::abs(std::distance(input_begin, input_end));
+                const size_type input_length = std::abs(std::distance(input_begin, input_end));
 
                 if(input_length > 0) {
                     where = make_room(where, input_length);
