@@ -84,16 +84,11 @@ namespace ccl {
     };
 
     #ifndef CCL_USER_DEFINED_ALLOCATOR
-        inline void *allocator::allocate(const size_t n_bytes, const int flags) {
-            (void)flags;
-
+        inline void *allocator::allocate(const size_t n_bytes, const int flags [[maybe_unused]]) {
             return ::malloc(n_bytes);
         }
 
-        inline void *allocator::allocate(const size_t n_bytes, const size_t alignment, const int flags) {
-            (void)alignment;
-            (void)flags;
-
+        inline void *allocator::allocate(const size_t n_bytes, const size_t alignment [[maybe_unused]], const int flags [[maybe_unused]]) {
             return ::malloc(n_bytes);
         }
 
