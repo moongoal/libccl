@@ -1,9 +1,18 @@
 #include <forward_list>
 #include <functional>
+#include <ccl/features.hpp>
 #include <ccl/test.hpp>
 #include <ccl/vector.hpp>
 
 using namespace ccl;
+
+constexpr const auto skip_if_exceptions_disabled = []() {
+    #ifdef CCL_FEATURE_EXCEPTIONS
+        return false;
+    #else // CCL_FEATURE_EXCEPTIONS
+        return true;
+    #endif // CCL_FEATURE_EXCEPTIONS
+};
 
 constexpr uint32_t constructed_value = 0x1234;
 
@@ -306,7 +315,7 @@ int main(int argc, char **argv) {
                 v.insert(v.end() + 1, 0);
             }
         );
-    });
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("insert rvalue (invalid iterator)", [] () {
         struct test_struct { int i; };
@@ -324,7 +333,7 @@ int main(int argc, char **argv) {
                 v.insert(v.end() + 1, x);
             }
         );
-    });
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("operator [] (invalid index)", []() {
         vector<int> v;
@@ -340,7 +349,7 @@ int main(int argc, char **argv) {
                 (*const_cast<const vector<int>*>(&v))[0];
             }
         );
-    });
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("resize (0)", [] () {
         vector<int> v{1, 2, 3};
@@ -454,7 +463,7 @@ int main(int argc, char **argv) {
                 my_list.end()
             );
         });
-    });
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("emplace", [] () {
         vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
@@ -478,7 +487,7 @@ int main(int argc, char **argv) {
         throws<std::out_of_range>([&] () {
             v.emplace(v.end() + 1, dummy{4});
         });
-    });
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("append_emplace", [] () {
         vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
