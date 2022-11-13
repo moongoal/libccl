@@ -78,7 +78,7 @@ namespace ccl {
                 return tests.emplace_back(std::make_shared<test>(name, test_func));
             }
 
-            int main(int argc, char **argv) {
+            int main(int argc [[maybe_unused]], char **argv [[maybe_unused]]) {
                 return 1 - execute();
             }
     };

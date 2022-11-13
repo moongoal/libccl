@@ -12,11 +12,13 @@
 
 This library is built with cmake `>= 3.24.2`. Lower versions may work but are not supported. The following are example build commands for informational purposes only. The specific commands for your system may differ.
 
-To initialise the build system, run:
+To initialise the build system for development, run:
 
 ```
-cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON
+cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DCMAKE_BUILD_TYPE=Debug
 ```
+
+Or with `-DCMAKE_BUILD_TYPE=Release` to use the release configuration.
 
 To build the project:
 

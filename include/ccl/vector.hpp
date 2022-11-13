@@ -102,11 +102,11 @@ namespace ccl {
     };
 
     template<typename Vector>
-    constexpr vector_iterator<Vector> operator +(
+    static constexpr vector_iterator<Vector> operator +(
         const typename vector_iterator<Vector>::difference_type n,
         const vector_iterator<Vector> it
     ) noexcept {
-        return vector_iterator<Vector>{it.get_data()};
+        return vector_iterator<Vector>{it.get_data() + n};
     }
 
     template<
@@ -169,8 +169,6 @@ namespace ccl {
             {}
 
             constexpr vector(const vector &other) : vector{other.allocator} {
-                const auto end_it = other.end();
-
                 reserve(other.length);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
                 length = other.length;

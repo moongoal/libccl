@@ -10,11 +10,17 @@ else()
     set(CCL_BUILD_MODE STATIC)
 endif()
 
+if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(${CMAKE_BUILD_TYPE} "Debug")
+endif()
+
 add_library(
     ccl
     ${CCL_BUILD_MODE}
         src/allocator.cpp
 )
+
+target_compile_options(ccl PUBLIC -Wall -Wextra -pedantic -Werror)
 
 target_compile_features(
     ccl
