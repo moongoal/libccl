@@ -128,9 +128,9 @@ namespace ccl {
             using const_iterator = vector_iterator<vector<const value_type, allocator_type>>;
 
         private:
-            size_type length = 0;
-            size_type capacity = 0;
-            value_type * data = nullptr;
+            size_type _length = 0;
+            size_type _capacity = 0;
+            value_type * _data = nullptr;
             allocator_type * allocator = nullptr;
 
             /**
@@ -145,9 +145,9 @@ namespace ccl {
                 CCL_ASSERT(it >= begin() || it <= end());
                 CCL_ASSERT(n >= 1);
 
-                const size_type index = std::to_address(it) - data;
-                reserve(length + n);
-                it = { data + index };
+                const size_type index = std::to_address(it) - _data;
+                reserve(_length + n);
+                it = { _data + index };
 
                 if(it < end()) {
                     std::move_backward(
@@ -157,7 +157,7 @@ namespace ccl {
                     );
                 }
 
-                length += n;
+                _length += n;
 
                 return it;
             }
@@ -169,20 +169,20 @@ namespace ccl {
             {}
 
             constexpr vector(const vector &other) : vector{other.allocator} {
-                reserve(other.length);
+                reserve(other._length);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
-                length = other.length;
+                _length = other._length;
             }
 
             constexpr vector(vector &&other)
-                : length{other.length},
-                capacity{other.capacity},
-                data{other.data},
+                : _length{other._length},
+                _capacity{other._capacity},
+                _data{other._data},
                 allocator{other.allocator}
             {
-                other.data = nullptr;
-                other.length = 0;
-                other.capacity = 0;
+                other._data = nullptr;
+                other._length = 0;
+                other._capacity = 0;
             }
 
             constexpr vector(
@@ -191,7 +191,7 @@ namespace ccl {
             ) : vector{allocator} {
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
-                length = values.size();
+                _length = values.size();
             }
 
             template<typename InputIterator>
@@ -203,7 +203,7 @@ namespace ccl {
                 if(input_length > 0) {
                     reserve(input_length);
                     std::uninitialized_copy(input_begin, input_end, begin());
-                    length = input_length;
+                    _length = input_length;
                 }
             }
 
@@ -214,22 +214,22 @@ namespace ccl {
             void destroy() noexcept {
                 clear();
 
-                allocator->free(data);
-                capacity = 0;
-                data = nullptr;
+                allocator->free(_data);
+                _capacity = 0;
+                _data = nullptr;
             }
 
             constexpr vector& operator =(const vector &other) {
-                if(other.length > length) {
+                if(other._length > _length) {
                     destroy();
-                    reserve(other.length);
+                    reserve(other._length);
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
                     std::copy(other.begin(), other.end(), begin());
-                    std::destroy(begin() + other.get_length(), end());
+                    std::destroy(begin() + other.size(), end());
                 }
 
-                length = other.get_length();
+                _length = other.size();
 
                 return *this;
             }
@@ -237,32 +237,32 @@ namespace ccl {
             constexpr vector& operator =(vector &&other) {
                 clear();
 
-                length = other.length;
-                capacity = other.capacity;
-                data = other.data;
+                _length = other._length;
+                _capacity = other._capacity;
+                _data = other._data;
                 allocator = other.allocator;
 
-                other.data = nullptr;
-                other.length = 0;
-                other.capacity = 0;
+                other._data = nullptr;
+                other._length = 0;
+                other._capacity = 0;
 
                 return *this;
             }
 
-            constexpr size_type get_length() const noexcept { return length; }
-            constexpr size_type get_capacity() const noexcept { return capacity; }
-            constexpr pointer get_data() const noexcept { return data; }
+            constexpr size_type size() const noexcept { return _length; }
+            constexpr size_type capacity() const noexcept { return _capacity; }
+            constexpr pointer data() const noexcept { return _data; }
 
             constexpr void reserve(const size_type new_capacity) {
-                if(new_capacity > capacity) {
-                    const size_type actual_new_capacity = increase_capacity(capacity, new_capacity);
+                if(new_capacity > _capacity) {
+                    const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
                     value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
 
                     std::uninitialized_move(begin(), end(), new_data);
-                    allocator->free(data);
+                    allocator->free(_data);
 
-                    data = new_data;
-                    capacity = actual_new_capacity;
+                    _data = new_data;
+                    _capacity = actual_new_capacity;
                 }
             }
 
@@ -330,15 +330,15 @@ namespace ccl {
             constexpr void append_emplace(Args&& ...args) { emplace(end(), std::forward<Args...>(args...)); }
 
             constexpr reference operator[](const size_type index) {
-                CCL_THROW_IF(index >= length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= _length, std::out_of_range{"Index out of range."});
 
-                return data[index];
+                return _data[index];
             }
 
             constexpr const_reference operator[](const size_type index) const {
-                CCL_THROW_IF(index >= length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= _length, std::out_of_range{"Index out of range."});
 
-                return data[index];
+                return _data[index];
             }
 
             constexpr void clear() noexcept {
@@ -346,33 +346,33 @@ namespace ccl {
                     std::for_each(begin(), end(), [](reference item) { item.~T(); });
                 }
 
-                length = 0;
+                _length = 0;
             }
 
             constexpr void resize(const size_type new_length) {
-                if(new_length > length) {
+                if(new_length > _length) {
                     reserve(new_length);
 
                     std::uninitialized_default_construct(
-                        begin() + length,
+                        begin() + _length,
                         begin() + new_length
                     );
                 } else if(new_length == 0) {
                     clear();
-                } else if(new_length < length) {
+                } else if(new_length < _length) {
                     std::destroy(
                         begin() + new_length,
-                        begin() + length
+                        begin() + _length
                     );
                 }
 
-                length = new_length;
+                _length = new_length;
             }
 
-            constexpr iterator begin() const noexcept { return data; }
-            constexpr const_iterator cbegin() const noexcept { return data; }
-            constexpr iterator end() const noexcept { return data + length; }
-            constexpr const_iterator cend() const noexcept { return data + length; }
+            constexpr iterator begin() const noexcept { return _data; }
+            constexpr const_iterator cbegin() const noexcept { return _data; }
+            constexpr iterator end() const noexcept { return _data + _length; }
+            constexpr const_iterator cend() const noexcept { return _data + _length; }
     };
 }
 

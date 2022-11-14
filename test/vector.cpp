@@ -46,9 +46,9 @@ int main(int argc, char **argv) {
         []() {
             vector<int> v;
 
-            check(v.get_capacity() == 0);
-            check(v.get_length() == 0);
-            check(v.get_data() == nullptr);
+            check(v.capacity() == 0);
+            check(v.size() == 0);
+            check(v.data() == nullptr);
         }
     );
 
@@ -65,8 +65,8 @@ int main(int argc, char **argv) {
             check(v[1] == 2);
             check(v[2] == 3);
 
-            check(v.get_length() == 3);
-            check(v.get_capacity() == 4);
+            check(v.size() == 3);
+            check(v.capacity() == 4);
         }
     );
 
@@ -83,62 +83,62 @@ int main(int argc, char **argv) {
             check(v[1] == 2);
             check(v[2] == 1);
 
-            check(v.get_length() == 3);
-            check(v.get_capacity() == 4);
+            check(v.size() == 3);
+            check(v.capacity() == 4);
         }
     );
 
     suite.add_test(
-        "reserve_less", [] () {
+        "reserve (less)", [] () {
             vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
             v.prepend(3);
 
-            int * const old_data = v.get_data();
+            int * const old_data = v.data();
 
             v.reserve(1);
 
-            check(v.get_length() == 3);
-            check(v.get_capacity() == 4);
-            check(v.get_data() == old_data);
+            check(v.size() == 3);
+            check(v.capacity() == 4);
+            check(v.data() == old_data);
         }
     );
 
     suite.add_test(
-        "reserve_same", [] () {
+        "reserve (same)", [] () {
             vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
             v.prepend(3);
 
-            int * const old_data = v.get_data();
+            int * const old_data = v.data();
 
-            v.reserve(v.get_capacity());
+            v.reserve(v.capacity());
 
-            check(v.get_length() == 3);
-            check(v.get_capacity() == 4);
-            check(v.get_data() == old_data);
+            check(v.size() == 3);
+            check(v.capacity() == 4);
+            check(v.data() == old_data);
         }
     );
 
     suite.add_test(
-        "reserve_more", [] () {
+        "reserve (more)", [] () {
             vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
             v.prepend(3);
 
-            int * const old_data = v.get_data();
+            int * const old_data = v.data();
 
             v.reserve(5);
 
-            check(v.get_length() == 3);
-            check(v.get_capacity() == 8);
-            check(v.get_data() != old_data);
+            check(v.size() == 3);
+            check(v.capacity() == 8);
+            check(v.data() != old_data);
 
             check(v[0] == 3);
             check(v[1] == 2);
@@ -168,13 +168,13 @@ int main(int argc, char **argv) {
             v.append(2);
             v.append(3);
 
-            int * const old_data = v.get_data();
+            int * const old_data = v.data();
 
             v.clear();
 
-            check(v.get_length() == 0);
-            check(v.get_capacity() == 4);
-            check(old_data == v.get_data());
+            check(v.size() == 0);
+            check(v.capacity() == 4);
+            check(old_data == v.data());
         }
     );
 
@@ -192,8 +192,8 @@ int main(int argc, char **argv) {
         check(v[2].construction_magic == constructed_value);
         check(v[3].construction_magic == constructed_value);
 
-        check(v.get_length() == 4);
-        check(v.get_capacity() == 4);
+        check(v.size() == 4);
+        check(v.capacity() == 4);
     });
 
     suite.add_test("resize (grow from empty)", [] () {
@@ -206,8 +206,8 @@ int main(int argc, char **argv) {
         check(v[2].construction_magic == constructed_value);
         check(v[3].construction_magic == constructed_value);
 
-        check(v.get_length() == 4);
-        check(v.get_capacity() == 4);
+        check(v.size() == 4);
+        check(v.capacity() == 4);
     });
 
     suite.add_test("resize (shrink)", [] () {
@@ -224,8 +224,8 @@ int main(int argc, char **argv) {
 
         v.resize(2);
 
-        check(v.get_length() == 2);
-        check(v.get_capacity() == 4);
+        check(v.size() == 2);
+        check(v.capacity() == 4);
         check(destruction_counter == 1);
     });
 
@@ -245,13 +245,13 @@ int main(int argc, char **argv) {
 
         check(destruction_counter == 0);
 
-        check(v.get_length() == 3);
-        check(v.get_capacity() == 4);
+        check(v.size() == 3);
+        check(v.capacity() == 4);
 
-        check(v2.get_length() == 3);
-        check(v2.get_capacity() == 4);
+        check(v2.size() == 3);
+        check(v2.capacity() == 4);
 
-        check(v.get_data() != v2.get_data());
+        check(v.data() != v2.data());
 
         check(v2[0].construction_magic == constructed_value);
         check(v2[1].construction_magic == constructed_value);
@@ -273,11 +273,11 @@ int main(int argc, char **argv) {
         vector v2{std::move(v)};
 
         check(destruction_counter == 0);
-        check(v.get_data() == nullptr);
+        check(v.data() == nullptr);
 
-        check(v2.get_length() == 3);
-        check(v2.get_capacity() == 4);
-        check(v2.get_data() != nullptr);
+        check(v2.size() == 3);
+        check(v2.capacity() == 4);
+        check(v2.data() != nullptr);
 
         check(v2[0].construction_magic == constructed_value);
         check(v2[1].construction_magic == constructed_value);
@@ -356,7 +356,7 @@ int main(int argc, char **argv) {
 
         v.resize(0);
 
-        check(v.get_length() == 0);
+        check(v.size() == 0);
     });
 
     suite.add_test("ctor (initializer list)", []() {
@@ -365,7 +365,7 @@ int main(int argc, char **argv) {
         check(v[0] == 1);
         check(v[1] == 2);
         check(v[2] == 3);
-        check(v.get_length() == 3);
+        check(v.size() == 3);
     });
 
     suite.add_test("operator = (copy - uninitialized)", [] () {
@@ -374,8 +374,8 @@ int main(int argc, char **argv) {
 
         v2 = v;
 
-        check(v2.get_length() == 3);
-        check(v2.get_capacity() == 4);
+        check(v2.size() == 3);
+        check(v2.capacity() == 4);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
@@ -388,8 +388,8 @@ int main(int argc, char **argv) {
 
         v2 = v;
 
-        check(v2.get_length() == 3);
-        check(v2.get_capacity() == 4);
+        check(v2.size() == 3);
+        check(v2.capacity() == 4);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
@@ -402,11 +402,11 @@ int main(int argc, char **argv) {
 
         v2 = std::move(v);
 
-        check(v.get_data() == nullptr);
+        check(v.data() == nullptr);
 
-        check(v2.get_length() == 3);
-        check(v2.get_capacity() == 4);
-        check(v2.get_data() != nullptr);
+        check(v2.size() == 3);
+        check(v2.capacity() == 4);
+        check(v2.data() != nullptr);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
@@ -417,7 +417,7 @@ int main(int argc, char **argv) {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         vector<int> v{my_list.begin(), my_list.end()};
 
-        check(v.get_length() == 5);
+        check(v.size() == 5);
         check(v[0] == 1);
         check(v[1] == 2);
         check(v[2] == 3);
@@ -435,7 +435,7 @@ int main(int argc, char **argv) {
             my_list.end()
         );
 
-        check(v.get_length() == 6);
+        check(v.size() == 6);
         check(v[0] == 1);
         check(v[1] == 2);
         check(v[2] == 3);
@@ -474,7 +474,7 @@ int main(int argc, char **argv) {
         check(v[1].value == 5);
         check(v[2].value == 3);
         check(v[3].value == 4);
-        check(v.get_length() == 4);
+        check(v.size() == 4);
     });
 
     suite.add_test("emplace (invalid iterator)", [] () {
@@ -498,7 +498,7 @@ int main(int argc, char **argv) {
         check(v[1].value == 3);
         check(v[2].value == 4);
         check(v[3].value == 5);
-        check(v.get_length() == 4);
+        check(v.size() == 4);
     });
 
     return suite.main(argc, argv);
