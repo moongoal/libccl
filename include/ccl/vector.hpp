@@ -7,6 +7,7 @@
 #define CCL_VECTOR_HPP
 
 #include <type_traits>
+#include <ranges>
 #include <memory>
 #include <cstring>
 #include <functional>
@@ -128,7 +129,7 @@ namespace ccl {
             using const_iterator = vector_iterator<vector<const value_type, allocator_type>>;
 
         private:
-            size_type _length = 0;
+            size_type _size = 0;
             size_type _capacity = 0;
             value_type * _data = nullptr;
             allocator_type * allocator = nullptr;
@@ -146,7 +147,7 @@ namespace ccl {
                 CCL_ASSERT(n >= 1);
 
                 const size_type index = std::to_address(it) - _data;
-                reserve(_length + n);
+                reserve(_size + n);
                 it = { _data + index };
 
                 if(it < end()) {
@@ -157,7 +158,7 @@ namespace ccl {
                     );
                 }
 
-                _length += n;
+                _size += n;
 
                 return it;
             }
@@ -169,19 +170,19 @@ namespace ccl {
             {}
 
             constexpr vector(const vector &other) : vector{other.allocator} {
-                reserve(other._length);
+                reserve(other._size);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
-                _length = other._length;
+                _size = other._size;
             }
 
             constexpr vector(vector &&other)
-                : _length{other._length},
+                : _size{other._size},
                 _capacity{other._capacity},
                 _data{other._data},
                 allocator{other.allocator}
             {
                 other._data = nullptr;
-                other._length = 0;
+                other._size = 0;
                 other._capacity = 0;
             }
 
@@ -191,19 +192,19 @@ namespace ccl {
             ) : vector{allocator} {
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
-                _length = values.size();
+                _size = values.size();
             }
 
-            template<typename InputIterator>
-            requires std::input_iterator<InputIterator>
-            constexpr vector(InputIterator input_begin, InputIterator input_end, allocator_type * const allocator = nullptr)
+            template<typename InputRange>
+            requires std::ranges::input_range<InputRange>
+            constexpr vector(InputRange input, allocator_type * const allocator = nullptr)
             : vector{allocator} {
-                const size_type input_length = std::abs(std::distance(input_begin, input_end));
+                const size_type input_size = std::abs(std::ranges::distance(input));
 
-                if(input_length > 0) {
-                    reserve(input_length);
-                    std::uninitialized_copy(input_begin, input_end, begin());
-                    _length = input_length;
+                if(input_size > 0) {
+                    reserve(input_size);
+                    _size = input_size;
+                    std::ranges::uninitialized_copy(input, *this);
                 }
             }
 
@@ -220,16 +221,16 @@ namespace ccl {
             }
 
             constexpr vector& operator =(const vector &other) {
-                if(other._length > _length) {
+                if(other._size > _size) {
                     destroy();
-                    reserve(other._length);
+                    reserve(other._size);
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
                     std::copy(other.begin(), other.end(), begin());
                     std::destroy(begin() + other.size(), end());
                 }
 
-                _length = other.size();
+                _size = other.size();
 
                 return *this;
             }
@@ -237,19 +238,19 @@ namespace ccl {
             constexpr vector& operator =(vector &&other) {
                 clear();
 
-                _length = other._length;
+                _size = other._size;
                 _capacity = other._capacity;
                 _data = other._data;
                 allocator = other.allocator;
 
                 other._data = nullptr;
-                other._length = 0;
+                other._size = 0;
                 other._capacity = 0;
 
                 return *this;
             }
 
-            constexpr size_type size() const noexcept { return _length; }
+            constexpr size_type size() const noexcept { return _size; }
             constexpr size_type capacity() const noexcept { return _capacity; }
             constexpr pointer data() const noexcept { return _data; }
 
@@ -292,17 +293,17 @@ namespace ccl {
                 );
             }
 
-            template <typename InputIterator>
-            requires std::input_iterator<InputIterator>
-            constexpr void insert(iterator where, InputIterator input_begin, InputIterator input_end) {
+            template <typename InputRange>
+            requires std::ranges::input_range<InputRange>
+            constexpr void insert(iterator where, InputRange input) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
-                const size_type input_length = std::abs(std::distance(input_begin, input_end));
+                const size_type input_size = std::abs(std::ranges::distance(input));
 
-                if(input_length > 0) {
-                    where = make_room(where, input_length);
+                if(input_size > 0) {
+                    where = make_room(where, input_size);
 
-                    std::copy(input_begin, input_end, begin());
+                    std::ranges::copy(input, begin());
                 }
             }
 
@@ -330,13 +331,13 @@ namespace ccl {
             constexpr void append_emplace(Args&& ...args) { emplace(end(), std::forward<Args...>(args...)); }
 
             constexpr reference operator[](const size_type index) {
-                CCL_THROW_IF(index >= _length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= _size, std::out_of_range{"Index out of range."});
 
                 return _data[index];
             }
 
             constexpr const_reference operator[](const size_type index) const {
-                CCL_THROW_IF(index >= _length, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= _size, std::out_of_range{"Index out of range."});
 
                 return _data[index];
             }
@@ -346,33 +347,33 @@ namespace ccl {
                     std::for_each(begin(), end(), [](reference item) { item.~T(); });
                 }
 
-                _length = 0;
+                _size = 0;
             }
 
             constexpr void resize(const size_type new_length) {
-                if(new_length > _length) {
+                if(new_length > _size) {
                     reserve(new_length);
 
                     std::uninitialized_default_construct(
-                        begin() + _length,
+                        begin() + _size,
                         begin() + new_length
                     );
                 } else if(new_length == 0) {
                     clear();
-                } else if(new_length < _length) {
+                } else if(new_length < _size) {
                     std::destroy(
                         begin() + new_length,
-                        begin() + _length
+                        begin() + _size
                     );
                 }
 
-                _length = new_length;
+                _size = new_length;
             }
 
             constexpr iterator begin() const noexcept { return _data; }
             constexpr const_iterator cbegin() const noexcept { return _data; }
-            constexpr iterator end() const noexcept { return _data + _length; }
-            constexpr const_iterator cend() const noexcept { return _data + _length; }
+            constexpr iterator end() const noexcept { return _data + _size; }
+            constexpr const_iterator cend() const noexcept { return _data + _size; }
     };
 }
 

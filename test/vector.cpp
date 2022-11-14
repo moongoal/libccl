@@ -413,9 +413,9 @@ int main(int argc, char **argv) {
         check(v2[2] == 3);
     });
 
-    suite.add_test("ctor (iterators)", [] () {
+    suite.add_test("ctor (range)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
-        vector<int> v{my_list.begin(), my_list.end()};
+        vector<int> v{my_list};
 
         check(v.size() == 5);
         check(v[0] == 1);
@@ -425,14 +425,13 @@ int main(int argc, char **argv) {
         check(v[4] == 5);
     });
 
-    suite.add_test("insert (iterators)", [] () {
+    suite.add_test("insert (ranges)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         vector<int> v { 123 };
 
         v.insert(
             v.begin(),
-            my_list.begin(),
-            my_list.end()
+            my_list
         );
 
         check(v.size() == 6);
@@ -444,23 +443,21 @@ int main(int argc, char **argv) {
         check(v[5] == 123);
     });
 
-    suite.add_test("insert (iterators - invalid)", [] () {
+    suite.add_test("insert (ranges - invalid)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         vector<int> v { 123 };
 
         throws<std::out_of_range>([&] () {
             v.insert(
                 v.begin() - 1,
-                my_list.begin(),
-                my_list.end()
+                my_list
             );
         });
 
         throws<std::out_of_range>([&] () {
             v.insert(
                 v.end() + 1,
-                my_list.begin(),
-                my_list.end()
+                my_list
             );
         });
     }, skip_if_exceptions_disabled);
