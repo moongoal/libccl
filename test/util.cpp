@@ -27,5 +27,21 @@ int main(int argc, char ** argv) {
         }
     );
 
+    suite.add_test("max", [] () {
+        check(max(0, 0, 0, 0, 0, 0) == 0);
+        check(max(1, 2, 3) == 3);
+        check(max(-500, 0, 0) == 0);
+        check(max(1, 2) == 2);
+        check(max(5) == 5);
+    });
+
+    suite.add_test("min", [] () {
+        check(min(0, 0, 0, 0, 0, 0) == 0);
+        check(min(1, 2, 3) == 1);
+        check(min(-500, 0, 0) == -500);
+        check(min(1, 2) == 1);
+        check(min(5) == 5);
+    });
+
     return suite.main(argc, argv);
 }

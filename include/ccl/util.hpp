@@ -68,6 +68,58 @@ namespace ccl {
 
         return capacity;
     }
+
+    /**
+     * Find the maximum among the arguments.
+     *
+     * @tparam FirstArg The type of the first argument.
+     * @tparam Ts The type of all the other arguments.
+     *
+     * @param arg1 The first argument.
+     * @param args The other arguments.
+     *
+     * @return The argument with the max value.
+     */
+    template<typename FirstArg, typename ...Ts>
+    constexpr FirstArg max(FirstArg&& arg1, Ts&& ...args) noexcept {
+        if constexpr(sizeof...(args) > 0) {
+            const auto arg2 = max(std::forward<Ts>(args)...);
+
+            return choose<FirstArg>(
+                arg1,
+                arg2,
+                arg1 > arg2
+            );
+        } else {
+            return arg1;
+        }
+    }
+
+    /**
+     * Find the minimum among the arguments.
+     *
+     * @tparam FirstArg The type of the first argument.
+     * @tparam Ts The type of all the other arguments.
+     *
+     * @param arg1 The first argument.
+     * @param args The other arguments.
+     *
+     * @return The argument with the min value.
+     */
+    template<typename FirstArg, typename ...Ts>
+    constexpr FirstArg min(FirstArg&& arg1, Ts&& ...args) noexcept {
+        if constexpr(sizeof...(args) > 0) {
+            const auto arg2 = max(std::forward<Ts>(args)...);
+
+            return choose<FirstArg>(
+                arg1,
+                arg2,
+                arg1 < arg2
+            );
+        } else {
+            return arg1;
+        }
+    }
 }
 
 #endif // CCL_UTIL_HPP
