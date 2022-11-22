@@ -215,7 +215,7 @@ namespace ccl {
             void destroy() noexcept {
                 clear();
 
-                allocator->free(_data);
+                allocator->deallocate(_data);
                 _capacity = 0;
                 _data = nullptr;
             }
@@ -260,7 +260,7 @@ namespace ccl {
                     value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
 
                     std::uninitialized_move(begin(), end(), new_data);
-                    allocator->free(_data);
+                    allocator->deallocate(_data);
 
                     _data = new_data;
                     _capacity = actual_new_capacity;

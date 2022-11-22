@@ -29,7 +29,7 @@ namespace ccl {
         { alloc.allocate(n_bytes, flags) } -> std::convertible_to<void*>;
         { alloc.allocate(n_bytes, alignment, flags) } -> std::convertible_to<void*>;
 
-        alloc.free(ptr);
+        alloc.deallocate(ptr);
     };
 
     /**

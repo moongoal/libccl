@@ -70,7 +70,7 @@ namespace ccl {
              *
              * @param ptr A pointer allocated with this allocator.
              */
-            void free(void * const ptr);
+            void deallocate(void * const ptr);
     };
 
     /**
@@ -92,7 +92,7 @@ namespace ccl {
             return ::malloc(n_bytes);
         }
 
-        inline void allocator::free(void * const ptr) {
+        inline void allocator::deallocate(void * const ptr) {
             ::free(ptr);
         }
     #endif // CCL_USER_DEFINED_ALLOCATOR
