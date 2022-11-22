@@ -17,7 +17,14 @@
     #endif // CCL_IMPL
     #else // CCL_FEATURE_BUILD_SHARED
 #endif // CCL_FEATURE_BUILD_SHARED
-    #define CCLAPI
+
+#define CCLAPI
 #define CCLNODISCARD [[nodiscard]]
+
+#ifdef _MSC_VER
+    #define CCLZEROSIZE [[msvc::no_unique_address]]
+#else // _MSC_VER
+    #define CCLZEROSIZE [[no_unique_address]]
+#endif // _MSC_VER
 
 #endif // CCL_API_HPP
