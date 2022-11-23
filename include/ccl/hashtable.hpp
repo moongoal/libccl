@@ -10,6 +10,8 @@
 #include <ccl/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/debug.hpp>
+#include <ccl/vector.hpp>
+#include <ccl/compressed-pair.hpp>
 
 namespace ccl {
     template<typename Hashtable>
@@ -26,60 +28,41 @@ namespace ccl {
         using key_reference = typename Hashtable::key_reference;
         using value_reference = typename Hashtable::value_reference;
 
-        constexpr hashtable_iterator() noexcept : keys{nullptr}, values{nullptr} {}
-        constexpr hashtable_iterator(const key_pointer keys, const value_pointer values) noexcept : keys{keys}, values{values} {}
-        constexpr hashtable_iterator(const hashtable_iterator &other) noexcept : keys{other.keys}, values{other.values} {}
-        constexpr hashtable_iterator(hashtable_iterator &&other) noexcept : keys{std::move(other.keys)}, values{std::move(other.values)} {}
+        using const_key_reference = typename Hashtable::const_key_reference;
+        using const_value_reference = typename Hashtable::const_value_reference;
+
+        using key_value_pair = compressed_pair<key_reference, value_reference>;
+        using const_key_value_pair = compressed_pair<const_key_reference, const_value_reference>;
+
+        constexpr hashtable_iterator() noexcept : key{nullptr}, value{nullptr} {}
+        constexpr hashtable_iterator(const key_pointer key, const value_pointer value) noexcept : key{key}, value{value} {}
+        constexpr hashtable_iterator(const hashtable_iterator &other) noexcept : key{other.key}, value{other.value} {}
+        constexpr hashtable_iterator(hashtable_iterator &&other) noexcept : key{std::move(other.key)}, value{std::move(other.value)} {}
 
         constexpr hashtable_iterator& operator =(const hashtable_iterator &other) noexcept {
-            keys = other.keys;
-            values = other.values;
+            key = other.key;
+            value = other.value;
 
             return *this;
         }
 
         constexpr hashtable_iterator& operator =(hashtable_iterator &&other) noexcept {
-            keys = std::move(other.keys);
-            values = std::move(other.values);
+            key = std::move(other.key);
+            value = std::move(other.value);
 
             return *this;
         }
 
-        constexpr value_reference operator*() const noexcept { return *values; }
-        constexpr value_pointer operator->() const noexcept { return values; }
+        constexpr key_value_pair operator*() noexcept { return key_value_pair{ *key, *value }; }
+        constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ *key, *value }; }
+        constexpr value_pointer operator->() const noexcept { return value; } // TODO: What value should this be?
 
-        constexpr hashtable_iterator& operator +=(const difference_type n) noexcept {
-            ptr += n;
-            return *this;
-        }
-
-        constexpr hashtable_iterator& operator -=(const difference_type n) noexcept {
-            ptr -= n;
-            return *this;
-        }
-
-        constexpr hashtable_iterator operator +(const difference_type n) const noexcept {
-            return ptr + n;
-        }
-
-        constexpr hashtable_iterator operator -(const difference_type n) const noexcept {
-            return ptr - n;
-        }
-
-        constexpr difference_type operator -(const hashtable_iterator other) const noexcept {
-            return ptr - other.ptr;
-        }
-
-        constexpr reference operator[](const difference_type i) const noexcept {
-            return ptr[i];
-        }
-
-        constexpr bool operator ==(const hashtable_iterator other) const noexcept { return ptr == other.ptr; }
-        constexpr bool operator !=(const hashtable_iterator other) const noexcept { return ptr != other.ptr; }
-        constexpr bool operator >(const hashtable_iterator other) const noexcept { return ptr > other.ptr; }
-        constexpr bool operator <(const hashtable_iterator other) const noexcept { return ptr < other.ptr; }
-        constexpr bool operator >=(const hashtable_iterator other) const noexcept { return ptr >= other.ptr; }
-        constexpr bool operator <=(const hashtable_iterator other) const noexcept { return ptr <= other.ptr; }
+        constexpr bool operator ==(const hashtable_iterator other) const noexcept { return key == other.key; }
+        constexpr bool operator !=(const hashtable_iterator other) const noexcept { return key != other.key; }
+        constexpr bool operator >(const hashtable_iterator other) const noexcept { return key > other.key; }
+        constexpr bool operator <(const hashtable_iterator other) const noexcept { return key < other.key; }
+        constexpr bool operator >=(const hashtable_iterator other) const noexcept { return key >= other.key; }
+        constexpr bool operator <=(const hashtable_iterator other) const noexcept { return key <= other.key; }
 
         constexpr hashtable_iterator& operator --() noexcept {
             --ptr;
@@ -100,8 +83,8 @@ namespace ccl {
         }
 
         private:
-            key_pointer keys;
-            value_pointer values;
+            key_pointer key;
+            value_pointer value;
     };
 
     template<typename Hashtable>
@@ -143,10 +126,17 @@ namespace ccl {
             using const_key_reference = const K&;
             using const_value_reference = const V&;
 
+            using key_vector_type = vector<key_type, allocator_type>;
+            using value_vector_type = vector<value_type, allocator_type>;
+
             using allocator_type = Allocator;
 
             using iterator = hashtable_iterator<hashtable>;
             using const_iterator = hashtable_iterator<hashtable<const key_type, const value_type, allocator_type>>;
+
+        private:
+            key_vector_type keys;
+            value_vector_type values;
     };
 }
 
