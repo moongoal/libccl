@@ -20,6 +20,7 @@
 
 #define CCLAPI
 #define CCLNODISCARD [[nodiscard]]
+#define CCLUNUSED [[maybe_unused]]
 
 #ifdef _MSC_VER
     #define CCLZEROSIZE [[msvc::no_unique_address]]
