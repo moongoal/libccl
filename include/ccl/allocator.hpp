@@ -78,17 +78,17 @@ namespace ccl {
      */
     class null_allocator {
         public:
-            CCLNODISCARD void* allocate(const size_t n_bytes [[maybe_unused]], const int flags [[maybe_unused]] = 0) { return nullptr; }
-            CCLNODISCARD void* allocate(const size_t n_bytes [[maybe_unused]], const size_t alignment [[maybe_unused]], const int flags [[maybe_unused]] = 0) { return nullptr; }
-            void free(void * const ptr [[maybe_unused]]) {}
+            CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
+            CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const size_t alignment CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
+            void free(void * const ptr CCLUNUSED) {}
     };
 
     #ifndef CCL_USER_DEFINED_ALLOCATOR
-        inline void *allocator::allocate(const size_t n_bytes, const int flags [[maybe_unused]]) {
+        inline void *allocator::allocate(const size_t n_bytes, const int flags CCLUNUSED) {
             return ::malloc(n_bytes);
         }
 
-        inline void *allocator::allocate(const size_t n_bytes, const size_t alignment [[maybe_unused]], const int flags [[maybe_unused]]) {
+        inline void *allocator::allocate(const size_t n_bytes, const size_t alignment CCLUNUSED, const int flags CCLUNUSED) {
             return ::malloc(n_bytes);
         }
 
