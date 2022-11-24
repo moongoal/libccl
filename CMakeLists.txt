@@ -14,6 +14,8 @@ if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
     set(${CMAKE_BUILD_TYPE} "Debug")
 endif()
 
+find_package(xxHash CONFIG REQUIRED)
+
 add_library(
     ccl
     ${CCL_BUILD_MODE}
@@ -58,6 +60,12 @@ target_include_directories(
     PUBLIC
         include
         build/include
+)
+
+target_link_libraries(
+    ccl
+    PUBLIC
+        xxHash::xxhash
 )
 
 include(cmake/test.cmake)

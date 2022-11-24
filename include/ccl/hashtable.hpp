@@ -11,7 +11,6 @@
 #include <ccl/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/debug.hpp>
-#include <ccl/vector.hpp>
 #include <ccl/compressed-pair.hpp>
 #include <ccl/hash.hpp>
 
@@ -104,6 +103,7 @@ namespace ccl {
      *
      * @tparam K Key type. Must be hashable.
      * @tparam V Value type.
+     * @tparam HashFunction The function used to compute the key hashes.
      * @tparam Allocator The allocator type.
      */
     template<
@@ -120,6 +120,7 @@ namespace ccl {
             using key_type = K;
             using value_type = V;
             using hash_type = typename HashFunction::hash_type;
+            using hash_function_type = HashFunction;
 
             using key_pointer = K*;
             using value_pointer = V*;
@@ -135,61 +136,73 @@ namespace ccl {
 
             using allocator_type = Allocator;
 
-            using key_vector_type = vector<key_type, allocator_type>;
-            using value_vector_type = vector<value_type, allocator_type>;
-
             using iterator = hashtable_iterator<hashtable>;
             using const_iterator = hashtable_iterator<hashtable<const key_type, const value_type, allocator_type>>;
 
+            static constexpr hash_type invalid_hash = 0;
+
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
-            ) : keys{allocator}, values{allocator}
+            ) : _size{0}, hashes{nullptr}, keys{nullptr}, values{nullptr}, allocator{allocator}
             {}
 
             constexpr hashtable(const hashtable &other)
-                : keys{other.keys}, values{other.values}
+                : _size{other._size}, keys{other.keys}, values{other.values}, allocator{other.allocator}
             {}
 
             constexpr hashtable(hashtable &&other)
-                : keys{std::move(other.keys)}, values{std::move(other.values)}
+                : _size{std::move(other._size)},
+                keys{std::move(other.keys)},
+                values{std::move(other.values)},
+                allocator{std::move(other.allocator)}
             {}
 
-            template<typename Pair>
-            constexpr hashtable(
-                std::initializer_list<Pair> values,
-                allocator_type * const allocator = nullptr
-            ) : hashtable{allocator} {
-                std::for_each(
-                    values.begin(),
-                    values.end(),
-                    [this] (const Pair &pair) {
-                        (*this)[pair.first] = pair.second;
-                    }
-                );
-            }
+            // template<typename Pair>
+            // constexpr hashtable(
+            //     std::initializer_list<Pair> values,
+            //     allocator_type * const allocator = nullptr
+            // ) : hashtable{allocator} {
+            //     std::for_each(
+            //         values.begin(),
+            //         values.end(),
+            //         [this] (const Pair &pair) {
+            //             (*this)[pair.first] = pair.second;
+            //         }
+            //     );
+            // }
 
-            template<typename InputRange>
-            requires std::ranges::input_range<InputRange>
-            constexpr hashtable(
-                InputRange input,
-                allocator_type * const allocator = nullptr
-            ) : hashtable{allocator} {
-                std::for_each(
-                    input.begin(),
-                    input.end(),
-                    [this] (const auto &pair) {
-                        (*this)[pair.first] = pair.second;
-                    }
-                );
-            }
+            // template<typename InputRange>
+            // requires std::ranges::input_range<InputRange>
+            // constexpr hashtable(
+            //     InputRange input,
+            //     allocator_type * const allocator = nullptr
+            // ) : hashtable{allocator} {
+            //     std::for_each(
+            //         input.begin(),
+            //         input.end(),
+            //         [this] (const auto &pair) {
+            //             (*this)[pair.first] = pair.second;
+            //         }
+            //     );
+            // }
 
             ~hashtable() {
                 destroy();
             }
 
             void destroy() noexcept {
-                keys.destroy();
-                values.destroy();
+                allocator->deallocate(hashes);
+                allocator->deallocate(keys);
+                allocator->deallocate(values);
+
+                _size = 0;
+                hashes = nullptr;
+                keys = nullptr;
+                values = nullptr;
+            }
+
+            constexpr size_type size() const noexcept {
+                return _size;
             }
 
             constexpr hashtable& operator =(const hashtable &other) {
@@ -208,19 +221,57 @@ namespace ccl {
 
             constexpr size_type capacity() const noexcept { return keys.capacity(); }
 
-            constexpr void reserve(const size_type new_capacity) {
-                key_vector_type new_keys;
-                value_vector_type new_values;
+            constexpr void resize(const size_type new_size) {
+                if(new_size < _size) {
+                    return;
+                }
 
-                new_keys.reserve(new_capacity);
-                new_values.reserve(new_capacity);
+                hash_type *new_hashes = allocator->template allocate<hash_type>(new_size);
+                key_type *new_keys = allocator->template allocate<key_type>(new_size);
+                value_type *new_values = allocator->template allocate<value_type>(new_size);
 
-                for(const pair)
+                std::memset(new_hashes, 0, sizeof(hash_type) * new_size);
+
+                for(size_type i = 0; i < _size; ++i) {
+                    const hash_type current_hash = hashes[i];
+
+                    if(current_hash != invalid_hash) {
+                        const_key_reference current_key = keys[i];
+                        const_value_reference current_value = values[i];
+
+                        // TODO: Rehash
+                    }
+                }
+
+                // ...
+                _size = new_size;
             }
 
         private:
-            key_vector_type keys;
-            value_vector_type values;
+            static void insert(
+                key_vector_reference keys,
+                value_vector_reference values,
+                const_key_reference key,
+                const_value_reference value
+            ) {
+                const size_type key_slot_count = keys.size();
+                const hash_type key_hash = hash(key);
+                size_type key_index = key_hash % key_slot_count; // TODO: Find faster way of computing this
+
+                for(; key_index < key_slot_count; ++key_index) {
+
+                }
+            }
+
+            static hash_type hash(const_key_reference x) {
+                return hash_function_type{}(x);
+            }
+
+            size_type _size = 0;
+            hash_type *hashes = nullptr;
+            key_type *keys = nullptr;
+            value_type *values = nullptr;
+            allocator_type * allocator = nullptr;
     };
 }
 
