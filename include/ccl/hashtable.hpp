@@ -122,6 +122,7 @@ namespace ccl {
             using hash_type = typename HashFunction::hash_type;
             using hash_function_type = HashFunction;
 
+            using hash_pointer = hash_type*;
             using key_pointer = K*;
             using value_pointer = V*;
 
@@ -143,15 +144,15 @@ namespace ccl {
 
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
-            ) : _size{0}, hashes{nullptr}, keys{nullptr}, values{nullptr}, allocator{allocator}
+            ) : _capacity{0}, hashes{nullptr}, keys{nullptr}, values{nullptr}, allocator{allocator}
             {}
 
             constexpr hashtable(const hashtable &other)
-                : _size{other._size}, keys{other.keys}, values{other.values}, allocator{other.allocator}
+                : _capacity{other._capacity}, keys{other.keys}, values{other.values}, allocator{other.allocator}
             {}
 
             constexpr hashtable(hashtable &&other)
-                : _size{std::move(other._size)},
+                : _capacity{std::move(other._capacity)},
                 keys{std::move(other.keys)},
                 values{std::move(other.values)},
                 allocator{std::move(other.allocator)}
@@ -195,14 +196,14 @@ namespace ccl {
                 allocator->deallocate(keys);
                 allocator->deallocate(values);
 
-                _size = 0;
+                _capacity = 0;
                 hashes = nullptr;
                 keys = nullptr;
                 values = nullptr;
             }
 
             constexpr size_type size() const noexcept {
-                return _size;
+                return _capacity;
             }
 
             constexpr hashtable& operator =(const hashtable &other) {
@@ -219,20 +220,20 @@ namespace ccl {
                 return *this;
             }
 
-            constexpr size_type capacity() const noexcept { return keys.capacity(); }
+            constexpr size_type capacity() const noexcept { return _capacity; }
 
-            constexpr void resize(const size_type new_size) {
-                if(new_size < _size) {
+            constexpr void resize(const size_type new_capacity) {
+                if(new_capacity <= _capacity) {
                     return;
                 }
 
-                hash_type *new_hashes = allocator->template allocate<hash_type>(new_size);
-                key_type *new_keys = allocator->template allocate<key_type>(new_size);
-                value_type *new_values = allocator->template allocate<value_type>(new_size);
+                const hash_pointer new_hashes = allocator->template allocate<hash_type>(new_capacity);
+                const key_pointer new_keys = allocator->template allocate<key_type>(new_capacity);
+                const value_pointer new_values = allocator->template allocate<value_type>(new_capacity);
 
-                std::memset(new_hashes, 0, sizeof(hash_type) * new_size);
+                std::memset(new_hashes, 0, sizeof(hash_type) * new_capacity);
 
-                for(size_type i = 0; i < _size; ++i) {
+                for(size_type i = 0; i < _capacity; ++i) {
                     const hash_type current_hash = hashes[i];
 
                     if(current_hash != invalid_hash) {
@@ -244,19 +245,19 @@ namespace ccl {
                 }
 
                 // ...
-                _size = new_size;
+                _capacity = new_capacity;
             }
 
         private:
             static void insert(
-                key_vector_reference keys,
-                value_vector_reference values,
+                const size_type capacity,
+                const key_pointer keys,
+                const value_pointer values,
                 const_key_reference key,
                 const_value_reference value
             ) {
-                const size_type key_slot_count = keys.size();
                 const hash_type key_hash = hash(key);
-                size_type key_index = key_hash % key_slot_count; // TODO: Find faster way of computing this
+                size_type key_index = key_hash % capacity; // TODO: Find faster way of computing this
 
                 for(; key_index < key_slot_count; ++key_index) {
 
@@ -267,11 +268,11 @@ namespace ccl {
                 return hash_function_type{}(x);
             }
 
-            size_type _size = 0;
-            hash_type *hashes = nullptr;
-            key_type *keys = nullptr;
-            value_type *values = nullptr;
-            allocator_type * allocator = nullptr;
+            size_type _capacity = 0;
+            hash_pointer hashes = nullptr;
+            key_pointer keys = nullptr;
+            value_pointer values = nullptr;
+            allocator_type *allocator = nullptr;
     };
 }
 
