@@ -6,12 +6,14 @@
 #ifndef CCL_HASHTABLE_HPP
 #define CCL_HASHTABLE_HPP
 
+#include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/compressed-pair.hpp>
+#include <ccl/hash.hpp>
 
 namespace ccl {
     template<typename Hashtable>
@@ -65,21 +67,23 @@ namespace ccl {
         constexpr bool operator <=(const hashtable_iterator other) const noexcept { return key <= other.key; }
 
         constexpr hashtable_iterator& operator --() noexcept {
-            --ptr;
+            --key;
+            --value;
             return *this;
         }
 
         constexpr hashtable_iterator operator --(int) noexcept {
-            return ptr--;
+            return {key--, value--};
         }
 
         constexpr hashtable_iterator& operator ++() noexcept {
-            ++ptr;
+            ++key;
+            ++value;
             return *this;
         }
 
         constexpr hashtable_iterator operator ++(int) noexcept {
-            return ptr++;
+            return {key++, value++};
         }
 
         private:
@@ -100,10 +104,12 @@ namespace ccl {
      *
      * @tparam K Key type. Must be hashable.
      * @tparam V Value type.
+     * @tparam Allocator The allocator type.
      */
     template<
         typename K,
         typename V,
+        typename HashFunction = hash<K>,
         typename Allocator = allocator
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
@@ -113,6 +119,7 @@ namespace ccl {
 
             using key_type = K;
             using value_type = V;
+            using hash_type = typename HashFunction::hash_type;
 
             using key_pointer = K*;
             using value_pointer = V*;
@@ -126,13 +133,90 @@ namespace ccl {
             using const_key_reference = const K&;
             using const_value_reference = const V&;
 
+            using allocator_type = Allocator;
+
             using key_vector_type = vector<key_type, allocator_type>;
             using value_vector_type = vector<value_type, allocator_type>;
 
-            using allocator_type = Allocator;
-
             using iterator = hashtable_iterator<hashtable>;
             using const_iterator = hashtable_iterator<hashtable<const key_type, const value_type, allocator_type>>;
+
+            explicit constexpr hashtable(
+                allocator_type * const allocator = nullptr
+            ) : keys{allocator}, values{allocator}
+            {}
+
+            constexpr hashtable(const hashtable &other)
+                : keys{other.keys}, values{other.values}
+            {}
+
+            constexpr hashtable(hashtable &&other)
+                : keys{std::move(other.keys)}, values{std::move(other.values)}
+            {}
+
+            template<typename Pair>
+            constexpr hashtable(
+                std::initializer_list<Pair> values,
+                allocator_type * const allocator = nullptr
+            ) : hashtable{allocator} {
+                std::for_each(
+                    values.begin(),
+                    values.end(),
+                    [this] (const Pair &pair) {
+                        (*this)[pair.first] = pair.second;
+                    }
+                );
+            }
+
+            template<typename InputRange>
+            requires std::ranges::input_range<InputRange>
+            constexpr hashtable(
+                InputRange input,
+                allocator_type * const allocator = nullptr
+            ) : hashtable{allocator} {
+                std::for_each(
+                    input.begin(),
+                    input.end(),
+                    [this] (const auto &pair) {
+                        (*this)[pair.first] = pair.second;
+                    }
+                );
+            }
+
+            ~hashtable() {
+                destroy();
+            }
+
+            void destroy() noexcept {
+                keys.destroy();
+                values.destroy();
+            }
+
+            constexpr hashtable& operator =(const hashtable &other) {
+                keys = other.keys;
+                values = other.values;
+
+                return *this;
+            }
+
+            constexpr hashtable& operator =(hashtable &&other) {
+                keys = std::move(other.keys);
+                values = std::move(other.values);
+
+                return *this;
+            }
+
+            constexpr size_type capacity() const noexcept { return keys.capacity(); }
+
+            constexpr void reserve(const size_type new_capacity) {
+                key_vector_type new_keys;
+                value_vector_type new_values;
+
+                new_keys.reserve(new_capacity);
+                new_values.reserve(new_capacity);
+
+                for(const pair)
+            }
 
         private:
             key_vector_type keys;
