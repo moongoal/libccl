@@ -43,5 +43,11 @@ int main(int argc, char ** argv) {
         check(min(5) == 5);
     });
 
+    suite.add_test("bitcount", [] () {
+        check(bitcount(4) == 3);
+        check(bitcount(1) == 1);
+        check(bitcount(0) == 0);
+    });
+
     return suite.main(argc, argv);
 }

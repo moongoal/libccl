@@ -120,6 +120,28 @@ namespace ccl {
             return arg1;
         }
     }
+
+    /**
+     * Count the number of places required to get to the highest
+     * set bit in a give number.
+     *
+     * @tparam T The type of number to compute the bit count for.
+     *
+     * @param n The number to count the bits for.
+     *
+     * @return The total bit count of the value to the highest set bit.
+     */
+    template<std::integral T>
+    constexpr size_t bitcount(T n) noexcept {
+        size_t count = 0;
+
+        while(n) {
+            n >>= 1;
+            ++count;
+        }
+
+        return count;
+    }
 }
 
 #endif // CCL_UTIL_HPP
