@@ -1,4 +1,5 @@
 #include <ccl/test.hpp>
+#include <ccl/util.hpp>
 #include <ccl/maybe.hpp>
 
 using namespace ccl;
@@ -11,8 +12,6 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("doesn't exist", [] () {
-        struct empty {};
-
         maybe<empty> x;
 
         check(sizeof(x) <= 1);

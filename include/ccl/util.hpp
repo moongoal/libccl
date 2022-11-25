@@ -142,6 +142,11 @@ namespace ccl {
 
         return count;
     }
+
+    /**
+     * An empty type.
+     */
+    struct empty {};
 }
 
 #endif // CCL_UTIL_HPP

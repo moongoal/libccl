@@ -1,9 +1,9 @@
 #include <ccl/test.hpp>
+#include <ccl/util.hpp>
 #include <ccl/compressed-pair.hpp>
 
 using namespace ccl;
 
-struct empty {};
 struct empty2 {};
 
 int main(int argc, char ** argv) {
