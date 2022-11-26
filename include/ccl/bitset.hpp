@@ -26,6 +26,8 @@ namespace ccl {
             using iterator = bitset_iterator<allocator_type>;
             using const_iterator = const bitset_iterator<allocator_type>;
 
+            static constexpr size_t cluster_size_bitcount = bitcount(sizeof(cluster_type));
+
             explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}
             constexpr bitset(bitset &&other) : clusters{std::move(other.clusters)}, _size_bits{std::move(other._size_bits)} {}
@@ -83,7 +85,7 @@ namespace ccl {
              * @param The new suggested capacity, in bits.
              */
             constexpr void reserve(const size_type new_capacity) {
-                clusters.reserve(new_capacity >> 3 >> (bitcount(sizeof(cluster_type)) - 1));
+                clusters.reserve(new_capacity >> 3 >> (cluster_size_bitcount - 1));
             }
 
             /**
@@ -243,11 +245,9 @@ namespace ccl {
                  * @return The bit location coordinates within `clusters`.
                  */
                 static constexpr bit_location locate_bit(const size_type index) {
-                    const size_type cluster_bit_count = bitcount(sizeof(cluster_type));
-
                     return {
-                        index >> cluster_bit_count,
-                        index & (cluster_bit_count - 1)
+                        index >> cluster_size_bitcount,
+                        index & (cluster_size_bitcount - 1)
                     };
                 }
     };
