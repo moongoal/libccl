@@ -26,6 +26,27 @@ namespace ccl {
             using iterator = bitset_iterator<allocator_type>;
             using const_iterator = const bitset_iterator<allocator_type>;
 
+            class bit_proxy {
+                bitset *set;
+                size_type index;
+
+                public:
+                    bit_proxy() = delete;
+                    bit_proxy(bitset &set, const size_type index) : set{&set}, index{index} {}
+                    bit_proxy(const bit_proxy &) = default;
+                    bit_proxy(bit_proxy &&) = default;
+
+                    constexpr bool operator =(const bool value) {
+                        set->assign(index, value);
+
+                        return value;
+                    }
+
+                    constexpr operator bool() const noexcept {
+                        return set->get(index);
+                    }
+            };
+
             static constexpr size_t cluster_size_bitcount = bitcount(sizeof(cluster_type));
 
             explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
@@ -34,6 +55,20 @@ namespace ccl {
 
             ~bitset() {
                 destroy();
+            }
+
+            bitset& operator =(const bitset &other) {
+                clusters = other.clusters;
+                _size_bits = other._size_bits;
+
+                return *this;
+            }
+
+            bitset& operator =(bitset &&other) {
+                clusters = std::move(other.clusters);
+                _size_bits = std::move(other._size_bits);
+
+                return *this;
             }
 
             /**
@@ -155,7 +190,33 @@ namespace ccl {
              *
              * @return The value of the bit at that index.
              */
-            constexpr bool operator[](const size_type index) const {
+            constexpr bit_proxy operator[](const size_type index) {
+                CCL_THROW_IF(index > _size_bits, std::out_of_range{"Index out of range."});
+
+                return {*this, index};
+            }
+
+            /**
+             * Access a bit given its index.
+             *
+             * @param index The index of the bit to access.
+             *
+             * @return The value of the bit at that index.
+             */
+            constexpr const bit_proxy operator[](const size_type index) const {
+                CCL_THROW_IF(index >= _size_bits, std::out_of_range{"Index out of range."});
+
+                return {*this, index};
+            }
+
+            /**
+             * Access a bit given its index.
+             *
+             * @param index The index of the bit to access.
+             *
+             * @return The value of the bit at that index.
+             */
+            constexpr bool get(const size_type index) const {
                 CCL_THROW_IF(index >= _size_bits, std::out_of_range{"Index out of range."});
 
                 const auto [target_cluster_index, internal_bit_index] = locate_bit(index);
@@ -188,6 +249,19 @@ namespace ccl {
                 const auto [target_cluster_index, internal_bit_index] = locate_bit(index);
                 cluster_type &target_cluster = clusters[target_cluster_index];
                 target_cluster &= ~(static_cast<cluster_type>(1) << internal_bit_index);
+            }
+
+            /**
+             * Clear all bits without changing the length of the set.
+             */
+            constexpr void zero() {
+                std::for_each(
+                    clusters.begin(),
+                    clusters.end(),
+                    [] (cluster_type &c) {
+                        c = 0;
+                    }
+                );
             }
 
             /**

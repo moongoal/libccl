@@ -12,11 +12,11 @@
 namespace ccl {
     template<typename T>
     struct hash {
-        using hash_value = uint64_t;
+        using hash_value_type = uint64_t;
 
-        static constexpr hash_value seed = 137438953471; // Mersenne, p=37
+        static constexpr hash_value_type seed = 137438953471; // Mersenne, p=37
 
-        constexpr hash_value operator()(const T& value) {
+        constexpr hash_value_type operator()(const T& value) {
             return XXH64(&value, sizeof(value), seed);
         }
     };

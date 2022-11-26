@@ -6,6 +6,7 @@
 #ifndef CCL_HASHTABLE_HPP
 #define CCL_HASHTABLE_HPP
 
+#include <optional>
 #include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/allocator.hpp>
@@ -13,6 +14,8 @@
 #include <ccl/debug.hpp>
 #include <ccl/compressed-pair.hpp>
 #include <ccl/hash.hpp>
+#include <ccl/util.hpp>
+#include <ccl/bitset.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl {
@@ -36,59 +39,116 @@ namespace ccl {
         using key_value_pair = compressed_pair<key_reference, value_reference>;
         using const_key_value_pair = compressed_pair<const_key_reference, const_value_reference>;
 
-        constexpr hashtable_iterator() noexcept : key{nullptr}, value{nullptr} {}
-        constexpr hashtable_iterator(const key_pointer key, const value_pointer value) noexcept : key{key}, value{value} {}
-        constexpr hashtable_iterator(const hashtable_iterator &other) noexcept : key{other.key}, value{other.value} {}
-        constexpr hashtable_iterator(hashtable_iterator &&other) noexcept : key{std::move(other.key)}, value{std::move(other.value)} {}
+        using hashtable_type = Hashtable;
+        using size_type = typename Hashtable::size_type;
+
+        constexpr hashtable_iterator() noexcept : hashtable{nullptr}, index{0} {}
+        explicit constexpr hashtable_iterator(hashtable_type& hashtable, const size_type item_index = 0) noexcept : hashtable{&hashtable}, index{item_index} {}
+        constexpr hashtable_iterator(const hashtable_iterator &other) noexcept : hashtable{other.hashtable}, index{other.index} {}
+        constexpr hashtable_iterator(hashtable_iterator &&other) noexcept : hashtable{std::move(other.hashtable)}, index{std::move(other.index)} {}
 
         constexpr hashtable_iterator& operator =(const hashtable_iterator &other) noexcept {
-            key = other.key;
-            value = other.value;
+            hashtable = other.hashtable;
+            index = other.index;
 
             return *this;
         }
 
         constexpr hashtable_iterator& operator =(hashtable_iterator &&other) noexcept {
-            key = std::move(other.key);
-            value = std::move(other.value);
+            hashtable = std::move(other.hashtable);
+            index = std::move(other.index);
 
             return *this;
         }
 
-        constexpr key_value_pair operator*() noexcept { return key_value_pair{ *key, *value }; }
-        constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ *key, *value }; }
-        constexpr value_pointer operator->() const noexcept { return value; } // TODO: What value should this be?
+        constexpr key_value_pair operator*() noexcept { return key_value_pair{ hashtable->keys[index], hashtable->values[index] }; }
+        constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ hashtable->keys[index], hashtable->values[index] }; }
 
-        constexpr bool operator ==(const hashtable_iterator other) const noexcept { return key == other.key; }
-        constexpr bool operator !=(const hashtable_iterator other) const noexcept { return key != other.key; }
-        constexpr bool operator >(const hashtable_iterator other) const noexcept { return key > other.key; }
-        constexpr bool operator <(const hashtable_iterator other) const noexcept { return key < other.key; }
-        constexpr bool operator >=(const hashtable_iterator other) const noexcept { return key >= other.key; }
-        constexpr bool operator <=(const hashtable_iterator other) const noexcept { return key <= other.key; }
+        constexpr key_value_pair* operator->() const noexcept {
+            pair = key_value_pair{ hashtable->keys[index], hashtable->values[index] };
+
+            return &pair;
+        } // TODO: What value should this be?
+
+        constexpr bool operator ==(const hashtable_iterator other) const noexcept { return hashtable == other.hashtable && index == other.index; }
+        constexpr bool operator !=(const hashtable_iterator other) const noexcept { return hashtable != other.hashtable || index != other.index; }
+
+        constexpr bool operator >(const hashtable_iterator other) const noexcept {
+            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+            return index > other.index;
+        }
+
+        constexpr bool operator <(const hashtable_iterator other) const noexcept {
+            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+            return index < other.index;
+        }
+
+        constexpr bool operator >=(const hashtable_iterator other) const noexcept {
+            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+            return index >= other.index;
+        }
+
+        constexpr bool operator <=(const hashtable_iterator other) const noexcept {
+            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+            return index <= other.index;
+        }
 
         constexpr hashtable_iterator& operator --() noexcept {
-            --key;
-            --value;
+            do {
+                index--;
+            } while(!hashtable->availability_map[index]);
+
             return *this;
         }
 
         constexpr hashtable_iterator operator --(int) noexcept {
-            return {key--, value--};
+            const size_type old_index = this->index;
+
+            do {
+                if(index == 0) {
+                    break;
+                }
+
+                index--;
+            } while(!hashtable->availability_map[index]);
+
+            return {*hashtable, old_index};
         }
 
         constexpr hashtable_iterator& operator ++() noexcept {
-            ++key;
-            ++value;
+            do {
+                if(index == hashtable->_capacity) {
+                    break;
+                }
+
+                index++;
+            } while(!hashtable->availability_map[index]);
+
             return *this;
         }
 
         constexpr hashtable_iterator operator ++(int) noexcept {
-            return {key++, value++};
+            const size_type old_index = this->index;
+
+            do {
+                if(index == hashtable->_capacity) {
+                    break;
+                }
+
+                index++;
+            } while(!hashtable->availability_map[index]);
+
+            return {*hashtable, old_index};
         }
 
         private:
-            key_pointer key;
-            value_pointer value;
+            hashtable_type *hashtable;
+            size_type index;
+            key_value_pair pair;
     };
 
     template<typename Hashtable>
@@ -115,6 +175,8 @@ namespace ccl {
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
     class hashtable : private internal::with_optional_allocator<Allocator> {
+        friend struct hashtable_iterator<hashtable>;
+
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
@@ -122,10 +184,9 @@ namespace ccl {
 
             using key_type = K;
             using value_type = V;
-            using hash_type = typename HashFunction::hash_type;
+            using hash_type = typename HashFunction::hash_value_type;
             using hash_function_type = HashFunction;
 
-            using hash_pointer = hash_type*;
             using key_pointer = K*;
             using value_pointer = V*;
 
@@ -140,20 +201,25 @@ namespace ccl {
             using iterator = hashtable_iterator<hashtable>;
             using const_iterator = hashtable_iterator<hashtable<const key_type, const value_type, allocator_type>>;
 
-            static constexpr hash_type invalid_hash = 0;
+            static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
 
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
-            ) : alloc{allocator}, _capacity{0}, hashes{nullptr}, keys{nullptr}, values{nullptr}
+            ) : alloc{allocator}, _capacity{0}, keys{nullptr}, values{nullptr}
             {}
 
             constexpr hashtable(const hashtable &other)
-                : alloc{other}, _capacity{other._capacity}, keys{other.keys}, values{other.values}
+                : alloc{other},
+                _capacity{other._capacity},
+                availability_map{other.availability_map},
+                keys{other.keys},
+                values{other.values}
             {}
 
             constexpr hashtable(hashtable &&other)
                 : alloc{std::move(other)},
                 _capacity{std::move(other._capacity)},
+                availability_map{std::move(other.availability_map)},
                 keys{std::move(other.keys)},
                 values{std::move(other.values)}
             {}
@@ -192,12 +258,11 @@ namespace ccl {
             }
 
             void destroy() noexcept {
-                alloc::get_allocator()->deallocate(hashes);
+                availability_map.destroy();
                 alloc::get_allocator()->deallocate(keys);
                 alloc::get_allocator()->deallocate(values);
 
                 _capacity = 0;
-                hashes = nullptr;
                 keys = nullptr;
                 values = nullptr;
             }
@@ -208,6 +273,7 @@ namespace ccl {
 
             constexpr hashtable& operator =(const hashtable &other) {
                 alloc::operator =(other);
+                availability_map = other.availability_map;
                 keys = other.keys;
                 values = other.values;
 
@@ -216,6 +282,7 @@ namespace ccl {
 
             constexpr hashtable& operator =(hashtable &&other) {
                 alloc::operator =(std::move(other));
+                availability_map = std::move(other.availability_map);
                 keys = std::move(other.keys);
                 values = std::move(other.values);
 
@@ -224,54 +291,168 @@ namespace ccl {
 
             constexpr size_type capacity() const noexcept { return _capacity; }
 
-            constexpr void resize(const size_type new_capacity) {
+            constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity <= _capacity) {
                     return;
                 }
 
-                const hash_pointer new_hashes = alloc::get_allocator()->template allocate<hash_type>(new_capacity);
-                const key_pointer new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
-                const value_pointer new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity);
+                const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
 
-                std::memset(new_hashes, 0, sizeof(hash_type) * new_capacity);
+                bitset<allocator_type> new_availability_map;
+                const key_pointer new_keys = alloc::get_allocator()->template allocate<key_type>(actual_new_capacity);
+                const value_pointer new_values = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
+
+                new_availability_map.resize(actual_new_capacity);
+                new_availability_map.zero();
 
                 for(size_type i = 0; i < _capacity; ++i) {
-                    const hash_type current_hash = hashes[i];
+                    const bool is_available = availability_map[i];
 
-                    if(current_hash != invalid_hash) {
-                        const_key_reference current_key = keys[i];
-                        const_value_reference current_value = values[i];
+                    if(is_available) {
+                        key_reference current_key = keys[i];
+                        value_reference current_value = values[i];
 
-                        // TODO: Rehash
+                        const size_type new_index = compute_key_index(i, actual_new_capacity);
+
+                        std::construct_at(&new_keys[new_index], std::move(current_key));
+                        std::construct_at(&new_values[new_index], std::move(current_value));
+
+                        std::destroy_at(&current_key);
+                        std::destroy_at(&current_value);
+
+                        new_availability_map.set(new_index);
                     }
                 }
 
-                // ...
-                _capacity = new_capacity;
+                alloc::get_allocator()->deallocate(keys);
+                alloc::get_allocator()->deallocate(values);
+
+                _capacity = actual_new_capacity;
+                availability_map = std::move(new_availability_map);
+                keys = new_keys;
+                values = new_values;
             }
 
-        private:
-            static void insert(
-                const size_type capacity,
-                const key_pointer keys,
-                const value_pointer values,
-                const_key_reference key,
-                const_value_reference value
-            ) {
-                const hash_type key_hash = hash(key);
-                size_type key_index = key_hash % capacity; // TODO: Find faster way of computing this
+            template<typename X, typename Y>
+            constexpr void insert(X&& key, Y&& value) {
+                if(!_capacity) {
+                    reserve(minimum_capacity);
+                }
 
-                for(; key_index < key_slot_count; ++key_index) {
+                const size_type index = compute_key_index(key, _capacity);
 
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(!availability_map[i] || key == keys[i]) {
+                        std::construct_at(&keys[i], key);
+                        std::construct_at(&values[i], value);
+                        availability_map[i] = true;
+                        return;
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
+                    if(!availability_map[i] || key == keys[i]) {
+                        std::construct_at(&keys[i], key);
+                        std::construct_at(&values[i], value);
+                        availability_map[i] = true;
+                        return;
+                    }
+                }
+
+                // No slots available
+                reserve(max<size_type>(1, _capacity << 1));
+                insert(key, value);
+            }
+
+            template<typename ...Args>
+            constexpr void emplace(const_key_reference key, Args&& ...args) {
+                const size_type index = compute_key_index(key, _capacity);
+
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(!availability_map[i]) {
+                        std::construct_at(&keys[i], key);
+                        std::construct_at(&values[i], std::forward<Args>(args)...);
+                        availability_map[i] = true;
+                        return;
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
+                    if(!availability_map[i]) {
+                        std::construct_at(&keys[i], key);
+                        std::construct_at(&values[i], std::forward<Args>(args)...);
+                        availability_map[i] = true;
+                        return;
+                    }
+                }
+
+                // No slots available
+                reserve(_capacity << 1);
+                emplace(key, std::forward<Args>(args)...);
+            }
+
+            constexpr void remove(const_key_reference key) {
+                const size_type index = compute_key_index(key, _capacity);
+
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(keys[i] == key) {
+                        CCL_ASSERT(availability_map[i]);
+
+                        std::destroy_at(&keys[i]);
+                        std::destroy_at(&values[i]);
+                        availability_map[i] = false;
+                        return;
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
+                    if(keys[i] == key) {
+                        CCL_ASSERT(availability_map[i]);
+
+                        std::destroy_at(&keys[i]);
+                        std::destroy_at(&values[i]);
+                        availability_map[i] = false;
+                        return;
+                    }
                 }
             }
 
+            constexpr std::optional<value_reference> operator [](const_key_reference key) {
+                const size_type index = compute_key_index(key, _capacity);
+
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(keys[i] == key) {
+                        CCL_ASSERT(availability_map[i]);
+
+                        return values[i];
+                    }
+                }
+
+                return {};
+            }
+
+            constexpr iterator begin() {}
+            constexpr iterator end() {}
+
+            constexpr const_iterator begin() const {}
+            constexpr const_iterator end() const {}
+
+            constexpr const_iterator cbegin() const {}
+            constexpr const_iterator cend() const {}
+
+        private:
             static hash_type hash(const_key_reference x) {
                 return hash_function_type{}(x);
             }
 
+            static size_type compute_key_index(const_key_reference x, const size_type capacity) {
+                CCL_ASSERT(is_power_2(capacity));
+
+                return hash(x) & (capacity - 1);
+            }
+
             size_type _capacity = 0;
-            hash_pointer hashes = nullptr;
+            bitset<allocator_type> availability_map; // Slot availability bit map
             key_pointer keys = nullptr;
             value_pointer values = nullptr;
     };

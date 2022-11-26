@@ -1,0 +1,11 @@
+/**
+ * @file
+ *
+ * Definitions.
+ */
+#ifndef CCL_DEFINITIONS_HPP
+#define CCL_DEFINITIONS_HPP
+
+#cmakedefine CCL_HASHTABLE_MINIMUM_CAPACITY @CCL_HASHTABLE_MINIMUM_CAPACITY@
+
+#endif // CCL_DEFINITIONS_HPP

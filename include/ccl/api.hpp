@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <ccl/features.hpp>
+#include <ccl/definitions.hpp>
 
 #ifdef CCL_FEATURE_BUILD_SHARED
     #ifdef CCL_IMPL

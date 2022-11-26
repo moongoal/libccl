@@ -1,0 +1,3 @@
+include_guard()
+
+set(CCL_HASHTABLE_MINIMUM_CAPACITY 256)

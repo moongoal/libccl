@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 project(ccl)
 
 include(cmake/features.cmake)
+include(cmake/definitions.cmake)
 enable_testing()
 
 if(CCL_FEATURE_BUILD_SHARED)
@@ -73,5 +74,11 @@ include(cmake/test.cmake)
 configure_file(
     include/ccl/features.hpp.in
     include/ccl/features.hpp
+    NEWLINE_STYLE UNIX
+)
+
+configure_file(
+    include/ccl/definitions.hpp.in
+    include/ccl/definitions.hpp
     NEWLINE_STYLE UNIX
 )
