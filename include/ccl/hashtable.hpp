@@ -13,6 +13,7 @@
 #include <ccl/debug.hpp>
 #include <ccl/compressed-pair.hpp>
 #include <ccl/hash.hpp>
+#include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl {
     template<typename Hashtable>
@@ -113,7 +114,9 @@ namespace ccl {
         typename Allocator = allocator
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
-    class hashtable {
+    class hashtable : private internal::with_optional_allocator<Allocator> {
+        using alloc = internal::with_optional_allocator<Allocator>;
+
         public:
             using size_type = size_t;
 
@@ -129,9 +132,6 @@ namespace ccl {
             using key_reference = K&;
             using value_reference = V&;
 
-            using rvalue_key_reference = K&&;
-            using rvalue_value_reference = V&&;
-
             using const_key_reference = const K&;
             using const_value_reference = const V&;
 
@@ -144,18 +144,18 @@ namespace ccl {
 
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
-            ) : _capacity{0}, hashes{nullptr}, keys{nullptr}, values{nullptr}, allocator{allocator}
+            ) : alloc{allocator}, _capacity{0}, hashes{nullptr}, keys{nullptr}, values{nullptr}
             {}
 
             constexpr hashtable(const hashtable &other)
-                : _capacity{other._capacity}, keys{other.keys}, values{other.values}, allocator{other.allocator}
+                : alloc{other}, _capacity{other._capacity}, keys{other.keys}, values{other.values}
             {}
 
             constexpr hashtable(hashtable &&other)
-                : _capacity{std::move(other._capacity)},
+                : alloc{std::move(other)},
+                _capacity{std::move(other._capacity)},
                 keys{std::move(other.keys)},
-                values{std::move(other.values)},
-                allocator{std::move(other.allocator)}
+                values{std::move(other.values)}
             {}
 
             // template<typename Pair>
@@ -192,9 +192,9 @@ namespace ccl {
             }
 
             void destroy() noexcept {
-                allocator->deallocate(hashes);
-                allocator->deallocate(keys);
-                allocator->deallocate(values);
+                alloc::get_allocator()->deallocate(hashes);
+                alloc::get_allocator()->deallocate(keys);
+                alloc::get_allocator()->deallocate(values);
 
                 _capacity = 0;
                 hashes = nullptr;
@@ -207,6 +207,7 @@ namespace ccl {
             }
 
             constexpr hashtable& operator =(const hashtable &other) {
+                alloc::operator =(other);
                 keys = other.keys;
                 values = other.values;
 
@@ -214,6 +215,7 @@ namespace ccl {
             }
 
             constexpr hashtable& operator =(hashtable &&other) {
+                alloc::operator =(std::move(other));
                 keys = std::move(other.keys);
                 values = std::move(other.values);
 
@@ -227,9 +229,9 @@ namespace ccl {
                     return;
                 }
 
-                const hash_pointer new_hashes = allocator->template allocate<hash_type>(new_capacity);
-                const key_pointer new_keys = allocator->template allocate<key_type>(new_capacity);
-                const value_pointer new_values = allocator->template allocate<value_type>(new_capacity);
+                const hash_pointer new_hashes = alloc::get_allocator()->template allocate<hash_type>(new_capacity);
+                const key_pointer new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
+                const value_pointer new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity);
 
                 std::memset(new_hashes, 0, sizeof(hash_type) * new_capacity);
 
@@ -272,7 +274,6 @@ namespace ccl {
             hash_pointer hashes = nullptr;
             key_pointer keys = nullptr;
             value_pointer values = nullptr;
-            allocator_type *allocator = nullptr;
     };
 }
 
