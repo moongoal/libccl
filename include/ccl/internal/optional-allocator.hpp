@@ -1,7 +1,10 @@
 /**
  * @file
  *
- * Optional allocator.
+ * Optionally resident allocator.
+ *
+ * This mixin is meant to be used by containers and other allocator-aware
+ * facilities and avoids allocating extra space for non-stateful allocators.
  */
 #ifndef CCL_INTERNAL_OPTIONAL_ALLOCATOR_HPP
 #define CCL_INTERNAL_OPTIONAL_ALLOCATOR_HPP

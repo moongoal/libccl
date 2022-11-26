@@ -18,6 +18,7 @@
 #include <ccl/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/util.hpp>
+#include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl {
     template<typename Vector>
@@ -114,15 +115,16 @@ namespace ccl {
         typename T,
         typed_allocator<T> Allocator = allocator
     >
-    class vector {
+    class vector : private internal::with_optional_allocator<Allocator> {
         static_assert(std::is_default_constructible_v<T>);
+
+        using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
             using size_type = size_t;
             using value_type = T;
             using pointer = T*;
             using reference = T&;
-            using rvalue_reference = T&&;
             using const_reference = const T&;
             using allocator_type = Allocator;
             using iterator = vector_iterator<vector>;
@@ -132,7 +134,6 @@ namespace ccl {
             size_type _size = 0;
             size_type _capacity = 0;
             value_type * _data = nullptr;
-            allocator_type * allocator = nullptr;
 
             /**
              * Make room for insertion by displacing existing items forward.
@@ -166,20 +167,20 @@ namespace ccl {
         public:
             explicit constexpr vector(
                 allocator_type * const allocator = nullptr
-            ) : allocator{allocator ? allocator : get_default_allocator<allocator_type>()}
+            ) : alloc{allocator ? allocator : get_default_allocator<allocator_type>()}
             {}
 
-            constexpr vector(const vector &other) : vector{other.allocator} {
+            constexpr vector(const vector &other) : vector{other.get_allocator()} {
                 reserve(other._size);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
                 _size = other._size;
             }
 
             constexpr vector(vector &&other)
-                : _size{other._size},
+                : alloc{other.get_allocator()},
+                _size{other._size},
                 _capacity{other._capacity},
-                _data{other._data},
-                allocator{other.allocator}
+                _data{other._data}
             {
                 other._data = nullptr;
                 other._size = 0;
@@ -189,7 +190,7 @@ namespace ccl {
             constexpr vector(
                 std::initializer_list<T> values,
                 allocator_type * const allocator = nullptr
-            ) : vector{allocator} {
+            ) : alloc{allocator} {
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
                 _size = values.size();
@@ -215,7 +216,7 @@ namespace ccl {
             void destroy() noexcept {
                 clear();
 
-                allocator->deallocate(_data);
+                alloc::get_allocator()->deallocate(_data);
                 _capacity = 0;
                 _data = nullptr;
             }
@@ -238,10 +239,11 @@ namespace ccl {
             constexpr vector& operator =(vector &&other) {
                 clear();
 
+                internal::with_optional_allocator<Allocator>::operator =(std::move(other));
+
                 _size = other._size;
                 _capacity = other._capacity;
                 _data = other._data;
-                allocator = other.allocator;
 
                 other._data = nullptr;
                 other._size = 0;
@@ -257,10 +259,10 @@ namespace ccl {
             constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity > _capacity) {
                     const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
-                    value_type * const new_data = allocator->template allocate<value_type>(actual_new_capacity);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
 
                     std::uninitialized_move(begin(), end(), new_data);
-                    allocator->deallocate(_data);
+                    alloc::get_allocator()->deallocate(_data);
 
                     _data = new_data;
                     _capacity = actual_new_capacity;
@@ -277,19 +279,6 @@ namespace ccl {
                 std::construct_at(
                     std::to_address(where),
                     item
-                );
-            }
-
-            constexpr void insert(iterator where, rvalue_reference item) {
-                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
-
-                where = make_room(where);
-
-                CCL_ASSERT(where >= begin() || where <= end());
-
-                std::construct_at(
-                    std::to_address(where),
-                    std::move(item)
                 );
             }
 
@@ -322,13 +311,13 @@ namespace ccl {
             }
 
             constexpr void prepend(const_reference item) { insert(begin(), item); }
-            constexpr void prepend(rvalue_reference item) { insert(begin(), std::move(item)); }
-
             constexpr void append(const_reference item) { insert(end(), item); }
-            constexpr void append(rvalue_reference item) { insert(end(), std::move(item)); }
 
             template<typename ...Args>
             constexpr void append_emplace(Args&& ...args) { emplace(end(), std::forward<Args...>(args...)); }
+
+            template<typename ...Args>
+            constexpr void prepend_emplace(Args&& ...args) { emplace(begin(), std::forward<Args...>(args...)); }
 
             constexpr reference operator[](const size_type index) {
                 CCL_THROW_IF(index >= _size, std::out_of_range{"Index out of range."});
