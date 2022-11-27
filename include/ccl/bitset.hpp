@@ -36,10 +36,10 @@ namespace ccl {
                     bit_proxy(const bit_proxy &) = default;
                     bit_proxy(bit_proxy &&) = default;
 
-                    constexpr bool operator =(const bool value) {
+                    constexpr bit_proxy& operator =(const bool value) {
                         set->assign(index, value);
 
-                        return value;
+                        return *this;
                     }
 
                     constexpr operator bool() const noexcept {
@@ -48,6 +48,7 @@ namespace ccl {
             };
 
             static constexpr size_t cluster_size_bitcount = bitcount(sizeof(cluster_type));
+            static constexpr size_t bits_per_cluster = sizeof(cluster_type) * 8;
 
             explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}
@@ -191,7 +192,7 @@ namespace ccl {
              * @return The value of the bit at that index.
              */
             constexpr bit_proxy operator[](const size_type index) {
-                CCL_THROW_IF(index > _size_bits, std::out_of_range{"Index out of range."});
+                CCL_THROW_IF(index >= _size_bits, std::out_of_range{"Index out of range."});
 
                 return {*this, index};
             }
@@ -275,13 +276,16 @@ namespace ccl {
 
                 const auto [target_cluster_index, internal_bit_index] = locate_bit(index);
                 cluster_type &target_cluster = clusters[target_cluster_index];
-                target_cluster &= ~(static_cast<cluster_type>(1) << internal_bit_index);
 
                 if(value) {
                     target_cluster |= static_cast<cluster_type>(1) << internal_bit_index;
                 } else {
                     target_cluster &= ~(static_cast<cluster_type>(1) << internal_bit_index);
                 }
+            }
+
+            constexpr auto& get_clusters() const noexcept {
+                return clusters;
             }
 
             private:
@@ -318,10 +322,10 @@ namespace ccl {
                  *
                  * @return The bit location coordinates within `clusters`.
                  */
-                static constexpr bit_location locate_bit(const size_type index) {
+                constexpr bit_location locate_bit(const size_type index) const {
                     return {
-                        index >> cluster_size_bitcount,
-                        index & (cluster_size_bitcount - 1)
+                        index / bits_per_cluster,
+                        index & (bits_per_cluster - 1)
                     };
                 }
     };

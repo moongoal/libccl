@@ -6,7 +6,6 @@
 #ifndef CCL_HASHTABLE_HPP
 #define CCL_HASHTABLE_HPP
 
-#include <optional>
 #include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/allocator.hpp>
@@ -333,8 +332,7 @@ namespace ccl {
                 values = new_values;
             }
 
-            template<typename X, typename Y>
-            constexpr void insert(X&& key, Y&& value) {
+            constexpr void insert(K&& key, V&& value) {
                 if(!_capacity) {
                     reserve(minimum_capacity);
                 }
@@ -361,7 +359,7 @@ namespace ccl {
 
                 // No slots available
                 reserve(max<size_type>(1, _capacity << 1));
-                insert(key, value);
+                insert(std::forward<K&&>(key), std::forward<V&&>(value));
             }
 
             template<typename ...Args>
@@ -417,7 +415,7 @@ namespace ccl {
                 }
             }
 
-            constexpr std::optional<value_reference> operator [](const_key_reference key) {
+            constexpr value_reference operator [](const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
 
                 for(size_type i = index; i < _capacity; ++i) {
@@ -428,7 +426,7 @@ namespace ccl {
                     }
                 }
 
-                return {};
+                throw std::invalid_argument{"Invalid key."};
             }
 
             constexpr iterator begin() {}

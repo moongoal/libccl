@@ -90,6 +90,23 @@ int main(int argc, char **argv) {
         check(x[0] == false);
     });
 
+    // Regression: with more than one cluster, location of
+    // bit is wrong
+    suite.add_test("assign (more than one cluster)", [] () {
+        using cluster_type = bitset<>::cluster_type;
+        static constexpr size_t cluster_size = sizeof(cluster_type) * 8 /* bits */;
+
+        bitset x;
+
+        for(size_t i = 0; i < 2 * cluster_size; ++i) {
+            x.push_back_set();
+        }
+
+        check(x.get_clusters().size() == 2);
+        check(x.get_clusters()[0] == ~static_cast<cluster_type>(0));
+        check(x.get_clusters()[1] == ~static_cast<cluster_type>(0));
+    });
+
     suite.add_test("reserve (grow)", [] () {
         bitset x;
 
