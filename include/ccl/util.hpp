@@ -147,6 +147,20 @@ namespace ccl {
      * An empty type.
      */
     struct empty {};
+
+    /**
+     * Unpack the first type of a pack.
+     */
+    template<typename First, typename ...Rest>
+    struct first_type {
+        using type = First;
+    };
+
+    /**
+     * Unpack the first type of a pack.
+     */
+    template<typename ...Ts>
+    using first_type_t = typename first_type<Ts...>::type;
 }
 
 #endif // CCL_UTIL_HPP
