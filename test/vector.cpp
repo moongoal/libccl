@@ -462,10 +462,9 @@ int main(int argc, char **argv) {
         });
     }, skip_if_exceptions_disabled);
 
-    suite.add_test("emplace", [] () {
+    suite.add_test("emplace_at", [] () {
         vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
-        v.emplace(v.begin() + 1, dummy{4});
-
+        v.emplace_at(v.begin() + 1, dummy{4});
 
         check(v[0].value == 2);
         check(v[1].value == 5);
@@ -474,22 +473,22 @@ int main(int argc, char **argv) {
         check(v.size() == 4);
     });
 
-    suite.add_test("emplace (invalid iterator)", [] () {
+    suite.add_test("emplace_at (invalid iterator)", [] () {
         vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
 
         throws<std::out_of_range>([&] () {
-            v.emplace(v.begin() - 1, dummy{4});
+            v.emplace_at(v.begin() - 1, dummy{4});
         });
 
         throws<std::out_of_range>([&] () {
-            v.emplace(v.end() + 1, dummy{4});
+            v.emplace_at(v.end() + 1, dummy{4});
         });
     }, skip_if_exceptions_disabled);
 
-    suite.add_test("append_emplace", [] () {
+    suite.add_test("emplace", [] () {
         vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
 
-        v.append_emplace(dummy{4});
+        v.emplace(dummy{4});
 
         check(v[0].value == 2);
         check(v[1].value == 3);
