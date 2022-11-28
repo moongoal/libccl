@@ -28,7 +28,7 @@ jobs:
       uses: rlalik/setup-cpp-compiler@v1.1
       id: install_cc
       with:
-        compiler: clang-latest
+        compiler: clang++-12
 
     - uses: actions/checkout@v3
       with:
