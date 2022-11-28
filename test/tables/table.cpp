@@ -1,5 +1,5 @@
 #include <ccl/test.hpp>
-#include <ccl/table.hpp>
+#include <ccl/tables/table.hpp>
 
 using namespace ccl;
 

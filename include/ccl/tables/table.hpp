@@ -3,8 +3,8 @@
  *
  * SoA-based table implementation.
  */
-#ifndef CCL_TABLE_HPP
-#define CCL_TABLE_HPP
+#ifndef CCL_TABLES_TABLE_HPP
+#define CCL_TABLES_TABLE_HPP
 
 #include <functional>
 #include <utility>
@@ -12,6 +12,7 @@
 #include <ccl/debug.hpp>
 #include <ccl/allocator.hpp>
 #include <ccl/vector.hpp>
+#include <ccl/tables/view.hpp>
 
 namespace ccl {
     /**
@@ -179,7 +180,13 @@ namespace ccl {
 
                 return get<first_type_t<ColumnTypes...>>().size() - 1;
             }
+
+            constexpr view<allocator_type, ColumnTypes...> view() const {
+                return ccl::view<allocator_type, ColumnTypes...>(
+                    (get<ColumnTypes>())...
+                );
+            }
     };
 }
 
-#endif // CCL_TABLE_HPP
+#endif // CCL_TABLES_TABLE_HPP
