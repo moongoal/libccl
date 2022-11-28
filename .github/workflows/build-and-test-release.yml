@@ -24,6 +24,12 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
+    - name: Install dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install xxhash
+
     - name: Setup C/C++ Compiler
       uses: rlalik/setup-cpp-compiler@v1.1
       id: install_cc
