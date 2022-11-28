@@ -63,5 +63,15 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("emplace", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        x.emplace(7, 28);
+
+        check(x[7] == 28);
+    });
+
     return suite.main(argc, argv);
 }

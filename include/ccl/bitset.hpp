@@ -143,7 +143,8 @@ namespace ccl {
             }
 
             /**
-             * Append a new bit.
+             * Append a new bit. If the value of the bit to add is known,
+             * prefer `push_back_set()` or `push_back_clear()`.
              *
              * @param value The to assign.
              */
@@ -154,11 +155,10 @@ namespace ccl {
                 clusters.resize(required_cluster_size);
                 cluster_type &target_cluster = clusters[target_cluster_index];
 
-                if(value) {
-                    target_cluster |= static_cast<cluster_type>(1) << internal_bit_index;
-                } else {
-                    target_cluster &= ~(static_cast<cluster_type>(1) << internal_bit_index);
-                }
+                const cluster_type cluster_w_enabled = target_cluster | static_cast<cluster_type>(1) << internal_bit_index;
+                const cluster_type cluster_w_disabled = target_cluster & ~(static_cast<cluster_type>(1) << internal_bit_index);
+
+                target_cluster = choose(cluster_w_enabled, cluster_w_disabled, value);
 
                 _size_bits++;
             }
@@ -284,13 +284,18 @@ namespace ccl {
                 const auto [target_cluster_index, internal_bit_index] = locate_bit(index);
                 cluster_type &target_cluster = clusters[target_cluster_index];
 
-                if(value) {
-                    target_cluster |= static_cast<cluster_type>(1) << internal_bit_index;
-                } else {
-                    target_cluster &= ~(static_cast<cluster_type>(1) << internal_bit_index);
-                }
+                const cluster_type cluster_w_enabled = target_cluster | static_cast<cluster_type>(1) << internal_bit_index;
+                const cluster_type cluster_w_disabled = target_cluster & ~(static_cast<cluster_type>(1) << internal_bit_index);
+
+                target_cluster = choose(cluster_w_enabled, cluster_w_disabled, value);
             }
 
+            /**
+             * Get the underlying data structure where the bit clusters
+             * are stored.
+             *
+             * @return The internal bit storage.
+             */
             constexpr auto& get_clusters() const noexcept {
                 return clusters;
             }

@@ -205,7 +205,9 @@ namespace ccl {
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
             ) : alloc{allocator}, _capacity{0}, keys{nullptr}, values{nullptr}
-            {}
+            {
+                reserve(minimum_capacity);
+            }
 
             constexpr hashtable(const hashtable &other)
                 : alloc{other},
@@ -266,7 +268,7 @@ namespace ccl {
                 values = nullptr;
             }
 
-            constexpr size_type size() const noexcept {
+            constexpr size_type capacity() const noexcept {
                 return _capacity;
             }
 
@@ -287,8 +289,6 @@ namespace ccl {
 
                 return *this;
             }
-
-            constexpr size_type capacity() const noexcept { return _capacity; }
 
             constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity <= _capacity) {
@@ -333,10 +333,6 @@ namespace ccl {
             }
 
             constexpr void insert(K&& key, V&& value) {
-                if(!_capacity) {
-                    reserve(minimum_capacity);
-                }
-
                 const size_type index = compute_key_index(key, _capacity);
 
                 for(size_type i = index; i < _capacity; ++i) {
