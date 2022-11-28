@@ -3,6 +3,7 @@ project(ccl)
 
 include(cmake/features.cmake)
 include(cmake/definitions.cmake)
+include(cmake/build-xxhash.cmake)
 enable_testing()
 
 if(CCL_FEATURE_BUILD_SHARED)
@@ -14,8 +15,6 @@ endif()
 if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
     set(${CMAKE_BUILD_TYPE} "Debug")
 endif()
-
-find_package(xxHash CONFIG REQUIRED)
 
 add_library(
     ccl
@@ -54,6 +53,8 @@ target_compile_definitions(
     ccl
     PRIVATE
         CCL_IMPL
+    PUBLIC
+        ${CCL_XXH_PUBLIC_COMPILE_DEFINITIONS}
 )
 
 target_include_directories(

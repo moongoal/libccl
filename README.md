@@ -10,7 +10,7 @@
 
 **Runtime dependencies**
 
-* XXHash `>= 0.8.1`
+* XXHash `>= 0.8.1` (internally managed)
 
 ## Building
 
