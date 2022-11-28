@@ -225,20 +225,6 @@ namespace ccl {
                 values{std::move(other.values)}
             {}
 
-            template<typename Pair>
-            constexpr hashtable(
-                std::initializer_list<Pair> values,
-                allocator_type * const allocator = nullptr
-            ) : hashtable{allocator} {
-                std::for_each(
-                    values.begin(),
-                    values.end(),
-                    [this] (const Pair &pair) {
-                        insert(pair.first, pair.second);
-                    }
-                );
-            }
-
             template<typename InputRange>
             requires std::ranges::input_range<InputRange>
             constexpr hashtable(
@@ -249,7 +235,7 @@ namespace ccl {
                     input.begin(),
                     input.end(),
                     [this] (const auto &pair) {
-                        insert(pair.first, pair.second);
+                        insert(pair.first(), pair.second());
                     }
                 );
             }
@@ -332,7 +318,7 @@ namespace ccl {
                 values = new_values;
             }
 
-            constexpr void insert(K&& key, V&& value) {
+            constexpr void insert(const_key_reference key, const_value_reference value) {
                 const size_type index = compute_key_index(key, _capacity);
 
                 for(size_type i = index; i < _capacity; ++i) {
@@ -355,7 +341,7 @@ namespace ccl {
 
                 // No slots available
                 reserve(max<size_type>(1, _capacity << 1));
-                insert(std::forward<K&&>(key), std::forward<V&&>(value));
+                insert(key, value);
             }
 
             template<typename ...Args>
@@ -428,7 +414,7 @@ namespace ccl {
                     }
                 }
 
-                throw std::invalid_argument{"Invalid key."};
+                CCL_THROW(std::invalid_argument{"Invalid key."});
             }
 
             constexpr iterator begin() {}

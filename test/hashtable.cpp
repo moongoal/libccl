@@ -73,5 +73,37 @@ int main(int argc, char **argv) {
         check(x[7] == 28);
     });
 
+    suite.add_test("ctor (range)", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        vector<compressed_pair<int, float>> v {
+            make_pair(1, 2.f),
+            make_pair(2, 3.f),
+            make_pair(3, 3.f)
+        };
+
+        my_hashtable x { v };
+
+        check(x[1] == 2);
+        check(x[2] == 3);
+        check(x[3] == 3);
+    });
+
+    suite.add_test("ctor (range w/allocator)", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        vector<compressed_pair<int, float>> v {
+            make_pair(1, 2.f),
+            make_pair(2, 3.f),
+            make_pair(3, 3.f)
+        };
+
+        my_hashtable x { v, get_default_allocator() };
+
+        check(x[1] == 2);
+        check(x[2] == 3);
+        check(x[3] == 3);
+    });
+
     return suite.main(argc, argv);
 }

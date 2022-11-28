@@ -11,7 +11,6 @@
 
 namespace ccl {
     namespace internal {
-
         template<
             typename T1,
             typename T2,
@@ -74,16 +73,12 @@ namespace ccl {
             using second_reference = T2&;
             using first_const_reference = const T1&;
             using second_const_reference = const T2&;
-            using first_rvalue_reference = T1&&;
-            using second_rvalue_reference = T2&&;
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference x) : _first{x} {}
             constexpr compressed_pair_impl(second_const_reference x) : _second{x} {}
-            constexpr compressed_pair_impl(first_rvalue_reference x) : _first{std::move(x)} {}
-            constexpr compressed_pair_impl(second_rvalue_reference x) : _second{std::move(x)} {}
             constexpr compressed_pair_impl(first_const_reference x, second_const_reference y) : _first{x}, _second{y} {}
-            constexpr compressed_pair_impl(first_rvalue_reference x, second_rvalue_reference y) : _first{std::move(x)}, _second{std::move(y)} {}
+            constexpr compressed_pair_impl(T1&& x, T2&& y) : _first{std::forward<T1>(x)}, _second{std::forward<T2>(y)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -105,8 +100,8 @@ namespace ccl {
             constexpr second_const_reference second() const noexcept { return _second; }
 
             private:
-                first_type _first;
-                second_type _second;
+                T1 _first;
+                T2 _second;
         };
 
         template<typename T>
@@ -117,12 +112,10 @@ namespace ccl {
             using second_reference = T&;
             using first_const_reference = const T&;
             using second_const_reference = const T&;
-            using first_rvalue_reference = T&&;
-            using second_rvalue_reference = T&&;
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference x, second_const_reference y) : _first{x}, _second{y} {}
-            constexpr compressed_pair_impl(first_rvalue_reference x, second_rvalue_reference y) : _first{std::move(x)}, _second{std::move(y)} {}
+            constexpr compressed_pair_impl(T&& x, T&& y) : _first{std::forward<T>(x)}, _second{std::forward<T>(y)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -138,14 +131,14 @@ namespace ccl {
             }
 
             constexpr first_reference first() noexcept { return _first; }
-            constexpr first_const_reference first() const noexcept { return _first; }
+            constexpr first_reference first() const noexcept { return _first; }
 
             constexpr second_reference second() noexcept { return _second; }
-            constexpr second_const_reference second() const noexcept { return _second; }
+            constexpr second_reference second() const noexcept { return _second; }
 
             private:
-                first_type _first;
-                second_type _second;
+                T _first;
+                T _second;
         };
 
         template<typename T1, typename T2>
@@ -156,14 +149,11 @@ namespace ccl {
             using second_reference = T2&;
             using first_const_reference = const T1&;
             using second_const_reference = const T2&;
-            using first_rvalue_reference = T1&&;
-            using second_rvalue_reference = T2&&;
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(second_const_reference x) : _second{x} {}
-            constexpr compressed_pair_impl(second_rvalue_reference x) : _second{std::move(x)} {}
             constexpr compressed_pair_impl(first_const_reference, second_const_reference y) : _second{y} {}
-            constexpr compressed_pair_impl(first_rvalue_reference, second_rvalue_reference y) : _second{std::move(y)} {}
+            constexpr compressed_pair_impl(T1&& x CCLUNUSED, T2&& y) : _second{std::forward<T2>(y)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -185,7 +175,7 @@ namespace ccl {
             constexpr second_const_reference second() const noexcept { return _second; }
 
             private:
-                second_type _second;
+                T2 _second;
         };
 
         template<typename T1, typename T2>
@@ -196,14 +186,11 @@ namespace ccl {
             using second_reference = T2&;
             using first_const_reference = const T1&;
             using second_const_reference = const T2&;
-            using first_rvalue_reference = T1&&;
-            using second_rvalue_reference = T2&&;
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference x) : _first{x} {}
-            constexpr compressed_pair_impl(first_rvalue_reference x) : _first{std::move(x)} {}
             constexpr compressed_pair_impl(first_const_reference x, second_const_reference) : _first{x}{}
-            constexpr compressed_pair_impl(first_rvalue_reference x, second_rvalue_reference) : _first{std::move(x)} {}
+            constexpr compressed_pair_impl(T1&& x, T2&& y CCLUNUSED) : _first{std::forward<T1>(x)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -225,7 +212,7 @@ namespace ccl {
             constexpr second_const_reference second() const noexcept { return *this; }
 
             private:
-                first_type _first;
+                T1 _first;
         };
 
         template<typename T1, typename T2>
@@ -236,16 +223,12 @@ namespace ccl {
             using second_reference = T2&;
             using first_const_reference = const T1&;
             using second_const_reference = const T2&;
-            using first_rvalue_reference = T1&&;
-            using second_rvalue_reference = T2&&;
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference) {}
             constexpr compressed_pair_impl(second_const_reference) {}
-            constexpr compressed_pair_impl(first_rvalue_reference) {}
-            constexpr compressed_pair_impl(second_rvalue_reference) {}
             constexpr compressed_pair_impl(first_const_reference, second_const_reference) {}
-            constexpr compressed_pair_impl(first_rvalue_reference, second_rvalue_reference) {}
+            constexpr compressed_pair_impl(T1&& x CCLUNUSED, T2&& y CCLUNUSED) {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -261,10 +244,10 @@ namespace ccl {
             }
 
             constexpr first_reference first() noexcept { return *this; }
-            constexpr first_const_reference first() const noexcept { return *this; }
+            constexpr first_reference first() const noexcept { return *this; }
 
             constexpr second_reference second() noexcept { return *this; }
-            constexpr second_const_reference second() const noexcept { return *this; }
+            constexpr second_reference second() const noexcept { return *this; }
         };
 
         template<typename T>
@@ -275,12 +258,10 @@ namespace ccl {
             using second_reference = T&;
             using first_const_reference = const T&;
             using second_const_reference = const T&;
-            using first_rvalue_reference = T&&;
-            using second_rvalue_reference = T&&;
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference, second_const_reference) {}
-            constexpr compressed_pair_impl(first_rvalue_reference, second_rvalue_reference) {}
+            constexpr compressed_pair_impl(T&& x CCLUNUSED, T&& y CCLUNUSED) {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -307,11 +288,9 @@ namespace ccl {
         struct compressed_pair : private internal::compressed_pair_impl<
             T1, T2,
             internal::compressed_pair_switch_v<
-                T1,
-                T2,
+                T1, T2,
                 std::is_same_v<std::remove_cv_t<T1>, std::remove_cv_t<T2>>,
-                std::is_empty_v<T1>,
-                std::is_empty_v<T2>
+                std::is_empty_v<T1>, std::is_empty_v<T2>
             >
         > {
             using first_type = T1;
@@ -320,16 +299,12 @@ namespace ccl {
             using second_reference = T2&;
             using first_const_reference = const T1&;
             using second_const_reference = const T2&;
-            using first_rvalue_reference = T1&&;
-            using second_rvalue_reference = T2&&;
 
             constexpr compressed_pair() = default;
             constexpr compressed_pair(first_const_reference x) : impl{x} {}
             constexpr compressed_pair(second_const_reference x) : impl{x} {}
-            constexpr compressed_pair(first_rvalue_reference x) : impl{std::move(x)} {}
-            constexpr compressed_pair(second_rvalue_reference x) : impl{std::move(x)} {}
             constexpr compressed_pair(first_const_reference x, second_const_reference y) : impl{x, y} {}
-            constexpr compressed_pair(first_rvalue_reference x, second_rvalue_reference y) : impl{std::move(x), std::move(y)} {}
+            constexpr compressed_pair(T1&& x, T2&& y) : impl{std::forward<T1>(x), std::forward<T2>(y)} {}
             constexpr compressed_pair(const compressed_pair &other) = default;
             constexpr compressed_pair(compressed_pair &&other) = default;
 
@@ -354,11 +329,9 @@ namespace ccl {
                 using impl = internal::compressed_pair_impl<
                     T1, T2,
                     internal::compressed_pair_switch_v<
-                        T1,
-                        T2,
+                        T1, T2,
                         std::is_same_v<std::remove_cv_t<T1>, std::remove_cv_t<T2>>,
-                        std::is_empty_v<T1>,
-                        std::is_empty_v<T2>
+                        std::is_empty_v<T1>, std::is_empty_v<T2>
                     >
                 >;
         };
@@ -367,11 +340,9 @@ namespace ccl {
     struct compressed_pair<T, T> : private internal::compressed_pair_impl<
         T, T,
         internal::compressed_pair_switch_v<
-            T,
-            T,
+            T, T,
             true,
-            std::is_empty_v<T>,
-            std::is_empty_v<T>
+            std::is_empty_v<T>, std::is_empty_v<T>
         >
     > {
         using first_type = T;
@@ -380,12 +351,10 @@ namespace ccl {
         using second_reference = T&;
         using first_const_reference = const T&;
         using second_const_reference = const T&;
-        using first_rvalue_reference = T&&;
-        using second_rvalue_reference = T&&;
 
         constexpr compressed_pair() = default;
         constexpr compressed_pair(first_const_reference x, second_const_reference y) : impl{x, y} {}
-        constexpr compressed_pair(first_rvalue_reference x, second_rvalue_reference y) : impl{std::move(x), std::move(y)} {}
+        constexpr compressed_pair(T&& x, T&& y) : impl{std::forward<T>(x), std::forward<T>(y)} {}
         constexpr compressed_pair(const compressed_pair &other) = default;
         constexpr compressed_pair(compressed_pair &&other) = default;
 
@@ -410,14 +379,17 @@ namespace ccl {
             using impl = internal::compressed_pair_impl<
                 T, T,
                 internal::compressed_pair_switch_v<
-                    T,
-                    T,
+                    T, T,
                     std::is_same_v<std::remove_cv_t<T>, std::remove_cv_t<T>>,
-                    std::is_empty_v<T>,
-                    std::is_empty_v<T>
+                    std::is_empty_v<T>, std::is_empty_v<T>
                 >
             >;
     };
+
+    template<typename X, typename Y>
+    constexpr compressed_pair<X, Y> make_pair(X&& x, Y&& y) {
+        return compressed_pair<X, Y>{std::forward<X>(x), std::forward<Y>(y)};
+    }
 }
 
 #endif // CCL_COMPRESSED_PAIR_HPP
