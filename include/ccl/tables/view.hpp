@@ -63,12 +63,12 @@ namespace ccl {
 
         private:
             template<typename First, typename ...Rest>
-            constexpr void each(const view_iterator<Ts...> iter) const {
+            constexpr void each(const view_iterator<First, Rest...> iter) const {
                 const auto& v = get<First>();
                 const size_t v_size = v.size();
 
                 for(size_t i = 0; i < v_size; ++i) {
-                    iter(v[i], get<Ts>()[i]...);
+                    iter(v[i], get<Rest>()[i]...);
                 }
             }
     };

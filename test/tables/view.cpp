@@ -37,6 +37,18 @@ int main(int argc, char **argv) {
 
             my_table.apply(add_int, add_float);
         }
+
+        auto view = my_table.view();
+        size_t n = 0;
+
+        view.each([&n] (const int& i, const float& f) {
+            check(n == static_cast<size_t>(i));
+            check(f == static_cast<float>(i) + 0.5);
+
+            n += 1;
+        });
+
+        check(n == 3);
     });
 
     return suite.main(argc, argv);
