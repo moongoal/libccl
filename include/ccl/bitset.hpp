@@ -47,8 +47,8 @@ namespace ccl {
                     }
             };
 
-            static constexpr size_t cluster_size_bitcount = bitcount(sizeof(cluster_type));
             static constexpr size_t bits_per_cluster = sizeof(cluster_type) * 8;
+            static constexpr size_t cluster_size_bitcount = bitcount(bits_per_cluster) - 1;
 
             explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}
@@ -123,7 +123,7 @@ namespace ccl {
             constexpr void reserve(const size_type new_capacity) {
                 #pragma clang diagnostic push
                 #pragma clang diagnostic ignored "-Wshift-count-overflow"
-                clusters.reserve(new_capacity / bits_per_cluster);
+                clusters.reserve(new_capacity >> cluster_size_bitcount);
                 #pragma clang diagnostic pop
             }
 
@@ -136,7 +136,7 @@ namespace ccl {
             constexpr void resize(const size_type new_size) {
                 #pragma clang diagnostic push
                 #pragma clang diagnostic ignored "-Wshift-count-overflow"
-                clusters.resize(new_size / bits_per_cluster);
+                clusters.resize(new_size >> cluster_size_bitcount);
                 #pragma clang diagnostic pop
 
                 _size_bits = new_size;
@@ -336,7 +336,7 @@ namespace ccl {
                  */
                 constexpr bit_location locate_bit(const size_type index) const {
                     return {
-                        index / bits_per_cluster,
+                        index >> cluster_size_bitcount,
                         index & (bits_per_cluster - 1)
                     };
                 }
