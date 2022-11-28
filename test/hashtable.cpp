@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
         my_hashtable x;
 
-        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+        for(size_t i = 0; i <= my_hashtable::minimum_capacity; ++i) {
             x.insert(i, 1);
         }
 

@@ -121,7 +121,10 @@ namespace ccl {
              * @param The new suggested capacity, in bits.
              */
             constexpr void reserve(const size_type new_capacity) {
-                clusters.reserve(new_capacity >> 3 >> (cluster_size_bitcount - 1));
+                #pragma clang diagnostic push
+                #pragma clang diagnostic ignored "-Wshift-count-overflow"
+                clusters.reserve(new_capacity / bits_per_cluster);
+                #pragma clang diagnostic pop
             }
 
             /**
@@ -131,7 +134,11 @@ namespace ccl {
              * @param new_size The new size of the collection, in bits.
              */
             constexpr void resize(const size_type new_size) {
-                clusters.resize((new_size >> 3) + 1);
+                #pragma clang diagnostic push
+                #pragma clang diagnostic ignored "-Wshift-count-overflow"
+                clusters.resize(new_size / bits_per_cluster);
+                #pragma clang diagnostic pop
+
                 _size_bits = new_size;
             }
 

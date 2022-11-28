@@ -418,7 +418,17 @@ namespace ccl {
             constexpr value_reference operator [](const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
 
+                CCL_THROW_IF(index >= _capacity, std::invalid_argument{"Invalid key."});
+
                 for(size_type i = index; i < _capacity; ++i) {
+                    if(keys[i] == key) {
+                        CCL_ASSERT(availability_map[i]);
+
+                        return values[i];
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
                     if(keys[i] == key) {
                         CCL_ASSERT(availability_map[i]);
 
