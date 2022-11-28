@@ -421,17 +421,13 @@ namespace ccl {
                 CCL_THROW_IF(index >= _capacity, std::invalid_argument{"Invalid key."});
 
                 for(size_type i = index; i < _capacity; ++i) {
-                    if(keys[i] == key) {
-                        CCL_ASSERT(availability_map[i]);
-
+                    if(availability_map[i] && keys[i] == key) {
                         return values[i];
                     }
                 }
 
                 for(size_type i = 0; i < index; ++i) {
-                    if(keys[i] == key) {
-                        CCL_ASSERT(availability_map[i]);
-
+                    if(availability_map[i] && keys[i] == key) {
                         return values[i];
                     }
                 }
