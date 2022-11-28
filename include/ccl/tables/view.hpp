@@ -6,6 +6,7 @@
 #ifndef CCL_TABLES_VIEW_HPP
 #define CCL_TABLES_VIEW_HPP
 
+#include <functional>
 #include <ccl/api.hpp>
 #include <ccl/vector.hpp>
 
@@ -43,10 +44,33 @@ namespace ccl {
         typename ...ColumnTypes
     > class table;
 
+    template<typename ...Ts>
+    using view_iterator = std::function<void(const Ts&...)>;
+
     template<basic_allocator Allocator, typename ...Ts>
     class view : private column_view<Ts, Allocator>... {
         public:
             explicit constexpr view(const vector<Ts, Allocator>& ...column_collections) noexcept : column_view<Ts, Allocator>(column_collections)... {}
+
+            template<typename T>
+            constexpr const auto& get() const noexcept {
+                return column_view<T, Allocator>::get();
+            }
+
+            constexpr void each(const view_iterator<Ts...> iter) const {
+                each<Ts...>(iter);
+            }
+
+        private:
+            template<typename First, typename ...Rest>
+            constexpr void each(const view_iterator<Ts...> iter) const {
+                const auto& v = get<First>();
+                const size_t v_size = v.size();
+
+                for(size_t i = 0; i < v_size; ++i) {
+                    iter(v[i], get<Ts>()[i]...);
+                }
+            }
     };
 }
 

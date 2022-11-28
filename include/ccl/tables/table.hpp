@@ -181,9 +181,28 @@ namespace ccl {
                 return get<first_type_t<ColumnTypes...>>().size() - 1;
             }
 
-            constexpr view<allocator_type, ColumnTypes...> view() const {
+            /**
+             * Create a view of the entire table.
+             *
+             * @return A new view object.
+             */
+            constexpr ccl::view<allocator_type, ColumnTypes...> view() const {
                 return ccl::view<allocator_type, ColumnTypes...>(
                     (get<ColumnTypes>())...
+                );
+            }
+
+            /**
+             * Create a view of the entire table.
+             *
+             * @tparam Ts The column value types to create the view for.
+             *
+             * @return A new view object.
+             */
+            template<typename ...Ts>
+            constexpr ccl::view<allocator_type, Ts...> view() const {
+                return ccl::view<allocator_type, Ts...>(
+                    (get<Ts>())...
                 );
             }
     };
