@@ -225,34 +225,34 @@ namespace ccl {
                 values{std::move(other.values)}
             {}
 
-            // template<typename Pair>
-            // constexpr hashtable(
-            //     std::initializer_list<Pair> values,
-            //     allocator_type * const allocator = nullptr
-            // ) : hashtable{allocator} {
-            //     std::for_each(
-            //         values.begin(),
-            //         values.end(),
-            //         [this] (const Pair &pair) {
-            //             (*this)[pair.first] = pair.second;
-            //         }
-            //     );
-            // }
+            template<typename Pair>
+            constexpr hashtable(
+                std::initializer_list<Pair> values,
+                allocator_type * const allocator = nullptr
+            ) : hashtable{allocator} {
+                std::for_each(
+                    values.begin(),
+                    values.end(),
+                    [this] (const Pair &pair) {
+                        insert(pair.first, pair.second);
+                    }
+                );
+            }
 
-            // template<typename InputRange>
-            // requires std::ranges::input_range<InputRange>
-            // constexpr hashtable(
-            //     InputRange input,
-            //     allocator_type * const allocator = nullptr
-            // ) : hashtable{allocator} {
-            //     std::for_each(
-            //         input.begin(),
-            //         input.end(),
-            //         [this] (const auto &pair) {
-            //             (*this)[pair.first] = pair.second;
-            //         }
-            //     );
-            // }
+            template<typename InputRange>
+            requires std::ranges::input_range<InputRange>
+            constexpr hashtable(
+                InputRange input,
+                allocator_type * const allocator = nullptr
+            ) : hashtable{allocator} {
+                std::for_each(
+                    input.begin(),
+                    input.end(),
+                    [this] (const auto &pair) {
+                        insert(pair.first, pair.second);
+                    }
+                );
+            }
 
             ~hashtable() {
                 destroy();

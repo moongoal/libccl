@@ -57,6 +57,18 @@ target_compile_definitions(
         ${CCL_XXH_PUBLIC_COMPILE_DEFINITIONS}
 )
 
+target_compile_options(
+    ccl
+    PUBLIC
+        -march=x86-64
+)
+
+target_link_options(
+    ccl
+    PUBLIC
+        -march=x86-64
+)
+
 target_include_directories(
     ccl
     PUBLIC
