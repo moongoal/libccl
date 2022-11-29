@@ -186,7 +186,7 @@ namespace ccl {
              *
              * @return A new view object.
              */
-            constexpr ccl::view<table, ColumnTypes...> view() const {
+            constexpr const ccl::view<table, ColumnTypes...> view() const {
                 return ccl::view<table, ColumnTypes...>{
                     *this
                 };
@@ -200,23 +200,32 @@ namespace ccl {
              * @return A new view object.
              */
             template<typename ...Ts>
-            constexpr ccl::view<table, Ts...> view() const {
+            constexpr const ccl::view<table, Ts...> view() const {
                 return ccl::view<table, Ts...>{
                     *this
                 };
             }
 
-            constexpr void each(const view_iterator<ColumnTypes...> iter) const {
-                each<ColumnTypes...>(iter);
+            /**
+             * Get the size of the collection.
+             *
+             * @return The number of items in a column.
+             */
+            constexpr size_t size() const noexcept {
+                using first_type = first_type_t<ColumnTypes...>;
+                return get<first_type>().size();
             }
 
-            template<typename First, typename ...Rest>
-            constexpr void each(const view_iterator<First, Rest...> iter) const {
-                const auto& v = get<First>();
-                const size_t v_size = v.size();
+            /**
+             * Iterate over the entire collection of items.
+             *
+             * @param iter The iterator function.
+             */
+            constexpr void each(const view_iterator<ColumnTypes...> iter) const {
+                const size_t v_size = size();
 
                 for(size_t i = 0; i < v_size; ++i) {
-                    iter(v[i], get<Rest>()[i]...);
+                    iter(get<ColumnTypes>()[i]...);
                 }
             }
     };

@@ -109,29 +109,20 @@ int main(int argc, char **argv) {
         check(n == 3);
     });
 
-    // suite.add_test("each (partial)", [] () {
-    //     table<allocator, int, float, char> my_table;
+    suite.add_test("size", [] () {
+        table<allocator, int, float> my_table;
 
-    //     my_table.reserve(3);
+        my_table.reserve(3);
 
-    //     for(size_t i = 0; i < 3; ++i) {
-    //         const auto add_int = [i] (auto& x) { x.emplace(i); };
-    //         const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
-    //         const auto add_char = [i] (auto& x) { x.emplace(i); };
+        for(size_t i = 0; i < 2; ++i) {
+            const auto add_int = [i] (auto& x) { x.emplace(i); };
+            const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
 
-    //         my_table.apply(add_int, add_float, add_char);
-    //     }
+            my_table.apply(add_int, add_float);
+        }
 
-    //     float n = 0;
-
-    //     my_table.view<float, int>();
-
-    //     my_table.each<int, float>([&n] (const int& f, const float& i) {
-    //         n += f;
-    //     });
-
-    //     check(n == 3);
-    // });
+        check(my_table.size() == 2);
+    });
 
     return suite.main(argc, argv);
 }

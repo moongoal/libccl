@@ -12,11 +12,6 @@
 #include <ccl/util.hpp>
 
 namespace ccl {
-    template<
-        basic_allocator Allocator,
-        typename ...ColumnTypes
-    > class table;
-
     template<typename ...Ts>
     using view_iterator = std::function<void(const Ts&...)>;
 
@@ -27,6 +22,13 @@ namespace ccl {
         public:
             explicit constexpr view(const Table& table) noexcept : table{&table} {}
 
+            /**
+             * Get a column.
+             *
+             * @tparam T The column data type.
+             *
+             * @return The column having this data type.
+             */
             template<typename T>
             constexpr const auto& get() const noexcept {
                 static_assert(is_type_in_pack<T, Ts...>(), "Type does not belong to view.");
@@ -34,10 +36,26 @@ namespace ccl {
                 return table->template get<T>();
             }
 
+            /**
+             * Iterate over the entire collection of items.
+             *
+             * @param iter The iterator function.
+             */
             constexpr void each(const view_iterator<Ts...> iter) const {
                 each<Ts...>(iter);
             }
 
+            /**
+             * Get the size of the collection.
+             *
+             * @return The number of items in a column.
+             */
+            constexpr size_t size() const noexcept {
+                using first_type = first_type_t<Ts...>;
+                return get<first_type>().size();
+            }
+
+        private:
             template<typename ...Types>
             constexpr void each(const view_iterator<Types...> iter) const {
                 using first_type = first_type_t<Types...>;
@@ -47,16 +65,6 @@ namespace ccl {
                 for(size_t i = 0; i < v_size; ++i) {
                     iter(get<Types>()[i]...);
                 }
-            }
-
-            constexpr size_t size() const noexcept {
-                return size<Ts...>();
-            }
-
-        private:
-            template<typename First, typename ...Rest>
-            constexpr size_t size() const noexcept {
-                return get<First>().size();
             }
     };
 }
