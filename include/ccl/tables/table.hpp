@@ -205,6 +205,21 @@ namespace ccl {
                     (get<Ts>())...
                 );
             }
+
+            constexpr void each(const view_iterator<ColumnTypes...> iter) const {
+                each<ColumnTypes...>(iter);
+            }
+
+        private:
+            template<typename First, typename ...Rest>
+            constexpr void each(const view_iterator<First, Rest...> iter) const {
+                const auto& v = get<First>();
+                const size_t v_size = v.size();
+
+                for(size_t i = 0; i < v_size; ++i) {
+                    iter(v[i], get<Rest>()[i]...);
+                }
+            }
     };
 }
 

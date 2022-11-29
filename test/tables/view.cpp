@@ -5,18 +5,6 @@
 using namespace ccl;
 
 int main(int argc, char **argv) {
-    suite.add_test("full view", [] () {
-        table<allocator, int, float> my_table;
-
-        auto view CCLUNUSED = my_table.view();
-    });
-
-    suite.add_test("partial view", [] () {
-        table<allocator, int, float> my_table;
-
-        auto view CCLUNUSED = my_table.view<int>();
-    });
-
     suite.add_test("get", [] () {
         table<allocator, int, float> my_table;
 
@@ -49,6 +37,23 @@ int main(int argc, char **argv) {
         });
 
         check(n == 3);
+    });
+
+    suite.add_test("size", [] () {
+        table<allocator, int, float> my_table;
+
+        my_table.reserve(3);
+
+        for(size_t i = 0; i < 2; ++i) {
+            const auto add_int = [i] (auto& x) { x.emplace(i); };
+            const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
+
+            my_table.apply(add_int, add_float);
+        }
+
+        auto view = my_table.view();
+
+        check(view.size() == 2);
     });
 
     return suite.main(argc, argv);

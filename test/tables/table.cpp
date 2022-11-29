@@ -73,5 +73,65 @@ int main(int argc, char **argv) {
         check(my_table.get<S>().size() == 1);
     });
 
+    suite.add_test("view (full)", [] () {
+        table<allocator, int, float> my_table;
+
+        auto view CCLUNUSED = my_table.view();
+    });
+
+    suite.add_test("view (partial)", [] () {
+        table<allocator, int, float> my_table;
+
+        auto view CCLUNUSED = my_table.view<int>();
+    });
+
+    suite.add_test("each (full)", [] () {
+        table<allocator, int, float> my_table;
+
+        my_table.reserve(3);
+
+        for(size_t i = 0; i < 3; ++i) {
+            const auto add_int = [i] (auto& x) { x.emplace(i); };
+            const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
+
+            my_table.apply(add_int, add_float);
+        }
+
+        size_t n = 0;
+
+        my_table.each([&n] (const int& i, const float& f) {
+            check(n == static_cast<size_t>(i));
+            check(f == static_cast<float>(i) + 0.5);
+
+            n += 1;
+        });
+
+        check(n == 3);
+    });
+
+    // suite.add_test("each (partial)", [] () {
+    //     table<allocator, int, float, char> my_table;
+
+    //     my_table.reserve(3);
+
+    //     for(size_t i = 0; i < 3; ++i) {
+    //         const auto add_int = [i] (auto& x) { x.emplace(i); };
+    //         const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
+    //         const auto add_char = [i] (auto& x) { x.emplace(i); };
+
+    //         my_table.apply(add_int, add_float, add_char);
+    //     }
+
+    //     float n = 0;
+
+    //     my_table.view<float, int>();
+
+    //     my_table.each<int, float>([&n] (const int& f, const float& i) {
+    //         n += f;
+    //     });
+
+    //     check(n == 3);
+    // });
+
     return suite.main(argc, argv);
 }

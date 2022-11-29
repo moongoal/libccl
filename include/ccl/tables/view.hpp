@@ -61,7 +61,6 @@ namespace ccl {
                 each<Ts...>(iter);
             }
 
-        private:
             template<typename First, typename ...Rest>
             constexpr void each(const view_iterator<First, Rest...> iter) const {
                 const auto& v = get<First>();
@@ -70,6 +69,16 @@ namespace ccl {
                 for(size_t i = 0; i < v_size; ++i) {
                     iter(v[i], get<Rest>()[i]...);
                 }
+            }
+
+            constexpr size_t size() const noexcept {
+                return size<Ts...>();
+            }
+
+        private:
+            template<typename First, typename ...Rest>
+            constexpr size_t size() const noexcept {
+                return get<First>().size();
             }
     };
 }
