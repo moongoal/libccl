@@ -69,11 +69,17 @@ target_link_options(
         -march=x86-64
 )
 
+set(CCL_INCLUDE_PATH include)
+set(CCL_BUILD_INCLUDE_PATH build/include)
+
+file(REAL_PATH ${CCL_INCLUDE_PATH} CCL_FULL_INCLUDE_PATH)
+file(REAL_PATH ${CCL_BUILD_INCLUDE_PATH} CCL_FULL_BUILD_INCLUDE_PATH)
+
 target_include_directories(
     ccl
     PUBLIC
-        include
-        build/include
+        $<INSTALL_INTERFACE:${CCL_INCLUDE_PATH}> $<BUILD_INTERFACE:${CCL_FULL_INCLUDE_PATH}>
+        $<INSTALL_INTERFACE:${CCL_BUILD_INCLUDE_PATH}> $<BUILD_INTERFACE:${CCL_FULL_BUILD_INCLUDE_PATH}>
 )
 
 target_link_libraries(
