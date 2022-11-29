@@ -4,6 +4,8 @@
 using namespace ccl;
 
 int main(int argc, char **argv) {
+    test_suite suite;
+
     suite.add_test("ctor", [] () {
         table<allocator, int, float> my_table;
 

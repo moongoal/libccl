@@ -7,6 +7,8 @@ using namespace ccl;
 struct empty2 {};
 
 int main(int argc, char ** argv) {
+    test_suite suite;
+
     suite.add_test("non empty, different types", [] () {
         compressed_pair<int, float> p{1, 2};
 

@@ -5,6 +5,8 @@
 using namespace ccl;
 
 int main(int argc, char **argv) {
+    test_suite suite;
+
     suite.add_test("get", [] () {
         table<allocator, int, float> my_table;
 

@@ -4,6 +4,8 @@
 using namespace ccl;
 
 int main(int argc, char **argv) {
+    test_suite suite;
+
     suite.add_test("insert one", []() {
         using my_hashtable = hashtable<int, float>;
 

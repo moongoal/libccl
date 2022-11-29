@@ -4,6 +4,8 @@
 using namespace ccl;
 
 int main(int argc, char ** argv) {
+    test_suite suite;
+
     suite.add_test("choose", [] () {
         check(choose(1, 2, true) == 1);
         check(choose(1, 2, false) == 2);

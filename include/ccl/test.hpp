@@ -114,8 +114,6 @@ namespace ccl {
 
         fail();
     }
-
-    static test_suite suite;
 }
 
 #endif // CCL_TEST_HPP

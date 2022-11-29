@@ -41,6 +41,8 @@ struct dummy {
 };
 
 int main(int argc, char **argv) {
+    test_suite suite;
+
     suite.add_test(
         "ctor",
         []() {
