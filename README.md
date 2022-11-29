@@ -1,5 +1,25 @@
 # Ccl C++ base library
 
+## API stability
+
+Stable: 🟢
+Almost stable: 🟡
+Unstable: 🔴
+
+|Interface|Status
+|-|-
+|Utilities|🔴
+|Vector|🔴
+|Test Driver|🟡
+|Maybe|🔴
+|Hashtable|🔴
+|Hash|🟡
+|Debug Utilities|🔴
+|Compressed Pair|🔴
+|Bitset|🔴
+|Allocator|🔴
+|Tables|🔴
+
 ## Dependencies
 
 **Build dependencies**
