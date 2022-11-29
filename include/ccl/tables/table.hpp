@@ -186,10 +186,10 @@ namespace ccl {
              *
              * @return A new view object.
              */
-            constexpr ccl::view<allocator_type, ColumnTypes...> view() const {
-                return ccl::view<allocator_type, ColumnTypes...>(
-                    (get<ColumnTypes>())...
-                );
+            constexpr ccl::view<table, ColumnTypes...> view() const {
+                return ccl::view<table, ColumnTypes...>{
+                    *this
+                };
             }
 
             /**
@@ -200,17 +200,16 @@ namespace ccl {
              * @return A new view object.
              */
             template<typename ...Ts>
-            constexpr ccl::view<allocator_type, Ts...> view() const {
-                return ccl::view<allocator_type, Ts...>(
-                    (get<Ts>())...
-                );
+            constexpr ccl::view<table, Ts...> view() const {
+                return ccl::view<table, Ts...>{
+                    *this
+                };
             }
 
             constexpr void each(const view_iterator<ColumnTypes...> iter) const {
                 each<ColumnTypes...>(iter);
             }
 
-        private:
             template<typename First, typename ...Rest>
             constexpr void each(const view_iterator<First, Rest...> iter) const {
                 const auto& v = get<First>();

@@ -161,6 +161,28 @@ namespace ccl {
      */
     template<typename ...Ts>
     using first_type_t = typename first_type<Ts...>::type;
+
+    /**
+     * Check whether a given type is in a pack of types.
+     *
+     * @tparam T The type to check.
+     * @tparam First The first type in the pack.
+     * @tparam Rest The remaining types in the pack.
+     *
+     * @return True if T is one of the types in the pack, false otherwise.
+     */
+    template<typename T, typename First, typename ...Rest>
+    consteval bool is_type_in_pack() {
+        if constexpr(std::is_same_v<T, First>) {
+            return true;
+        }
+
+        if constexpr(sizeof...(Rest) == 0) {
+            return false;
+        } else {
+            return is_type_in_pack<T, Rest...>();
+        }
+    }
 }
 
 #endif // CCL_UTIL_HPP

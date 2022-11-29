@@ -49,5 +49,10 @@ int main(int argc, char ** argv) {
         check(bitcount(0) == 0);
     });
 
+    suite.add_test("is_type_in_pack", [] () {
+        check(is_type_in_pack<int, float, int>());
+        check(!is_type_in_pack<char, float, int>());
+    });
+
     return suite.main(argc, argv);
 }
