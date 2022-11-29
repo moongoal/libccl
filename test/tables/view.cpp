@@ -56,5 +56,16 @@ int main(int argc, char **argv) {
         check(view.size() == 2);
     });
 
+    suite.add_test("get (w/index)", [] () {
+        table<allocator, int, float> my_table;
+
+        my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); });
+
+        auto my_view = my_table.view();
+
+        check(my_view.get<int>(0) == 5);
+        check(my_view.get<float>(0) == 1);
+    });
+
     return suite.main(argc, argv);
 }

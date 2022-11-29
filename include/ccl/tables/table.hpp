@@ -133,6 +133,34 @@ namespace ccl {
             }
 
             /**
+             * Get a value from a column.
+             *
+             * @tparam T The column data type.
+             *
+             * @param index The index of the item to retrieve.
+             *
+             * @return The column having this data type.
+             */
+            template<typename T>
+            constexpr T& get(const size_type index) noexcept {
+                return get<T>()[index];
+            }
+
+            /**
+             * Get a value from a column.
+             *
+             * @tparam T The column data type.
+             *
+             * @param index The index of the item to retrieve.
+             *
+             * @return The column having this data type.
+             */
+            template<typename T>
+            constexpr const T& get(const size_type index) const noexcept {
+                return get<T>()[index];
+            }
+
+            /**
              * Apply an operation to each column.
              *
              * @param ops The operation functors, one per column.

@@ -124,5 +124,16 @@ int main(int argc, char **argv) {
         check(my_table.size() == 2);
     });
 
+    suite.add_test("get (w/index)", [] () {
+        table<allocator, int, float> my_table;
+
+        my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); });
+
+        my_table.get<float>(0) = 2;
+
+        check(my_table.get<int>(0) == 5);
+        check(my_table.get<float>(0) == 2);
+    });
+
     return suite.main(argc, argv);
 }

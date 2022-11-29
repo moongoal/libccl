@@ -37,6 +37,20 @@ namespace ccl {
             }
 
             /**
+             * Get a value from a column.
+             *
+             * @tparam T The column data type.
+             *
+             * @param index The index of the item to retrieve.
+             *
+             * @return The column having this data type.
+             */
+            template<typename T>
+            constexpr const T& get(const size_t index) const noexcept {
+                return get<T>()[index];
+            }
+
+            /**
              * Iterate over the entire collection of items.
              *
              * @param iter The iterator function.
