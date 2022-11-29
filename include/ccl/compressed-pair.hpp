@@ -78,7 +78,6 @@ namespace ccl {
             constexpr compressed_pair_impl(first_const_reference x) : _first{x} {}
             constexpr compressed_pair_impl(second_const_reference x) : _second{x} {}
             constexpr compressed_pair_impl(first_const_reference x, second_const_reference y) : _first{x}, _second{y} {}
-            constexpr compressed_pair_impl(T1&& x, T2&& y) : _first{std::forward<T1>(x)}, _second{std::forward<T2>(y)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -115,7 +114,6 @@ namespace ccl {
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference x, second_const_reference y) : _first{x}, _second{y} {}
-            constexpr compressed_pair_impl(T&& x, T&& y) : _first{std::forward<T>(x)}, _second{std::forward<T>(y)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -153,7 +151,6 @@ namespace ccl {
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(second_const_reference x) : _second{x} {}
             constexpr compressed_pair_impl(first_const_reference, second_const_reference y) : _second{y} {}
-            constexpr compressed_pair_impl(T1&& x CCLUNUSED, T2&& y) : _second{std::forward<T2>(y)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -190,7 +187,6 @@ namespace ccl {
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference x) : _first{x} {}
             constexpr compressed_pair_impl(first_const_reference x, second_const_reference) : _first{x}{}
-            constexpr compressed_pair_impl(T1&& x, T2&& y CCLUNUSED) : _first{std::forward<T1>(x)} {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -228,7 +224,6 @@ namespace ccl {
             constexpr compressed_pair_impl(first_const_reference) {}
             constexpr compressed_pair_impl(second_const_reference) {}
             constexpr compressed_pair_impl(first_const_reference, second_const_reference) {}
-            constexpr compressed_pair_impl(T1&& x CCLUNUSED, T2&& y CCLUNUSED) {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -261,7 +256,6 @@ namespace ccl {
 
             constexpr compressed_pair_impl() = default;
             constexpr compressed_pair_impl(first_const_reference, second_const_reference) {}
-            constexpr compressed_pair_impl(T&& x CCLUNUSED, T&& y CCLUNUSED) {}
             constexpr compressed_pair_impl(const compressed_pair_impl &other) = default;
             constexpr compressed_pair_impl(compressed_pair_impl &&other) = default;
 
@@ -304,7 +298,6 @@ namespace ccl {
             constexpr compressed_pair(first_const_reference x) : impl{x} {}
             constexpr compressed_pair(second_const_reference x) : impl{x} {}
             constexpr compressed_pair(first_const_reference x, second_const_reference y) : impl{x, y} {}
-            constexpr compressed_pair(T1&& x, T2&& y) : impl{std::forward<T1>(x), std::forward<T2>(y)} {}
             constexpr compressed_pair(const compressed_pair &other) = default;
             constexpr compressed_pair(compressed_pair &&other) = default;
 
@@ -354,7 +347,6 @@ namespace ccl {
 
         constexpr compressed_pair() = default;
         constexpr compressed_pair(first_const_reference x, second_const_reference y) : impl{x, y} {}
-        constexpr compressed_pair(T&& x, T&& y) : impl{std::forward<T>(x), std::forward<T>(y)} {}
         constexpr compressed_pair(const compressed_pair &other) = default;
         constexpr compressed_pair(compressed_pair &&other) = default;
 

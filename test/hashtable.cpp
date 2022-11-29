@@ -105,5 +105,37 @@ int main(int argc, char **argv) {
         check(x[3] == 3);
     });
 
+    suite.add_test("begin", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        vector<compressed_pair<int, float>> v {
+            make_pair(1, 2.f)
+        };
+
+        my_hashtable x { v, get_default_allocator() };
+
+        const auto it = x.begin();
+
+        check(it->first() == 1);
+        check(it->second() == 2);
+        check(++it == x.end());
+    });
+
+    suite.add_test("last", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        vector<compressed_pair<int, float>> v {
+            make_pair(1, 2.f)
+        };
+
+        my_hashtable x { v, get_default_allocator() };
+
+        const auto it = --x.end();
+
+        check(it->first() == 1);
+        check(it->second() == 2);
+        check(it == x.begin());
+    });
+
     return suite.main(argc, argv);
 }

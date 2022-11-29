@@ -26,23 +26,24 @@ namespace ccl {
         using key_type = typename Hashtable::key_type;
         using value_type = typename Hashtable::value_type;
 
-        using key_pointer = typename Hashtable::key_pointer;
-        using value_pointer = typename Hashtable::value_pointer;
-
-        using key_reference = typename Hashtable::key_reference;
-        using value_reference = typename Hashtable::value_reference;
-
-        using const_key_reference = typename Hashtable::const_key_reference;
-        using const_value_reference = typename Hashtable::const_value_reference;
-
-        using key_value_pair = compressed_pair<key_reference, value_reference>;
-        using const_key_value_pair = compressed_pair<const_key_reference, const_value_reference>;
+        using key_value_pair = compressed_pair<key_type, value_type>;
+        using const_key_value_pair = compressed_pair<const key_type, const value_type>;
 
         using hashtable_type = Hashtable;
         using size_type = typename Hashtable::size_type;
 
         constexpr hashtable_iterator() noexcept : hashtable{nullptr}, index{0} {}
-        explicit constexpr hashtable_iterator(hashtable_type& hashtable, const size_type item_index = 0) noexcept : hashtable{&hashtable}, index{item_index} {}
+
+        explicit constexpr hashtable_iterator(hashtable_type& hashtable, const size_type item_index = 0) noexcept : hashtable{&hashtable}, index{item_index} {
+            // Ensure we are actually pointing at an existing value or at the end.
+            // Useful for `begin()` iterators.
+            for(; index < hashtable._capacity; ++index) {
+                if(hashtable.availability_map[index]) {
+                    return;
+                }
+            }
+        }
+
         constexpr hashtable_iterator(const hashtable_iterator &other) noexcept : hashtable{other.hashtable}, index{other.index} {}
         constexpr hashtable_iterator(hashtable_iterator &&other) noexcept : hashtable{std::move(other.hashtable)}, index{std::move(other.index)} {}
 
@@ -67,7 +68,7 @@ namespace ccl {
             pair = key_value_pair{ hashtable->keys[index], hashtable->values[index] };
 
             return &pair;
-        } // TODO: What value should this be?
+        }
 
         constexpr bool operator ==(const hashtable_iterator other) const noexcept { return hashtable == other.hashtable && index == other.index; }
         constexpr bool operator !=(const hashtable_iterator other) const noexcept { return hashtable != other.hashtable || index != other.index; }
@@ -96,7 +97,7 @@ namespace ccl {
             return index <= other.index;
         }
 
-        constexpr hashtable_iterator& operator --() noexcept {
+        constexpr auto& operator --() const noexcept {
             do {
                 index--;
             } while(!hashtable->availability_map[index]);
@@ -104,7 +105,7 @@ namespace ccl {
             return *this;
         }
 
-        constexpr hashtable_iterator operator --(int) noexcept {
+        constexpr auto operator --(int) const noexcept {
             const size_type old_index = this->index;
 
             do {
@@ -115,39 +116,27 @@ namespace ccl {
                 index--;
             } while(!hashtable->availability_map[index]);
 
-            return {*hashtable, old_index};
+            return hashtable_iterator{*hashtable, old_index};
         }
 
-        constexpr hashtable_iterator& operator ++() noexcept {
-            do {
-                if(index == hashtable->_capacity) {
-                    break;
-                }
-
-                index++;
-            } while(!hashtable->availability_map[index]);
+        constexpr auto& operator ++() const noexcept {
+            for(index += 1; index < hashtable->_capacity && !hashtable->availability_map[index]; ++index);
 
             return *this;
         }
 
-        constexpr hashtable_iterator operator ++(int) noexcept {
+        constexpr auto operator ++(int) const noexcept {
             const size_type old_index = this->index;
 
-            do {
-                if(index == hashtable->_capacity) {
-                    break;
-                }
+            for(; index < hashtable->_capacity && !hashtable->availability_map[index]; ++index);
 
-                index++;
-            } while(!hashtable->availability_map[index]);
-
-            return {*hashtable, old_index};
+            return hashtable_iterator{*hashtable, old_index};
         }
 
         private:
             hashtable_type *hashtable;
-            size_type index;
-            key_value_pair pair;
+            mutable size_type index;
+            mutable key_value_pair pair;
     };
 
     template<typename Hashtable>
@@ -228,7 +217,7 @@ namespace ccl {
             template<typename InputRange>
             requires std::ranges::input_range<InputRange>
             constexpr hashtable(
-                InputRange input,
+                InputRange&& input,
                 allocator_type * const allocator = nullptr
             ) : hashtable{allocator} {
                 std::for_each(
@@ -417,14 +406,14 @@ namespace ccl {
                 CCL_THROW(std::invalid_argument{"Invalid key."});
             }
 
-            constexpr iterator begin() {}
-            constexpr iterator end() {}
+            constexpr iterator begin() { return hashtable_iterator<hashtable>{ *this, 0 }; }
+            constexpr iterator end() { return hashtable_iterator<hashtable>{ *this, _capacity }; }
 
-            constexpr const_iterator begin() const {}
-            constexpr const_iterator end() const {}
+            constexpr const_iterator begin() const { return hashtable_iterator<hashtable>{ *this, 0 }; }
+            constexpr const_iterator end() const { return hashtable_iterator<hashtable>{ *this, _capacity }; }
 
-            constexpr const_iterator cbegin() const {}
-            constexpr const_iterator cend() const {}
+            constexpr const_iterator cbegin() const { return hashtable_iterator<hashtable>{ *this, 0 }; }
+            constexpr const_iterator cend() const { return hashtable_iterator<hashtable>{ *this, _capacity }; }
 
         private:
             static hash_type hash(const_key_reference x) {

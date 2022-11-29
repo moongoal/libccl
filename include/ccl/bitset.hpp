@@ -230,7 +230,7 @@ namespace ccl {
                 const auto [target_cluster_index, internal_bit_index] = locate_bit(index);
                 const cluster_type &target_cluster = clusters[target_cluster_index];
 
-                return target_cluster & static_cast<cluster_type>(1) << internal_bit_index;
+                return target_cluster & (static_cast<cluster_type>(1) << internal_bit_index);
             }
 
             /**
@@ -284,7 +284,7 @@ namespace ccl {
                 const auto [target_cluster_index, internal_bit_index] = locate_bit(index);
                 cluster_type &target_cluster = clusters[target_cluster_index];
 
-                const cluster_type cluster_w_enabled = target_cluster | static_cast<cluster_type>(1) << internal_bit_index;
+                const cluster_type cluster_w_enabled = target_cluster | (static_cast<cluster_type>(1) << internal_bit_index);
                 const cluster_type cluster_w_disabled = target_cluster & ~(static_cast<cluster_type>(1) << internal_bit_index);
 
                 target_cluster = choose(cluster_w_enabled, cluster_w_disabled, value);
