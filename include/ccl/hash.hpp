@@ -14,10 +14,8 @@ namespace ccl {
     struct hash {
         using hash_value_type = uint64_t;
 
-        static constexpr hash_value_type seed = 137438953471; // Mersenne, p=37
-
         constexpr hash_value_type operator()(const T& value) {
-            return XXH64(&value, sizeof(value), seed);
+            return XXH3_64bits(&value, sizeof(value));
         }
     };
 }

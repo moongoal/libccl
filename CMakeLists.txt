@@ -12,7 +12,7 @@ else()
     set(CCL_BUILD_MODE STATIC)
 endif()
 
-if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
     set(${CMAKE_BUILD_TYPE} "Debug")
 endif()
 
@@ -70,10 +70,10 @@ target_link_options(
 )
 
 set(CCL_INCLUDE_PATH include)
-set(CCL_BUILD_INCLUDE_PATH build/include)
+set(CCL_FULL_BUILD_INCLUDE_PATH ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 file(REAL_PATH ${CCL_INCLUDE_PATH} CCL_FULL_INCLUDE_PATH)
-file(REAL_PATH ${CCL_BUILD_INCLUDE_PATH} CCL_FULL_BUILD_INCLUDE_PATH)
+file(RELATIVE_PATH CCL_BUILD_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${CCL_FULL_BUILD_INCLUDE_PATH})
 
 target_include_directories(
     ccl
@@ -100,4 +100,16 @@ configure_file(
     include/ccl/definitions.hpp.in
     include/ccl/definitions.hpp
     NEWLINE_STYLE UNIX
+)
+
+install(
+    TARGETS ccl xxhash
+    EXPORT ccl
+    ARCHIVE
+    PUBLIC_HEADER
+)
+
+install(
+    EXPORT ccl
+    DESTINATION "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}>"
 )
