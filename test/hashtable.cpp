@@ -139,5 +139,21 @@ int main(int argc, char **argv) {
         check(it == x.begin());
     });
 
+    suite.add_test("clear", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        vector<compressed_pair<int, float>> v {
+            make_pair(1, 2.f),
+            make_pair(2, 3.f),
+            make_pair(3, 3.f)
+        };
+
+        my_hashtable x { v, get_default_allocator() };
+
+        x.clear();
+
+        check(x.begin() == x.end());
+    });
+
     return suite.main(argc, argv);
 }

@@ -406,6 +406,28 @@ namespace ccl {
                 CCL_THROW(std::invalid_argument{"Invalid key."});
             }
 
+            constexpr void clear() {
+                for(size_type i = 0; i < _capacity; ++i) {
+                    if constexpr(std::is_destructible_v<K>) {
+                        if(availability_map[i]) {
+                            std::destroy_at(&keys[i]);
+                        }
+                    }
+
+                    if constexpr(std::is_destructible_v<V>) {
+                        if(availability_map[i]) {
+                            std::destroy_at(&keys[i]);
+                        }
+                    }
+                }
+
+                std::fill(
+                    availability_map.get_clusters().begin(),
+                    availability_map.get_clusters().end(),
+                    static_cast<typename decltype(availability_map)::cluster_type>(0)
+                );
+            }
+
             constexpr iterator begin() { return hashtable_iterator<hashtable>{ *this, 0 }; }
             constexpr iterator end() { return hashtable_iterator<hashtable>{ *this, _capacity }; }
 
