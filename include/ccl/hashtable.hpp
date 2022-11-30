@@ -54,13 +54,6 @@ namespace ccl {
             return *this;
         }
 
-        constexpr hashtable_iterator& operator =(hashtable_iterator &&other) noexcept {
-            hashtable = std::move(other.hashtable);
-            index = std::move(other.index);
-
-            return *this;
-        }
-
         constexpr key_value_pair operator*() noexcept { return key_value_pair{ hashtable->keys[index], hashtable->values[index] }; }
         constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ hashtable->keys[index], hashtable->values[index] }; }
 
@@ -68,33 +61,6 @@ namespace ccl {
             pair = key_value_pair{ hashtable->keys[index], hashtable->values[index] };
 
             return &pair;
-        }
-
-        constexpr bool operator ==(const hashtable_iterator other) const noexcept { return hashtable == other.hashtable && index == other.index; }
-        constexpr bool operator !=(const hashtable_iterator other) const noexcept { return hashtable != other.hashtable || index != other.index; }
-
-        constexpr bool operator >(const hashtable_iterator other) const noexcept {
-            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
-
-            return index > other.index;
-        }
-
-        constexpr bool operator <(const hashtable_iterator other) const noexcept {
-            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
-
-            return index < other.index;
-        }
-
-        constexpr bool operator >=(const hashtable_iterator other) const noexcept {
-            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
-
-            return index >= other.index;
-        }
-
-        constexpr bool operator <=(const hashtable_iterator other) const noexcept {
-            CCL_THROW_IF(hashtable != other.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
-
-            return index <= other.index;
         }
 
         constexpr auto& operator --() const noexcept {
@@ -133,10 +99,9 @@ namespace ccl {
             return hashtable_iterator{*hashtable, old_index};
         }
 
-        private:
-            hashtable_type *hashtable;
-            mutable size_type index;
-            mutable key_value_pair pair;
+        hashtable_type *hashtable;
+        mutable size_type index;
+        mutable key_value_pair pair;
     };
 
     template<typename Hashtable>
@@ -145,6 +110,44 @@ namespace ccl {
         const hashtable_iterator<Hashtable> it
     ) noexcept {
         return hashtable_iterator<Hashtable>{it.get_data() + n};
+    }
+
+    template<typename Hashtable>
+    static constexpr bool operator ==(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+        return a.hashtable == b.hashtable && a.index == b.index;
+    }
+
+    template<typename Hashtable>
+    static constexpr bool operator !=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+        return a.hashtable != b.hashtable || a.index != b.index;
+    }
+
+    template<typename Hashtable>
+    static constexpr bool operator >(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+        CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+        return a.index > b.index;
+    }
+
+    template<typename Hashtable>
+    static constexpr bool operator <(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+        CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+        return a.index < b.index;
+    }
+
+    template<typename Hashtable>
+    static constexpr bool operator >=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+        CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+        return a.index >= b.index;
+    }
+
+    template<typename Hashtable>
+    static constexpr bool operator <=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+        CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
+
+        return a.index <= b.index;
     }
 
     /**
@@ -164,6 +167,7 @@ namespace ccl {
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
     class hashtable : private internal::with_optional_allocator<Allocator> {
         friend struct hashtable_iterator<hashtable>;
+        friend struct hashtable_iterator<const hashtable>;
 
         using alloc = internal::with_optional_allocator<Allocator>;
 
@@ -446,14 +450,14 @@ namespace ccl {
                 );
             }
 
-            constexpr iterator begin() { return hashtable_iterator<hashtable>{ *this, 0 }; }
-            constexpr iterator end() { return hashtable_iterator<hashtable>{ *this, _capacity }; }
+            constexpr iterator begin() { return iterator{ *this, 0 }; }
+            constexpr iterator end() { return iterator{ *this, _capacity }; }
 
-            constexpr const_iterator begin() const { return hashtable_iterator<hashtable>{ *this, 0 }; }
-            constexpr const_iterator end() const { return hashtable_iterator<hashtable>{ *this, _capacity }; }
+            constexpr const_iterator begin() const { return const_iterator{ *this, 0 }; }
+            constexpr const_iterator end() const { return const_iterator{ *this, _capacity }; }
 
-            constexpr const_iterator cbegin() const { return hashtable_iterator<hashtable>{ *this, 0 }; }
-            constexpr const_iterator cend() const { return hashtable_iterator<hashtable>{ *this, _capacity }; }
+            constexpr const_iterator cbegin() const { return const_iterator{ *this, 0 }; }
+            constexpr const_iterator cend() const { return const_iterator{ *this, _capacity }; }
 
         private:
             static hash_type hash(const_key_reference x) {
