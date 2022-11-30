@@ -128,7 +128,7 @@ namespace ccl {
             using const_reference = const T&;
             using allocator_type = Allocator;
             using iterator = vector_iterator<vector>;
-            using const_iterator = vector_iterator<vector<const value_type, allocator_type>>;
+            using const_iterator = vector_iterator<const vector<const value_type, allocator_type>>;
 
         private:
             size_type _size = 0;
@@ -363,6 +363,32 @@ namespace ccl {
                 }
 
                 _size = new_length;
+            }
+
+            constexpr void erase(const iterator start, const iterator finish) {
+                static_assert(std::is_move_assignable_v<T>);
+
+                std::move(finish, end(), start);
+                std::destroy(finish, end());
+
+                _size -= finish - start;
+            }
+
+            constexpr void erase(const const_iterator start, const const_iterator finish) {
+                static_assert(std::is_move_assignable_v<T>);
+
+                std::move(finish, end(), start);
+                std::destroy(finish, end());
+
+                _size -= finish - start;
+            }
+
+            constexpr void erase(const iterator it) {
+                erase(it, it + 1);
+            }
+
+            constexpr void erase(const const_iterator it) {
+                erase(it, it + 1);
             }
 
             constexpr bool is_empty() const noexcept { return _size == 0; }

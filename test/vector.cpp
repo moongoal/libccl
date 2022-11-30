@@ -499,5 +499,59 @@ int main(int argc, char **argv) {
         check(v.size() == 4);
     });
 
+    suite.add_test("erase (last)", [] () {
+        vector<int> v { 1, 2, 3 };
+
+        v.erase(v.begin() + 2, v.end());
+
+        check(v.size() == 2);
+        check(v.begin() + 2 == v.end());
+        check(v[0] == 1);
+        check(v[1] == 2);
+    });
+
+    suite.add_test("erase (first)", [] () {
+        vector<int> v { 1, 2, 3 };
+
+        v.erase(v.begin(), v.end() - 2);
+
+        check(v.size() == 2);
+        check(v.begin() + 2 == v.end());
+        check(v[0] == 2);
+        check(v[1] == 3);
+    });
+
+    suite.add_test("erase (middle)", [] () {
+        vector<int> v { 1, 2, 3 };
+
+        v.erase(v.begin() + 1, v.end() - 1);
+
+        check(v.size() == 2);
+        check(v.begin() + 2 == v.end());
+        check(v[0] == 1);
+        check(v[1] == 3);
+    });
+
+    suite.add_test("erase (same)", [] () {
+        vector<int> v { 1, 2, 3 };
+
+        v.erase(v.begin(), v.begin());
+
+        check(v.size() == 3);
+        check(v.begin() + 3 == v.end());
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+    });
+
+    suite.add_test("erase (all)", [] () {
+        vector<int> v { 1, 2, 3 };
+
+        v.erase(v.begin(), v.end());
+
+        check(v.size() == 0);
+        check(v.begin() == v.end());
+    });
+
     return suite.main(argc, argv);
 }
