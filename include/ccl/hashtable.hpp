@@ -34,7 +34,7 @@ namespace ccl {
 
         constexpr hashtable_iterator() noexcept : hashtable{nullptr}, index{0} {}
 
-        explicit constexpr hashtable_iterator(hashtable_type& hashtable, const size_type item_index = 0) noexcept : hashtable{&hashtable}, index{item_index} {
+        explicit constexpr hashtable_iterator(hashtable_type& hashtable, const size_type item_index) noexcept : hashtable{&hashtable}, index{item_index} {
             // Ensure we are actually pointing at an existing value or at the end.
             // Useful for `begin()` iterators.
             for(; index < hashtable._capacity; ++index) {
@@ -191,7 +191,7 @@ namespace ccl {
             using allocator_type = Allocator;
 
             using iterator = hashtable_iterator<hashtable>;
-            using const_iterator = hashtable_iterator<hashtable<const key_type, const value_type, allocator_type>>;
+            using const_iterator = hashtable_iterator<const hashtable<const key_type, const value_type, allocator_type>>;
 
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
 
