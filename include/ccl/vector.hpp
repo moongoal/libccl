@@ -314,9 +314,13 @@ namespace ccl {
 
             constexpr void prepend(const_reference item) { insert(begin(), item); }
             constexpr void append(const_reference item) { insert(end(), item); }
+            constexpr void push_back(const_reference item) { append(item); }
 
             template<typename ...Args>
             constexpr reference emplace(Args&& ...args) { return emplace_at(end(), std::forward<Args>(args)...); }
+
+            template<typename ...Args>
+            constexpr reference emplace_back(Args&& ...args) { return emplace_back(std::forward<Args>(args)...); }
 
             template<typename ...Args>
             constexpr reference  prepend_emplace(Args&& ...args) { return emplace_at(begin(), std::forward<Args>(args)...); }
