@@ -47,6 +47,23 @@ namespace ccl {
                     }
             };
 
+            class const_bit_proxy {
+                const bitset *set;
+                size_type index;
+
+                public:
+                    const_bit_proxy() = delete;
+                    const_bit_proxy(const bitset &set, const size_type index) : set{&set}, index{index} {}
+                    const_bit_proxy(const const_bit_proxy &) = default;
+                    const_bit_proxy(const_bit_proxy &&) = default;
+
+                    constexpr bit_proxy& operator =(const bool value) = delete;
+
+                    constexpr operator bool() const noexcept {
+                        return set->get(index);
+                    }
+            };
+
             static constexpr size_t bits_per_cluster = sizeof(cluster_type) * 8;
             static constexpr size_t cluster_size_bitcount = bitcount(bits_per_cluster) - 1;
 
@@ -211,7 +228,7 @@ namespace ccl {
              *
              * @return The value of the bit at that index.
              */
-            constexpr const bit_proxy operator[](const size_type index) const {
+            constexpr const const_bit_proxy operator[](const size_type index) const {
                 CCL_THROW_IF(index >= _size_bits, std::out_of_range{"Index out of range."});
 
                 return {*this, index};

@@ -286,7 +286,7 @@ namespace ccl {
                         key_reference current_key = keys[i];
                         value_reference current_value = values[i];
 
-                        const size_type new_index = compute_key_index(i, actual_new_capacity);
+                        const size_type new_index = compute_key_index(keys[i], actual_new_capacity);
 
                         std::construct_at(&new_keys[new_index], std::move(current_key));
                         std::construct_at(&new_values[new_index], std::move(current_value));
@@ -334,7 +334,7 @@ namespace ccl {
             }
 
             template<typename ...Args>
-            constexpr void emplace(const_key_reference key, Args&& ...args) {
+            constexpr value_reference emplace(const_key_reference key, Args&& ...args) {
                 const size_type index = compute_key_index(key, _capacity);
 
                 for(size_type i = index; i < _capacity; ++i) {
@@ -342,7 +342,7 @@ namespace ccl {
                         std::construct_at(&keys[i], key);
                         std::construct_at(&values[i], std::forward<Args>(args)...);
                         availability_map[i] = true;
-                        return;
+                        return values[i];
                     }
                 }
 
@@ -351,13 +351,13 @@ namespace ccl {
                         std::construct_at(&keys[i], key);
                         std::construct_at(&values[i], std::forward<Args>(args)...);
                         availability_map[i] = true;
-                        return;
+                        return values[i];
                     }
                 }
 
                 // No slots available
                 reserve(_capacity << 1);
-                emplace(key, std::forward<Args>(args)...);
+                return emplace(key, std::forward<Args>(args)...);
             }
 
             constexpr void erase(const_key_reference key) {
@@ -386,10 +386,8 @@ namespace ccl {
                 }
             }
 
-            constexpr value_reference operator [](const_key_reference key) {
+            CCLNODISCARD constexpr auto& at(const_key_reference key) const {
                 const size_type index = compute_key_index(key, _capacity);
-
-                CCL_THROW_IF(index >= _capacity, std::invalid_argument{"Invalid key."});
 
                 for(size_type i = index; i < _capacity; ++i) {
                     if(availability_map[i] && keys[i] == key) {
@@ -403,7 +401,27 @@ namespace ccl {
                     }
                 }
 
-                CCL_THROW(std::invalid_argument{"Invalid key."});
+                CCL_THROW(std::out_of_range{"Key not present."});
+            }
+
+            constexpr value_reference operator [](const_key_reference key) {
+                static_assert(std::is_default_constructible_v<V>);
+
+                const size_type index = compute_key_index(key, _capacity);
+
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(availability_map[i] && keys[i] == key) {
+                        return values[i];
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
+                    if(availability_map[i] && keys[i] == key) {
+                        return values[i];
+                    }
+                }
+
+                return emplace(key);
             }
 
             constexpr void clear() {
@@ -444,6 +462,7 @@ namespace ccl {
 
             static size_type compute_key_index(const_key_reference x, const size_type capacity) {
                 CCL_ASSERT(is_power_2(capacity));
+                CCL_ASSERT(capacity);
 
                 return hash(x) & (capacity - 1);
             }

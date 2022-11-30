@@ -42,14 +42,36 @@ int main(int argc, char **argv) {
         }
     });
 
+    suite.add_test("at (not present)", []() {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        throws<std::out_of_range>([&x]() {
+            decltype(auto) value CCLUNUSED = x.at(1);
+        });
+    });
+
+    suite.add_test("at", []() {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+            x.insert(i, i + 1);
+        }
+
+        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+            check(x.at(i) == i + 1);
+        }
+    });
+
     suite.add_test("operator [] not present", []() {
         using my_hashtable = hashtable<int, float>;
 
         my_hashtable x;
 
-        throws<std::invalid_argument>([&x]() {
-            x[1];
-        });
+        decltype(auto) value CCLUNUSED = x[1]; // Default-constructed
     });
 
     suite.add_test("erase", [] () {
@@ -60,8 +82,8 @@ int main(int argc, char **argv) {
         x.insert(1, 1);
         x.erase(1);
 
-        throws<std::invalid_argument>([&x]() {
-            x[1];
+        throws<std::out_of_range>([&x]() {
+            decltype(auto) v CCLUNUSED = x.at(1);
         });
     });
 
