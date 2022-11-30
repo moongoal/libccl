@@ -116,9 +116,9 @@ namespace ccl {
         typed_allocator<T> Allocator = allocator
     >
     class vector : private internal::with_optional_allocator<Allocator> {
-        static_assert(std::is_default_constructible_v<T>);
-
         using alloc = internal::with_optional_allocator<Allocator>;
+
+        static constexpr struct value_init_tag_t {} value_init_tag;
 
         public:
             using size_type = size_t;
@@ -345,14 +345,25 @@ namespace ccl {
                 _size = 0;
             }
 
-            constexpr void resize(const size_type new_length) {
+            template<typename X>
+            constexpr void resize(const size_type new_length, const X& value) {
+                static_assert(
+                    (std::is_same_v<value_init_tag_t, X> && std::is_default_constructible_v<T>)
+                    || !std::is_same_v<value_init_tag_t, X>,
+                    "Vector item is not default-constructible."
+                );
+
                 if(new_length > _size) {
                     reserve(new_length);
 
-                    std::uninitialized_default_construct(
-                        begin() + _size,
-                        begin() + new_length
-                    );
+                    const auto start = begin() + _size;
+                    const auto finish = begin() + new_length;
+
+                    if constexpr(std::is_same_v<value_init_tag_t, X>) {
+                        std::uninitialized_default_construct(start, finish);
+                    } else {
+                        std::uninitialized_fill(start, finish, value);
+                    }
                 } else if(new_length == 0) {
                     clear();
                 } else if(new_length < _size) {
@@ -363,6 +374,10 @@ namespace ccl {
                 }
 
                 _size = new_length;
+            }
+
+            constexpr void resize(const size_type new_length) {
+                resize(new_length, value_init_tag);
             }
 
             constexpr void erase(const iterator start, const iterator finish) {
