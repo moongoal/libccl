@@ -450,6 +450,42 @@ namespace ccl {
                 );
             }
 
+            constexpr iterator find(const_key_reference key) {
+                const size_type index = compute_key_index(key, _capacity);
+
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(availability_map[i] && keys[i] == key) {
+                        return iterator { *this, i };
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
+                    if(availability_map[i] && keys[i] == key) {
+                        return iterator { *this, i };
+                    }
+                }
+
+                return end();
+            }
+
+            constexpr const_iterator find(const_key_reference key) const {
+                const size_type index = compute_key_index(key, _capacity);
+
+                for(size_type i = index; i < _capacity; ++i) {
+                    if(availability_map[i] && keys[i] == key) {
+                        return const_iterator { *this, i };
+                    }
+                }
+
+                for(size_type i = 0; i < index; ++i) {
+                    if(availability_map[i] && keys[i] == key) {
+                        return const_iterator { *this, i };
+                    }
+                }
+
+                return end();
+            }
+
             constexpr iterator begin() { return iterator{ *this, 0 }; }
             constexpr iterator end() { return iterator{ *this, _capacity }; }
 

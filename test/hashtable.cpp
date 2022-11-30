@@ -177,5 +177,25 @@ int main(int argc, char **argv) {
         check(x.begin() == x.end());
     });
 
+    suite.add_test("find (not present)", []() {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        check(x.find(1) == x.end());
+    });
+
+    suite.add_test("find", []() {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        x.emplace(1, 1);
+        x.emplace(2, 3);
+
+        check(x.find(1)->second() == 1);
+        check(x.find(2)->second() == 3);
+    });
+
     return suite.main(argc, argv);
 }
