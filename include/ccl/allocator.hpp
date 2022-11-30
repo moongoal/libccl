@@ -13,8 +13,8 @@
 #endif // CCL_USER_DEFINED_ALLOCATOR
 
 namespace ccl {
-    enum allocation_flags {
-        #define CCL_VALUE(name, bitno) CCL_ALLOCATION_FLAGS ## name = 1 << bitno
+    enum allocation_flag_bits {
+        #define CCL_VALUE(name, bitno) CCL_ALLOCATION_ ## name ## _BIT = 1 << bitno
 
         /**
          * Allocate space in permanent memory. This cannot be freed.
@@ -27,6 +27,34 @@ namespace ccl {
         CCL_VALUE(TEMPORARY, 1)
 
         #undef CCL_VALUE
+    };
+    typedef uint32_t allocation_flags;
+
+    enum allocator_feature_flag_bits {
+        #define CCL_VALUE(name, bitno) CCL_ALLOCATOR_FEATURE_ ## name ## _BIT = 1 << bitno
+
+        /**
+         * The return value of `allocator::get_allocation_info()` is meaningful.
+         */
+        CCL_VALUE(ALLOCATION_INFO, 0),
+
+        #undef CCL_VALUE
+    };
+    typedef uint32_t allocator_feature_flags;
+
+    /**
+     * Information about a memory allocation.
+     */
+    struct allocation_info {
+        /**
+         * Total size of the allocation.
+         */
+        size_t size;
+
+        /**
+         * Alignment constraint used when allocating.
+         */
+        size_t alignment;
     };
 
     class CCLAPI allocator {
@@ -66,11 +94,27 @@ namespace ccl {
             }
 
             /**
+             * Get information about a memory allocation.
+             *
+             * @param ptr The pointer to the allocation to retrieve information for.
+             *
+             * @return A structure containing the information held by the allocator for this allocation.
+             */
+            allocation_info get_allocation_info(void* const ptr) const;
+
+            /**
              * Free memory.
              *
              * @param ptr A pointer allocated with this allocator.
              */
             void deallocate(void * const ptr);
+
+            /**
+             * Return the feature set supported by this allocator.
+             *
+             * @return An integer representing the set of supported allocator features.
+             */
+            allocator_feature_flags get_features() const noexcept;
     };
 
     /**
@@ -94,6 +138,14 @@ namespace ccl {
 
         inline void allocator::deallocate(void * const ptr) {
             ::free(ptr);
+        }
+
+        inline allocator_feature_flags allocator::get_features() const noexcept {
+            return 0;
+        }
+
+        inline allocation_info allocator::get_allocation_info(void* const ptr CCLUNUSED) const {
+            return {};
         }
     #endif // CCL_USER_DEFINED_ALLOCATOR
 
