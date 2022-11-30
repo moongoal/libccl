@@ -52,13 +52,13 @@ int main(int argc, char **argv) {
         });
     });
 
-    suite.add_test("remove", [] () {
+    suite.add_test("erase", [] () {
         using my_hashtable = hashtable<int, float>;
 
         my_hashtable x;
 
         x.insert(1, 1);
-        x.remove(1);
+        x.erase(1);
 
         throws<std::invalid_argument>([&x]() {
             x[1];

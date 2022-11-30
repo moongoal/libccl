@@ -360,7 +360,7 @@ namespace ccl {
                 emplace(key, std::forward<Args>(args)...);
             }
 
-            constexpr void remove(const_key_reference key) {
+            constexpr void erase(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
 
                 for(size_type i = index; i < _capacity; ++i) {
