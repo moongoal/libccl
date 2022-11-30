@@ -366,6 +366,9 @@ namespace ccl {
             }
 
             constexpr void erase(const iterator start, const iterator finish) {
+                CCL_THROW_IF(std::to_address(start) < _data || std::to_address(start) > _data + _size, std::out_of_range{"Invalid start iterator."});
+                CCL_THROW_IF(std::to_address(finish) < _data || std::to_address(finish) > _data + _size, std::out_of_range{"Invalid finish iterator."});
+
                 static_assert(std::is_move_assignable_v<T>);
 
                 std::move(finish, end(), start);
@@ -375,6 +378,9 @@ namespace ccl {
             }
 
             constexpr void erase(const const_iterator start, const const_iterator finish) {
+                CCL_THROW_IF(std::to_address(start) < _data || std::to_address(start) > _data + _size, std::out_of_range{"Invalid start iterator."});
+                CCL_THROW_IF(std::to_address(finish) < _data || std::to_address(finish) > _data + _size, std::out_of_range{"Invalid finish iterator."});
+
                 static_assert(std::is_move_assignable_v<T>);
 
                 std::move(finish, end(), start);

@@ -553,5 +553,17 @@ int main(int argc, char **argv) {
         check(v.begin() == v.end());
     });
 
+    suite.add_test("erase (invalid iterators)", [] () {
+        vector<int> v { 1, 2, 3 };
+
+        throws<std::out_of_range>([&v] () {
+            v.erase(v.begin() - 1, v.end());
+        });
+
+        throws<std::out_of_range>([&v] () {
+            v.erase(v.begin(), v.end() + 1);
+        });
+    });
+
     return suite.main(argc, argv);
 }
