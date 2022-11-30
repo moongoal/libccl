@@ -486,6 +486,10 @@ namespace ccl {
                 return end();
             }
 
+            constexpr bool contains(const_key_reference key) const {
+                return find(key) != end();
+            }
+
             constexpr iterator begin() { return iterator{ *this, 0 }; }
             constexpr iterator end() { return iterator{ *this, _capacity }; }
 

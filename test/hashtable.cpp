@@ -197,5 +197,18 @@ int main(int argc, char **argv) {
         check(x.find(2)->second() == 3);
     });
 
+    suite.add_test("contains", []() {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        x.emplace(1, 1);
+        x.emplace(2, 3);
+
+        check(x.contains(1));
+        check(x.contains(2));
+        check(!x.contains(3));
+    });
+
     return suite.main(argc, argv);
 }
