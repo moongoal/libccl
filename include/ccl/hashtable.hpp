@@ -145,7 +145,7 @@ namespace ccl {
     /**
      * An open-addressed hash table.
      *
-     * @tparam K Key type. Must be hashable.
+     * @tparam K Key type.
      * @tparam V Value type.
      * @tparam HashFunction The function used to compute the key hashes.
      * @tparam Allocator The allocator type.
@@ -430,7 +430,7 @@ namespace ccl {
 
                     if constexpr(std::is_destructible_v<V>) {
                         if(availability_map[i]) {
-                            std::destroy_at(&keys[i]);
+                            std::destroy_at(&values[i]);
                         }
                     }
                 }
