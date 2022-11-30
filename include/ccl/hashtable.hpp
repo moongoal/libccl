@@ -191,7 +191,7 @@ namespace ccl {
             using allocator_type = Allocator;
 
             using iterator = hashtable_iterator<hashtable>;
-            using const_iterator = hashtable_iterator<const hashtable<const key_type, const value_type, allocator_type>>;
+            using const_iterator = hashtable_iterator<const hashtable<key_type, value_type, allocator_type>>;
 
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
 
