@@ -105,46 +105,38 @@ namespace ccl {
     };
 
     template<typename Hashtable>
-    static constexpr hashtable_iterator<Hashtable> operator +(
-        const typename hashtable_iterator<Hashtable>::difference_type n,
-        const hashtable_iterator<Hashtable> it
-    ) noexcept {
-        return hashtable_iterator<Hashtable>{it.get_data() + n};
-    }
-
-    template<typename Hashtable>
-    static constexpr bool operator ==(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator ==(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
         return a.hashtable == b.hashtable && a.index == b.index;
     }
 
     template<typename Hashtable>
-    static constexpr bool operator !=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator !=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
         return a.hashtable != b.hashtable || a.index != b.index;
     }
 
     template<typename Hashtable>
-    static constexpr bool operator >(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator >(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index > b.index;
     }
 
     template<typename Hashtable>
-    static constexpr bool operator <(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator <(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index < b.index;
     }
 
     template<typename Hashtable>
-    static constexpr bool operator >=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator >=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index >= b.index;
     }
 
     template<typename Hashtable>
-    static constexpr bool operator <=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator <=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index <= b.index;

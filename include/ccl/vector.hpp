@@ -31,16 +31,9 @@ namespace ccl {
 
         constexpr vector_iterator(const pointer ptr = nullptr) noexcept : ptr{ptr} {}
         constexpr vector_iterator(const vector_iterator &other) noexcept : ptr{other.ptr} {}
-        constexpr vector_iterator(vector_iterator &&other) noexcept : ptr{std::move(other.ptr)} {}
 
         constexpr vector_iterator& operator =(const vector_iterator &other) noexcept {
             ptr = other.ptr;
-
-            return *this;
-        }
-
-        constexpr vector_iterator& operator =(vector_iterator &&other) noexcept {
-            ptr = std::move(other.ptr);
 
             return *this;
         }
@@ -74,13 +67,6 @@ namespace ccl {
             return ptr[i];
         }
 
-        constexpr bool operator ==(const vector_iterator other) const noexcept { return ptr == other.ptr; }
-        constexpr bool operator !=(const vector_iterator other) const noexcept { return ptr != other.ptr; }
-        constexpr bool operator >(const vector_iterator other) const noexcept { return ptr > other.ptr; }
-        constexpr bool operator <(const vector_iterator other) const noexcept { return ptr < other.ptr; }
-        constexpr bool operator >=(const vector_iterator other) const noexcept { return ptr >= other.ptr; }
-        constexpr bool operator <=(const vector_iterator other) const noexcept { return ptr <= other.ptr; }
-
         constexpr vector_iterator& operator --() noexcept {
             --ptr;
             return *this;
@@ -99,9 +85,38 @@ namespace ccl {
             return ptr++;
         }
 
-        private:
-            pointer ptr;
+        pointer ptr;
     };
+
+    template<typename Vector>
+    constexpr bool operator ==(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+        return a.ptr == b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator !=(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+        return a.ptr != b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator >(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+        return a.ptr > b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator <(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+        return a.ptr < b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator >=(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+        return a.ptr >= b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator <=(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+        return a.ptr <= b.ptr;
+    }
 
     template<typename Vector>
     static constexpr vector_iterator<Vector> operator +(
@@ -128,7 +143,7 @@ namespace ccl {
             using const_reference = const T&;
             using allocator_type = Allocator;
             using iterator = vector_iterator<vector>;
-            using const_iterator = vector_iterator<const vector<const value_type, allocator_type>>;
+            using const_iterator = vector_iterator<const vector>;
 
         private:
             size_type _size = 0;
@@ -414,9 +429,13 @@ namespace ccl {
 
             constexpr bool is_empty() const noexcept { return _size == 0; }
 
-            constexpr iterator begin() const noexcept { return _data; }
+            constexpr iterator begin() noexcept { return _data; }
+            constexpr iterator end() noexcept { return _data + _size; }
+
+            constexpr const_iterator begin() const noexcept { return _data; }
+            constexpr const_iterator end() const noexcept { return _data + _size; }
+
             constexpr const_iterator cbegin() const noexcept { return _data; }
-            constexpr iterator end() const noexcept { return _data + _size; }
             constexpr const_iterator cend() const noexcept { return _data + _size; }
     };
 }
