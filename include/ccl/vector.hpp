@@ -361,6 +361,8 @@ namespace ccl {
                 _size = new_length;
             }
 
+            constexpr bool is_empty() const noexcept { return _size == 0; }
+
             constexpr iterator begin() const noexcept { return _data; }
             constexpr const_iterator cbegin() const noexcept { return _data; }
             constexpr iterator end() const noexcept { return _data + _size; }
