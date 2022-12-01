@@ -33,6 +33,32 @@ int main(int argc, char **argv) {
         }
     });
 
+    suite.add_test("insert iterators", [] () {
+        using my_set = set<int>;
+
+        vector<int> v { 1, 2, 3 };
+        my_set x;
+
+        x.insert(v.begin(), v.end());
+
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+    });
+
+    suite.add_test("insert range", [] () {
+        using my_set = set<int>;
+
+        vector<int> v { 1, 2, 3 };
+        my_set x;
+
+        x.insert(v);
+
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+    });
+
     suite.add_test("erase", [] () {
         using my_set = set<int>;
 
@@ -92,7 +118,7 @@ int main(int argc, char **argv) {
     suite.add_test("clear", [] () {
         using my_set = set<int>;
 
-        vector<int> v { 1 , 2, 3 };
+        vector<int> v { 1, 2, 3 };
         my_set x { v, get_default_allocator() };
 
         x.clear();

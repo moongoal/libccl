@@ -199,13 +199,7 @@ namespace ccl {
                 InputRange&& input,
                 allocator_type * const allocator = nullptr
             ) : set{allocator} {
-                std::for_each(
-                    input.begin(),
-                    input.end(),
-                    [this] (const auto &key) {
-                        insert(key);
-                    }
-                );
+                insert(input);
             }
 
             ~set() {
@@ -321,6 +315,20 @@ namespace ccl {
                 // rehash.
                 reserve(max<size_type>(1, _capacity << 1));
                 insert(key);
+            }
+
+            template<std::input_iterator Iterator>
+            constexpr void insert(Iterator&& start, Iterator&& finish) {
+                for(auto it = start; it != finish; ++it) {
+                    insert(*it);
+                }
+            }
+
+            template<std::ranges::input_range InputRange>
+            constexpr void insert(InputRange&& input) {
+                for(auto it = input.begin(); it != input.end(); ++it) {
+                    insert(*it);
+                }
             }
 
             constexpr void erase(const_key_reference key) {
