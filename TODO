@@ -1,7 +1,0 @@
-Issue 1 - searching with `!availability_map[i] || key == keys[i]` when inserting can cause error with
-    insert, remove, insert
-
-Issue 2 - Set (hashtable?) rehash not happening correctly
-
-
-Add hash overloads

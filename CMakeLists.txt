@@ -5,6 +5,7 @@ project(ccl)
 include(cmake/features.cmake)
 include(cmake/definitions.cmake)
 include(cmake/build-xxhash.cmake)
+include(cmake/build-c4core.cmake)
 enable_testing()
 
 if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
@@ -39,6 +40,7 @@ target_link_libraries(
     ccl
     INTERFACE
         xxHash::xxhash
+        c4core
 )
 
 include(cmake/test.cmake)

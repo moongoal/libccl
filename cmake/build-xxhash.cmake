@@ -16,4 +16,4 @@ set(
         -DXXH_CPU_LITTLE_ENDIAN
 )
 
-add_subdirectory(contrib/xxhash/cmake_unofficial xxhash)
+add_subdirectory(contrib/xxhash/cmake_unofficial contrib/xxhash)
