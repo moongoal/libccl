@@ -317,14 +317,14 @@ namespace ccl {
                 insert(key);
             }
 
-            template<std::input_iterator Iterator>
+            template<typename Iterator>
             constexpr void insert(Iterator&& start, Iterator&& finish) {
                 for(auto it = start; it != finish; ++it) {
                     insert(*it);
                 }
             }
 
-            template<std::ranges::input_range InputRange>
+            template<std::ranges::range InputRange>
             constexpr void insert(InputRange&& input) {
                 for(auto it = input.begin(); it != input.end(); ++it) {
                     insert(*it);
