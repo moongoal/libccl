@@ -280,12 +280,10 @@ namespace ccl {
              * Clear all bits without changing the length of the set.
              */
             constexpr void zero() {
-                std::for_each(
+                std::fill(
                     clusters.begin(),
                     clusters.end(),
-                    [] (cluster_type &c) {
-                        c = 0;
-                    }
+                    static_cast<cluster_type>(0)
                 );
             }
 

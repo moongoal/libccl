@@ -105,38 +105,38 @@ namespace ccl {
     };
 
     template<typename Hashtable>
-    constexpr bool operator ==(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator ==(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         return a.hashtable == b.hashtable && a.index == b.index;
     }
 
     template<typename Hashtable>
-    constexpr bool operator !=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator !=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         return a.hashtable != b.hashtable || a.index != b.index;
     }
 
     template<typename Hashtable>
-    constexpr bool operator >(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator >(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index > b.index;
     }
 
     template<typename Hashtable>
-    constexpr bool operator <(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator <(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index < b.index;
     }
 
     template<typename Hashtable>
-    constexpr bool operator >=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator >=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index >= b.index;
     }
 
     template<typename Hashtable>
-    constexpr bool operator <=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) noexcept {
+    constexpr bool operator <=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index <= b.index;
@@ -275,23 +275,18 @@ namespace ccl {
                 new_availability_map.resize(actual_new_capacity);
                 new_availability_map.zero();
 
-                for(size_type i = 0; i < _capacity; ++i) {
-                    const bool is_available = availability_map[i];
+                const auto finish = end();
 
-                    if(is_available) {
-                        key_reference current_key = keys[i];
-                        value_reference current_value = values[i];
+                for(auto it = begin(); it < finish; ++it) {
+                    const size_type new_index = compute_key_index(it->first(), actual_new_capacity);
 
-                        const size_type new_index = compute_key_index(keys[i], actual_new_capacity);
+                    std::construct_at(&new_keys[it.index], std::move(it->first()));
+                    std::construct_at(&new_values[it.index], std::move(it->second()));
 
-                        std::construct_at(&new_keys[new_index], std::move(current_key));
-                        std::construct_at(&new_values[new_index], std::move(current_value));
+                    std::destroy_at(keys + it.index);
+                    std::destroy_at(values + it.index);
 
-                        std::destroy_at(&current_key);
-                        std::destroy_at(&current_value);
-
-                        new_availability_map.set(new_index);
-                    }
+                    new_availability_map.set(new_index);
                 }
 
                 alloc::get_allocator()->deallocate(keys);

@@ -14,6 +14,7 @@
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/hash.hpp>
 #include <ccl/bitset.hpp>
+#include <ccl/util.hpp>
 
 namespace ccl {
     template<typename Set>
@@ -34,7 +35,7 @@ namespace ccl {
             // Ensure we are actually pointing at an existing value or at the end.
             // Useful for `begin()` iterators.
             for(; index < set._capacity; ++index) {
-                if(set.availability_map[index]) {
+                if(set.slot_map[index]) {
                     return;
                 }
             }
@@ -59,7 +60,7 @@ namespace ccl {
         constexpr auto& operator --() const noexcept {
             do {
                 index--;
-            } while(!set->availability_map[index]);
+            } while(!set->slot_map[index]);
 
             return *this;
         }
@@ -73,13 +74,13 @@ namespace ccl {
                 }
 
                 index--;
-            } while(!set->availability_map[index]);
+            } while(!set->slot_map[index]);
 
             return set_iterator{*set, old_index};
         }
 
         constexpr auto& operator ++() const noexcept {
-            for(index += 1; index < set->_capacity && !set->availability_map[index]; ++index);
+            for(index += 1; index < set->_capacity && !set->slot_map[index]; ++index);
 
             return *this;
         }
@@ -87,7 +88,7 @@ namespace ccl {
         constexpr auto operator ++(int) const noexcept {
             const size_type old_index = this->index;
 
-            for(; index < set->_capacity && !set->availability_map[index]; ++index);
+            for(; index < set->_capacity && !set->slot_map[index]; ++index);
 
             return set_iterator{*set, old_index};
         }
@@ -97,38 +98,38 @@ namespace ccl {
     };
 
     template<typename Set>
-    constexpr bool operator ==(const set_iterator<Set> a, const set_iterator<Set> b) noexcept {
+    constexpr bool operator ==(const set_iterator<Set> a, const set_iterator<Set> b) {
         return a.set == b.set && a.index == b.index;
     }
 
     template<typename Set>
-    constexpr bool operator !=(const set_iterator<Set> a, const set_iterator<Set> b) noexcept {
+    constexpr bool operator !=(const set_iterator<Set> a, const set_iterator<Set> b) {
         return a.set != b.set || a.index != b.index;
     }
 
     template<typename Set>
-    constexpr bool operator >(const set_iterator<Set> a, const set_iterator<Set> b) noexcept {
+    constexpr bool operator >(const set_iterator<Set> a, const set_iterator<Set> b) {
         CCL_THROW_IF(a.set != b.set, std::runtime_error{"Comparing iterators from different sets."});
 
         return a.index > b.index;
     }
 
     template<typename Set>
-    constexpr bool operator <(const set_iterator<Set> a, const set_iterator<Set> b) noexcept {
+    constexpr bool operator <(const set_iterator<Set> a, const set_iterator<Set> b) {
         CCL_THROW_IF(a.set != b.set, std::runtime_error{"Comparing iterators from different sets."});
 
         return a.index < b.index;
     }
 
     template<typename Set>
-    constexpr bool operator >=(const set_iterator<Set> a, const set_iterator<Set> b) noexcept {
+    constexpr bool operator >=(const set_iterator<Set> a, const set_iterator<Set> b) {
         CCL_THROW_IF(a.set != b.set, std::runtime_error{"Comparing iterators from different sets."});
 
         return a.index >= b.index;
     }
 
     template<typename Set>
-    constexpr bool operator <=(const set_iterator<Set> a, const set_iterator<Set> b) noexcept {
+    constexpr bool operator <=(const set_iterator<Set> a, const set_iterator<Set> b) {
         CCL_THROW_IF(a.set != b.set, std::runtime_error{"Comparing iterators from different sets."});
 
         return a.index <= b.index;
@@ -181,14 +182,14 @@ namespace ccl {
             constexpr set(const set &other)
                 : alloc{other},
                 _capacity{other._capacity},
-                availability_map{other.availability_map},
+                slot_map{other.slot_map},
                 keys{other.keys}
             {}
 
             constexpr set(set &&other)
                 : alloc{std::move(other)},
                 _capacity{std::move(other._capacity)},
-                availability_map{std::move(other.availability_map)},
+                slot_map{std::move(other.slot_map)},
                 keys{std::move(other.keys)}
             {}
 
@@ -212,7 +213,7 @@ namespace ccl {
             }
 
             void destroy() noexcept {
-                availability_map.destroy();
+                slot_map.destroy();
                 alloc::get_allocator()->deallocate(keys);
 
                 _capacity = 0;
@@ -225,7 +226,7 @@ namespace ccl {
 
             constexpr set& operator =(const set &other) {
                 alloc::operator =(other);
-                availability_map = other.availability_map;
+                slot_map = other.slot_map;
                 keys = other.keys;
 
                 return *this;
@@ -233,90 +234,103 @@ namespace ccl {
 
             constexpr set& operator =(set &&other) {
                 alloc::operator =(std::move(other));
-                availability_map = std::move(other.availability_map);
+                slot_map = std::move(other.slot_map);
                 keys = std::move(other.keys);
 
                 return *this;
             }
 
-            constexpr void reserve(const size_type new_capacity) {
+            constexpr void reserve(size_type new_capacity) {
                 if(new_capacity <= _capacity) {
                     return;
                 }
 
-                const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
+                bool done;
+                new_capacity = increase_capacity(_capacity, new_capacity);
+                bitset<allocator_type> new_slot_map;
+                const auto finish = end();
+                key_pointer new_keys;
 
-                bitset<allocator_type> new_availability_map;
-                const key_pointer new_keys = alloc::get_allocator()->template allocate<key_type>(actual_new_capacity);
+                do {
+                    bool keep_iterating = true;
+                    done = true;
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
 
-                new_availability_map.resize(actual_new_capacity);
-                new_availability_map.zero();
+                    new_slot_map.resize(new_capacity);
+                    new_slot_map.zero();
 
-                for(size_type i = 0; i < _capacity; ++i) {
-                    const bool is_available = availability_map[i];
+                    for(auto it = begin(); it < finish && keep_iterating; ++it) {
+                        const size_type new_index = compute_key_index(*it, new_capacity);
+                        const size_type last_chunk_index = wrap_index(new_index + CCL_SET_KEY_CHUNK_SIZE, new_capacity);
+                        bool item_added = false;
 
-                    if(is_available) {
-                        key_reference current_key = keys[i];
+                        for(size_type i = new_index; i != last_chunk_index; i = wrap_index(++i, new_capacity)) {
+                            if(!new_slot_map[i]) {
+                                std::construct_at(&new_keys[i], std::move(*it));
+                                std::destroy_at(std::to_address(it));
+                                new_slot_map.set(i);
 
-                        const size_type new_index = compute_key_index(keys[i], actual_new_capacity);
+                                item_added = true;
+                                break;
+                            }
+                        }
 
-                        std::construct_at(&new_keys[new_index], std::move(current_key));
-                        std::destroy_at(&current_key);
-
-                        new_availability_map.set(new_index);
+                        // If the chunk is full because of too many close-by
+                        // elements we have to start over and increase the capacity once more.
+                        if(!item_added) {
+                            alloc::get_allocator()->deallocate(new_keys);
+                            new_capacity <<= 1;
+                            done = false;
+                            break;
+                        }
                     }
-                }
+                } while(!done);
 
                 alloc::get_allocator()->deallocate(keys);
 
-                _capacity = actual_new_capacity;
-                availability_map = std::move(new_availability_map);
+                _capacity = new_capacity;
+                slot_map = std::move(new_slot_map);
                 keys = new_keys;
             }
 
             constexpr void insert(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
+                const size_type last_chunk_index = wrap_index(index + CCL_SET_KEY_CHUNK_SIZE, _capacity);
+                size_type first_empty = invalid_size;
 
-                for(size_type i = index; i < _capacity; ++i) {
-                    if(!availability_map[i] || key == keys[i]) {
-                        std::construct_at(&keys[i], key);
-                        availability_map[i] = true;
+                // Check all items in a chunk. If we find the exact key,
+                // nothing needs to be done. Item is already there. Otherwise
+                // find the first available slot in the chunk and add the item.
+                for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
+                    if(slot_map[i] && key == keys[i]) {
                         return;
+                    }
+
+                    if(!slot_map[i] && first_empty == invalid_size) {
+                        first_empty = i;
                     }
                 }
 
-                for(size_type i = 0; i < index; ++i) {
-                    if(!availability_map[i] || key == keys[i]) {
-                        std::construct_at(&keys[i], key);
-                        availability_map[i] = true;
-                        return;
-                    }
+                if(first_empty != invalid_size) {
+                    std::construct_at(&keys[first_empty], key);
+                    slot_map[first_empty] = true;
+                    return;
                 }
 
-                // No slots available
+                // No slots available in the chunk. Reserve and
+                // rehash.
                 reserve(max<size_type>(1, _capacity << 1));
                 insert(key);
             }
 
             constexpr void erase(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
+                const size_type last_chunk_index = wrap_index(index + CCL_SET_KEY_CHUNK_SIZE, _capacity);
 
-                for(size_type i = index; i < _capacity; ++i) {
-                    if(keys[i] == key) {
-                        CCL_ASSERT(availability_map[i]);
-
+                for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
+                    if(slot_map[i] && keys[i] == key) {
                         std::destroy_at(&keys[i]);
-                        availability_map[i] = false;
-                        return;
-                    }
-                }
-
-                for(size_type i = 0; i < index; ++i) {
-                    if(keys[i] == key) {
-                        CCL_ASSERT(availability_map[i]);
-
-                        std::destroy_at(&keys[i]);
-                        availability_map[i] = false;
+                        slot_map[i] = false;
                         return;
                     }
                 }
@@ -325,30 +339,21 @@ namespace ccl {
             constexpr void clear() {
                 for(size_type i = 0; i < _capacity; ++i) {
                     if constexpr(std::is_destructible_v<K>) {
-                        if(availability_map[i]) {
+                        if(slot_map[i]) {
                             std::destroy_at(&keys[i]);
                         }
                     }
                 }
 
-                std::fill(
-                    availability_map.get_clusters().begin(),
-                    availability_map.get_clusters().end(),
-                    static_cast<typename decltype(availability_map)::cluster_type>(0)
-                );
+                slot_map.zero();
             }
 
             constexpr iterator find(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
+                const size_type last_chunk_index = wrap_index(index + CCL_SET_KEY_CHUNK_SIZE, _capacity);
 
-                for(size_type i = index; i < _capacity; ++i) {
-                    if(availability_map[i] && keys[i] == key) {
-                        return iterator { *this, i };
-                    }
-                }
-
-                for(size_type i = 0; i < index; ++i) {
-                    if(availability_map[i] && keys[i] == key) {
+                for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
+                    if(slot_map[i] && keys[i] == key) {
                         return iterator { *this, i };
                     }
                 }
@@ -358,15 +363,10 @@ namespace ccl {
 
             constexpr bool contains(const_key_reference key) const {
                 const size_type index = compute_key_index(key, _capacity);
+                const size_type last_chunk_index = wrap_index(index + CCL_SET_KEY_CHUNK_SIZE, _capacity);
 
-                for(size_type i = index; i < _capacity; ++i) {
-                    if(availability_map[i] && keys[i] == key) {
-                        return true;
-                    }
-                }
-
-                for(size_type i = 0; i < index; ++i) {
-                    if(availability_map[i] && keys[i] == key) {
+                for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
+                    if(slot_map[i] && keys[i] == key) {
                         return true;
                     }
                 }
@@ -388,16 +388,22 @@ namespace ccl {
                 return hash_function_type{}(x);
             }
 
-            static size_type compute_key_index(const_key_reference x, const size_type capacity) {
+            static constexpr size_type wrap_index(const size_type index, const size_type capacity) {
                 CCL_ASSERT(is_power_2(capacity));
                 CCL_ASSERT(capacity);
 
-                return hash(x) & (capacity - 1);
+                return index & (capacity - 1);
+            }
+
+            static constexpr size_type compute_key_index(const_key_reference x, const size_type capacity) {
+                return wrap_index(hash(x), capacity);
             }
 
             size_type _capacity = 0;
-            bitset<allocator_type> availability_map; // Slot availability bit map
+            bitset<allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
             key_pointer keys = nullptr;
+
+            static constexpr size_type invalid_size = ~static_cast<size_type>(0);
     };
 }
 
