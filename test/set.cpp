@@ -1,7 +1,11 @@
+#include <string>
+#include <string_view>
 #include <ccl/test.hpp>
 #include <ccl/set.hpp>
 
 using namespace ccl;
+using namespace std::string_literals;
+using namespace std::string_view_literals;
 
 int main(int argc, char **argv) {
     test_suite suite;
@@ -15,6 +19,21 @@ int main(int argc, char **argv) {
 
         check(x.capacity() == my_set::minimum_capacity);
         check(x.contains(5));
+    });
+
+    suite.add_test("insert move", []() {
+        struct S {
+            int dummy;
+            bool operator ==(const S& other) const { return dummy == other.dummy; }
+        };
+
+        using my_set = set<S>;
+
+        my_set x;
+
+        x.insert(S{});
+
+        check(x.capacity() == my_set::minimum_capacity);
     });
 
     suite.add_test("insert grow", []() {

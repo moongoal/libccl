@@ -147,7 +147,7 @@ namespace ccl {
         typename HashFunction = hash<K>,
         typename Allocator = allocator
     >
-    requires typed_allocator<Allocator, K>
+    requires typed_allocator<Allocator, K> && std::equality_comparable<K>
     class set : private internal::with_optional_allocator<Allocator> {
         friend struct set_iterator<set>;
         friend struct set_iterator<const set>;
@@ -315,6 +315,36 @@ namespace ccl {
                 // rehash.
                 reserve(max<size_type>(1, _capacity << 1));
                 insert(key);
+            }
+
+            constexpr void insert(key_type&& key) {
+                const size_type index = compute_key_index(key, _capacity);
+                const size_type last_chunk_index = wrap_index(index + CCL_SET_KEY_CHUNK_SIZE, _capacity);
+                size_type first_empty = invalid_size;
+
+                // Check all items in a chunk. If we find the exact key,
+                // nothing needs to be done. Item is already there. Otherwise
+                // find the first available slot in the chunk and add the item.
+                for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
+                    if(slot_map[i] && key == keys[i]) {
+                        return;
+                    }
+
+                    if(!slot_map[i] && first_empty == invalid_size) {
+                        first_empty = i;
+                    }
+                }
+
+                if(first_empty != invalid_size) {
+                    std::construct_at(&keys[first_empty], std::move(key));
+                    slot_map[first_empty] = true;
+                    return;
+                }
+
+                // No slots available in the chunk. Reserve and
+                // rehash.
+                reserve(max<size_type>(1, _capacity << 1));
+                insert(std::move(key));
             }
 
             template<typename Iterator>
