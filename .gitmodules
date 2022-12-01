@@ -1,8 +1,6 @@
 [submodule "xxhash"]
 	path = contrib/xxhash
 	url = https://github.com/Cyan4973/xxHash.git
-	branch = 35b0373c697b5f160d3db26b1cbb45a0d5ba788c
 [submodule "contrib/c4core"]
 	path = contrib/c4core
 	url = https://github.com/biojppm/c4core.git
-	branch = 3729e3fdfa5df6072e1b2d0dcea755d7e977ad58
