@@ -2,15 +2,25 @@ cmake_minimum_required(VERSION 3.23)
 
 project(ccl)
 
+set(CCL_CONAN_PATHS_FILE ${CMAKE_BINARY_DIR}/conan_paths.cmake)
+
 include(cmake/features.cmake)
 include(cmake/definitions.cmake)
-include(cmake/build-xxhash.cmake)
-include(cmake/build-c4core.cmake)
+
+if(EXISTS ${CCL_CONAN_PATHS_FILE})
+    message(STATUS "Conan paths file found.")
+    include(${CCL_CONAN_PATHS_FILE})
+else()
+    message(WARNING "Conan paths file NOT found.")
+endif()
+
 enable_testing()
 
 if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
     set(${CMAKE_BUILD_TYPE} "Debug")
 endif()
+
+find_package(xxHash REQUIRED)
 
 add_library(
     ccl
@@ -39,8 +49,7 @@ target_include_directories(
 target_link_libraries(
     ccl
     INTERFACE
-        xxHash::xxhash
-        c4core
+        xxHash::xxHash
 )
 
 include(cmake/test.cmake)
@@ -58,7 +67,7 @@ configure_file(
 )
 
 install(
-    TARGETS ccl xxhash
+    TARGETS ccl
     EXPORT ccl
     ARCHIVE
     PUBLIC_HEADER

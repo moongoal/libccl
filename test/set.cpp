@@ -1,11 +1,7 @@
-#include <string>
-#include <string_view>
 #include <ccl/test.hpp>
 #include <ccl/set.hpp>
 
 using namespace ccl;
-using namespace std::string_literals;
-using namespace std::string_view_literals;
 
 int main(int argc, char **argv) {
     test_suite suite;

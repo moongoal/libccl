@@ -1,0 +1,10 @@
+[requires]
+xxhash/0.8.1
+
+[generators]
+cmake_find_package
+cmake_paths
+
+[options]
+xxhash:shared=False
+xxhash:utility=False

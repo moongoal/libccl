@@ -27,10 +27,23 @@ Unstable: 🔴
 * Cmake `>= 3.24.2`
 * LLVM `>= 15.0.0`
 * Ninja `>= 1.11.0`
+* Conan `>= 1.55.0`
 
 **Runtime dependencies**
 
 * XXHash `>= 0.8.1` (internally managed)
+
+### Conan support
+
+Runtime dependencies are, by default, managed by [Conan](https://conan.io). They are listed in the `conanfile.txt`. To build the runtime dependencies, run:
+
+```
+mkdir build
+
+conan install -if build --build -pr:b=default .
+```
+
+This will build and install the supported dependencies using the *default* profile.
 
 ### Internally Managed Dependencies
 
