@@ -22,36 +22,26 @@ Unstable: 🔴
 
 ## Dependencies
 
-**Build dependencies**
+### Build dependencies
 
 * Cmake `>= 3.24.2`
 * LLVM `>= 15.0.0`
 * Ninja `>= 1.11.0`
 * Conan `>= 1.55.0`
 
-**Runtime dependencies**
+### Runtime dependencies
 
-* XXHash `>= 0.8.1` (internally managed)
-
-### Conan support
+* XXHash `>= 0.8.1`
 
 Runtime dependencies are, by default, managed by [Conan](https://conan.io). They are listed in the `conanfile.txt`. To build the runtime dependencies, run:
 
 ```
 mkdir build
 
-conan install -if build --build -pr:b=default .
+conan install -if build --build -pr:b=<YOUR_PROFILE> .
 ```
 
-This will build and install the supported dependencies using the *default* profile.
-
-### Internally Managed Dependencies
-
-Internally managed dependencies are stored in `contrib/` as git submodules. To populate these folders, run:
-
-```
-    git submodules update --init
-```
+This will build and install the supported dependencies in the local cache.
 
 ## Building
 
@@ -69,6 +59,14 @@ To build the project:
 
 ```
 cmake --build build
+```
+
+## Packaging
+
+This library can be packaged with Conan, by running:
+
+```
+    conan create -pr:b <YOUR_PROFILE> .
 ```
 
 ## Testing
