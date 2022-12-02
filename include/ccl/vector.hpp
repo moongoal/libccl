@@ -133,7 +133,8 @@ namespace ccl {
     class vector : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
-        static constexpr struct value_init_tag_t {} value_init_tag;
+        struct value_init_tag_t {};
+        static constexpr value_init_tag_t value_init_tag{};
 
         public:
             using size_type = size_t;

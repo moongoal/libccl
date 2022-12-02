@@ -37,8 +37,8 @@ Runtime dependencies are, by default, managed by [Conan](https://conan.io). They
 
 ```
 mkdir build
-
-conan install -if build --build -pr:b=<YOUR_PROFILE> .
+cd build
+conan install --build -pr:b=<YOUR_PROFILE> ..
 ```
 
 This will build and install the supported dependencies in the local cache.
