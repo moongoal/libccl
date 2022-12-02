@@ -31,7 +31,27 @@ Unstable: 🔴
 
 **Runtime dependencies**
 
-* XXHash `>= 0.8.1`
+* XXHash `>= 0.8.1` (internally managed)
+
+### Conan support
+
+Runtime dependencies are, by default, managed by [Conan](https://conan.io). They are listed in the `conanfile.txt`. To build the runtime dependencies, run:
+
+```
+mkdir build
+
+conan install -if build --build -pr:b=default .
+```
+
+This will build and install the supported dependencies using the *default* profile.
+
+### Internally Managed Dependencies
+
+Internally managed dependencies are stored in `contrib/` as git submodules. To populate these folders, run:
+
+```
+    git submodules update --init
+```
 
 ## Building
 
