@@ -1,5 +1,7 @@
 from conans import ConanFile
+from conans import tools
 from conan.tools.cmake import CMakeToolchain, CMake
+
 
 class LibcclConan(ConanFile):
     name = "libccl"
@@ -32,6 +34,7 @@ class LibcclConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+        cmake.test()
 
     def packge_id(self):
         self.info.header_only()
@@ -44,5 +47,4 @@ class LibcclConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
         tc.generate()

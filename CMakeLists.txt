@@ -20,6 +20,8 @@ if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
     set(${CMAKE_BUILD_TYPE} "Debug")
 endif()
 
+option(CCL_ENABLE_TESTS "Enable unit tests" ON)
+
 find_package(xxHash REQUIRED)
 
 add_library(
@@ -52,7 +54,9 @@ target_link_libraries(
         xxHash::xxhash
 )
 
-include(cmake/test.cmake)
+if(CCL_ENABLE_TESTS)
+    include(cmake/test.cmake)
+endif()
 
 configure_file(
     include/ccl/features.hpp.in
