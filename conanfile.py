@@ -1,5 +1,4 @@
-from conans import ConanFile
-from conans import tools
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
 
 
@@ -36,7 +35,7 @@ class LibcclConan(ConanFile):
         cmake.build()
         cmake.test()
 
-    def packge_id(self):
+    def package_id(self):
         self.info.header_only()
 
     def package(self):
