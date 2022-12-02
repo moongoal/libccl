@@ -10,7 +10,7 @@ class LibcclConan(ConanFile):
     url = "https://github.com/moongoal/libccl"
     description = "CCL Library"
     topics = ("collections",)
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "build_type", "arch"
     options = {}
     default_options = {}
     generators = ("cmake_find_package", "cmake_paths", "CMakeToolchain")
