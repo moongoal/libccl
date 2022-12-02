@@ -2,32 +2,15 @@ cmake_minimum_required(VERSION 3.23)
 
 project(ccl)
 
-set(CCL_CONAN_PATHS_FILE ${CMAKE_BINARY_DIR}/conan_paths.cmake)
-
 include(cmake/features.cmake)
 include(cmake/definitions.cmake)
 
-if(EXISTS ${CCL_CONAN_PATHS_FILE})
-    message(STATUS "Conan paths file found.")
-    include(${CCL_CONAN_PATHS_FILE})
-else()
-    message(WARNING "Conan paths file NOT found.")
-endif()
-
 enable_testing()
-
-if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
-    set(${CMAKE_BUILD_TYPE} "Debug")
-endif()
 
 option(CCL_ENABLE_TESTS "Enable unit tests" ON)
 
 find_package(xxHash REQUIRED)
-
-add_library(
-    ccl
-    INTERFACE
-)
+add_library(ccl INTERFACE)
 
 target_compile_features(
     ccl
