@@ -49,7 +49,7 @@ target_include_directories(
 target_link_libraries(
     ccl
     INTERFACE
-        xxHash::xxHash
+        xxHash::xxhash
 )
 
 include(cmake/test.cmake)

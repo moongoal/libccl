@@ -1,5 +1,5 @@
-from conans import ConanFile, CMake
-
+from conans import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake
 
 class LibcclConan(ConanFile):
     name = "libccl"
@@ -12,7 +12,7 @@ class LibcclConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {}
     default_options = {}
-    generators = ("cmake_find_package", "cmake_paths")
+    generators = ("cmake_find_package", "cmake_paths", "CMakeToolchain")
     requires = "xxhash/0.8.1"
     exports_sources = (
         "include/*",
@@ -41,3 +41,8 @@ class LibcclConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libccl"]
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+
+        tc.generate()
