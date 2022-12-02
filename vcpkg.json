@@ -1,0 +1,8 @@
+{
+    "name": "libccl",
+    "description": "CCL base library",
+    "version": "0.0.1",
+    "dependencies": [
+        "xxhash"
+    ]
+}
