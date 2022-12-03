@@ -9,9 +9,9 @@ include(CMakePackageConfigHelpers)
 include(cmake/features.cmake)
 include(cmake/definitions.cmake)
 
-if(EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
+if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
     message(STATUS "Conan paths file found.")
-    include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+    include(${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
 else()
     message(STATUS "Conan paths file not found.")
 endif()
@@ -73,15 +73,31 @@ configure_file(
 install(
     TARGETS ccl
     EXPORT ccl
-    ARCHIVE
     PUBLIC_HEADER
+)
+
+file(
+    GLOB_RECURSE
+    CCL_HEADER_FILES
+    LIST_DIRECTORIES false
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    include/*.hpp
+)
+
+install(
+    DIRECTORY
+        include/
+        ${CMAKE_CURRENT_BINARY_DIR}/include/
+    TYPE INCLUDE
+    FILES_MATCHING
+    PATTERN *.hpp
 )
 
 install(
     EXPORT ${PROJECT_NAME}
     FILE ${PROJECT_NAME}-config.cmake
     NAMESPACE ${PROJECT_NAME}::
-    DESTINATION "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}>"
+    DESTINATION .
 )
 
 set(CCL_CONFIG_VERSION_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake)
@@ -93,5 +109,5 @@ write_basic_package_version_file(
 
 install(
     FILES ${CCL_CONFIG_VERSION_FILE}
-    DESTINATION "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}>"
+    DESTINATION .
 )
