@@ -34,12 +34,15 @@ class LibcclConan(ConanFile):
         cmake.configure()
         cmake.build()
         cmake.test()
+        cmake.install()
 
     def package_id(self):
         self.info.header_only()
 
     def package(self):
         self.copy("*.hpp", dst="include", src="include")
+        self.copy("ccl-config.cmake")
+        self.copy("ccl-config-version.cmake")
 
     def package_info(self):
         self.cpp_info.libs = ["libccl"]
