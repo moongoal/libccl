@@ -92,22 +92,3 @@ install(
     FILES_MATCHING
     PATTERN *.hpp
 )
-
-install(
-    EXPORT ${PROJECT_NAME}
-    FILE ${PROJECT_NAME}-config.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION .
-)
-
-set(CCL_CONFIG_VERSION_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake)
-
-write_basic_package_version_file(
-    ${CCL_CONFIG_VERSION_FILE}
-    COMPATIBILITY SameMinorVersion
-)
-
-install(
-    FILES ${CCL_CONFIG_VERSION_FILE}
-    DESTINATION .
-)
