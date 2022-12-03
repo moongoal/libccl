@@ -1,9 +1,20 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(ccl)
+project(
+    ccl
+    VERSION 0.0.1
+)
 
+include(CMakePackageConfigHelpers)
 include(cmake/features.cmake)
 include(cmake/definitions.cmake)
+
+if(EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
+    message(STATUS "Conan paths file found.")
+    include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+else()
+    message(STATUS "Conan paths file not found.")
+endif()
 
 enable_testing()
 
@@ -53,6 +64,12 @@ configure_file(
     NEWLINE_STYLE UNIX
 )
 
+configure_file(
+    include/ccl/version.hpp.in
+    include/ccl/version.hpp
+    NEWLINE_STYLE UNIX
+)
+
 install(
     TARGETS ccl
     EXPORT ccl
@@ -61,6 +78,20 @@ install(
 )
 
 install(
-    EXPORT ccl
+    EXPORT ${PROJECT_NAME}
+    FILE ${PROJECT_NAME}-config.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}>"
+)
+
+set(CCL_CONFIG_VERSION_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake)
+
+write_basic_package_version_file(
+    ${CCL_CONFIG_VERSION_FILE}
+    COMPATIBILITY SameMinorVersion
+)
+
+install(
+    FILES ${CCL_CONFIG_VERSION_FILE}
     DESTINATION "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}>"
 )
