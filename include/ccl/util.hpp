@@ -183,6 +183,40 @@ namespace ccl {
             return is_type_in_pack<T, Rest...>();
         }
     }
+
+    /**
+     * Align a size to some alignment constraint.
+     *
+     * @param orig_size The original size.
+     * @param alignment The alignment constraint - must be a power of 2.
+     *
+     * @return The aligned size. Aligned sizes are always >= than `orig_size`.
+     */
+    constexpr size_t align_size(const size_t orig_size, const size_t alignment) noexcept {
+        CCL_ASSERT(is_power_2(alignment));
+
+        size_t const mask = alignment - 1;
+
+        return (orig_size + mask) & ~mask;
+    }
+
+    /**
+     * Align an address to some alignment constraint.
+     *
+     * @param orig_address The address to align.
+     * @param alignment The alignment constraint - must be a power of 2.
+     *
+     * @return The aligned pointer. Aligned addresses are always >= than `orig_address`.
+     */
+    template<typename T>
+    constexpr T* align_address(const T* const orig_address, const uintptr_t alignment) noexcept {
+        CCL_ASSERT(is_power_2(alignment));
+
+        uintptr_t const int_addr = (uintptr_t)orig_address;
+        uintptr_t const mask = alignment - 1;
+
+        return (T*)((int_addr + mask) & ~mask);
+    }
 }
 
 #endif // CCL_UTIL_HPP
