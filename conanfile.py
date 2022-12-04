@@ -26,7 +26,7 @@ class LibcclConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        cmake.test()
+        cmake.test(cli_args=['--output-on-failure'])
         cmake.install()
 
     def package_id(self):
