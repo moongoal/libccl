@@ -104,6 +104,14 @@ namespace ccl {
         }
     }
 
+    inline void equals(const auto value1, const auto value2) {
+        if(value1 != value2) {
+            std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
+
+            fail();
+        }
+    }
+
     template<typename Exception = std::exception>
     inline void throws(std::function<void()> code) {
         try {

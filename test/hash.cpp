@@ -45,75 +45,74 @@ int main(int argc, char **argv) {
         check(hash<test_internally_hashable>{}({}) == 2);
     });
 
-    suite.add_test("hash bool", [] () { check(hash<bool>{}(true) == 1); });
+    suite.add_test("hash bool", [] () { equals(hash<bool>{}(true), 1ULL); });
 
-    suite.add_test("hash uint8_t", [] () { check(hash<uint8_t>{}(2) == 2); });
-    suite.add_test("hash uint16_t", [] () { check(hash<uint16_t>{}(2) == 2); });
-    suite.add_test("hash uint32_t", [] () { check(hash<uint32_t>{}(2) == 2); });
-    suite.add_test("hash uint64_t", [] () { check(hash<uint64_t>{}(2) == 2); });
+    suite.add_test("hash uint8_t", [] () { equals(hash<uint8_t>{}(2), 2ULL); });
+    suite.add_test("hash uint16_t", [] () { equals(hash<uint16_t>{}(2), 2ULL); });
+    suite.add_test("hash uint32_t", [] () { equals(hash<uint32_t>{}(2), 2ULL); });
+    suite.add_test("hash uint64_t", [] () { equals(hash<uint64_t>{}(2), 2ULL); });
 
-    suite.add_test("hash int8_t", [] () { check(hash<int8_t>{}(2) == 2); });
-    suite.add_test("hash int16_t", [] () { check(hash<int16_t>{}(2) == 2); });
-    suite.add_test("hash int32_t", [] () { check(hash<int32_t>{}(2) == 2); });
-    suite.add_test("hash int64_t", [] () { check(hash<int64_t>{}(2) == 2); });
+    suite.add_test("hash int8_t", [] () { equals(hash<int8_t>{}(2), 2ULL); });
+    suite.add_test("hash int16_t", [] () { equals(hash<int16_t>{}(2), 2ULL); });
+    suite.add_test("hash int32_t", [] () { equals(hash<int32_t>{}(2), 2ULL); });
+    suite.add_test("hash int64_t", [] () { equals(hash<int64_t>{}(2), 2ULL); });
 
-    suite.add_test("hash char8_t", [] () { check(hash<char8_t>{}('x') == static_cast<hash_t>('x')); });
-    suite.add_test("hash char16_t", [] () { check(hash<char16_t>{}('x') == static_cast<hash_t>('x')); });
-    suite.add_test("hash char32_t", [] () { check(hash<char32_t>{}('x') == static_cast<hash_t>('x')); });
-    suite.add_test("hash char", [] () { check(hash<char>{}('x') == static_cast<hash_t>('x')); });
-    suite.add_test("hash wchar_t", [] () { check(hash<wchar_t>{}('x') == static_cast<hash_t>('x')); });
+    suite.add_test("hash char8_t", [] () { equals(hash<char8_t>{}('x'), static_cast<hash_t>('x')); });
+    suite.add_test("hash char16_t", [] () { equals(hash<char16_t>{}('x'), static_cast<hash_t>('x')); });
+    suite.add_test("hash char32_t", [] () { equals(hash<char32_t>{}('x'), static_cast<hash_t>('x')); });
+    suite.add_test("hash char", [] () { equals(hash<char>{}('x'), static_cast<hash_t>('x')); });
+    suite.add_test("hash wchar_t", [] () { equals(hash<wchar_t>{}('x'), static_cast<hash_t>('x')); });
 
     suite.add_test("hash float", [] () {
         const float value = 5.443;
 
-        check(hash<float>{}(value) == *reinterpret_cast<const uint32_t*>(&value));
+        equals(hash<float>{}(value), *reinterpret_cast<const uint32_t*>(&value));
     });
 
     suite.add_test("hash double", [] () {
         const double value = 5.443;
 
-        check(hash<double>{}(value) == *reinterpret_cast<const hash_t*>(&value));
+        equals(hash<double>{}(value), *reinterpret_cast<const hash_t*>(&value));
     });
 
     if constexpr(sizeof(double) == sizeof(long double)) {
         suite.add_test("hash long double (size same as double)", [] () {
             const long double value = 5.443;
 
-            check(hash<long double>{}(value) == *reinterpret_cast<const hash_t*>(&value));
+            equals(hash<long double>{}(value), *reinterpret_cast<const hash_t*>(&value));
         });
     } else {
         suite.add_test("hash long double (size greater than double)", [] () {
             union pun { long double n; uint64_t bits[2]; } x;
 
-            x.bits[0] = 0x123;
-            x.bits[1] = 0x666;
+            x.n = 0.00000234;
 
-            const hash_t expected_hash = 0x123 ^ 0x666;
+            const hash_t expected_hash = x.bits[0] ^ x.bits[1];
 
-            check(hash<long double>{}(x.n) == expected_hash);
+            equals(hash<long double>{}(x.n),  expected_hash);
         });
     }
 
     suite.add_test("hash std::nullptr_t", [] () {
-        check(hash<std::nullptr_t>{}(nullptr) == 0);
+        equals(hash<std::nullptr_t>{}(nullptr), 0ULL);
     });
 
     suite.add_test("hash pointer", [] () {
         const float value = 5.443;
 
-        check(hash<const float*>{}(&value) == reinterpret_cast<hash_t>(&value));
+        equals(hash<const float*>{}(&value), reinterpret_cast<hash_t>(&value));
     });
 
     suite.add_test("hash enum", [] () {
         const test_enum value = one;
 
-        check(hash<test_enum>{}(value) == static_cast<hash_t>(value));
+        equals(hash<test_enum>{}(value), static_cast<hash_t>(value));
     });
 
     suite.add_test("hash scoped enum", [] () {
         const test_scoped_enum value = test_scoped_enum::one;
 
-        check(hash<test_scoped_enum>{}(value) == static_cast<hash_t>(value));
+        equals(hash<test_scoped_enum>{}(value), static_cast<hash_t>(value));
     });
 
     return suite.main(argc, argv);
