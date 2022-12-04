@@ -38,6 +38,11 @@ namespace ccl {
          */
         CCL_VALUE(ALLOCATION_INFO, 0),
 
+        /**
+         * The return value of `allocator::owns()` is meaningful.
+         */
+        CCL_VALUE(OWNERSHIP_QUERY, 1)
+
         #undef CCL_VALUE
     };
     typedef uint32_t allocator_feature_flags;
@@ -100,7 +105,7 @@ namespace ccl {
              *
              * @return A structure containing the information held by the allocator for this allocation.
              */
-            allocation_info get_allocation_info(void* const ptr) const;
+            allocation_info get_allocation_info(const void* const ptr) const;
 
             /**
              * Free memory.
@@ -108,6 +113,19 @@ namespace ccl {
              * @param ptr A pointer allocated with this allocator.
              */
             void deallocate(void * const ptr);
+
+            /**
+             * Return a boolean value stating whether the allocator owns
+             * the memory represented by the pointer.
+             *
+             * If the allocator does not support ownership queries, this function
+             * must return false.
+             *
+             * @param ptr A pointer.
+             *
+             * @return True if the memory pointed at by `ptr` is owned by this allocator.
+             */
+            CCLNODISCARD bool owns(const void * const ptr) const;
 
             /**
              * Return the feature set supported by this allocator.
@@ -144,8 +162,12 @@ namespace ccl {
             return 0;
         }
 
-        inline allocation_info allocator::get_allocation_info(void* const ptr CCLUNUSED) const {
+        inline allocation_info allocator::get_allocation_info(const void* const ptr CCLUNUSED) const {
             return {};
+        }
+
+        inline bool allocator::owns(const void * const ptr CCLUNUSED) const {
+            return false;
         }
     #endif // CCL_USER_DEFINED_ALLOCATOR
 

@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
         check(ptr);
     });
 
-    suite.add_test("allocate exceed", [] () {
+    suite.add_test("allocate exceed (throw)", [] () {
         local_allocator<16> allocator;
 
         uint8_t * const ptr CCLUNUSED = allocator.allocate<uint8_t>(16);
@@ -30,6 +30,15 @@ int main(int argc, char **argv) {
         throws<std::bad_alloc>([&allocator] () {
             auto * const ptr_fail CCLUNUSED = allocator.allocate(1);
         });
+    });
+
+    suite.add_test("allocate exceed (nullptr)", [] () {
+        local_allocator<16, local_allocator_policy::return_nullptr> allocator;
+
+        uint8_t * const ptr CCLUNUSED = allocator.allocate<uint8_t>(16);
+        auto * const ptr_fail = allocator.allocate(1);
+
+        check(!ptr_fail);
     });
 
     suite.add_test("deallocate", [] () {
@@ -52,6 +61,20 @@ int main(int argc, char **argv) {
         allocator.clear();
 
         ptr = allocator.allocate<uint8_t>(16);
+    });
+
+    suite.add_test("owns", [] () {
+        local_allocator<16> allocator;
+
+        uint8_t * const ptr = allocator.allocate<uint8_t>(16);
+
+        check(allocator.owns(ptr));
+    });
+
+    suite.add_test("owns not", [] () {
+        local_allocator<16> allocator;
+
+        check(!allocator.owns(nullptr));
     });
 
     return suite.main(argc, argv);

@@ -13,10 +13,30 @@
 #include <ccl/util.hpp>
 
 namespace ccl {
-    template<size_t Size>
+    enum class local_allocator_policy {
+        /**
+         * Throw an exception when allocation fails.
+         */
+        throw_exception,
+
+        /**
+         * Return `nullptr` when allocation fails.
+         */
+        return_nullptr
+    };
+
+    /**
+     * An allocator that only uses local memory. Useful to store a
+     * known, small amount of data without accessing the heap.
+     *
+     * @tparam Size The size of the local memory area in bytes.
+     * @tparam Policy The allocator policy.
+     */
+    template<size_t Size, local_allocator_policy Policy = local_allocator_policy::throw_exception>
     class local_allocator {
         public:
             static constexpr size_t memory_size = Size;
+            static constexpr local_allocator_policy policy = Policy;
 
         private:
             uint8_t memory[memory_size];
@@ -52,7 +72,13 @@ namespace ccl {
                 const size_t allocation_size = n_bytes + padding;
                 const size_t remaining_size = memory_size - used_size;
 
-                CCL_THROW_IF(allocation_size > remaining_size, std::bad_alloc{});
+                if(allocation_size > remaining_size) {
+                    if constexpr (policy == local_allocator_policy::throw_exception) {
+                        CCL_THROW(std::bad_alloc{});
+                    } else {
+                        return nullptr;
+                    }
+                }
 
                 used_size += allocation_size;
 
@@ -79,7 +105,7 @@ namespace ccl {
              *
              * @return A structure containing the information held by the allocator for this allocation.
              */
-            allocation_info get_allocation_info(void* const ptr CCLUNUSED) const { return {}; }
+            allocation_info get_allocation_info(const void* const ptr CCLUNUSED) const { return {}; }
 
             /**
              * Free memory.
@@ -93,12 +119,21 @@ namespace ccl {
              *
              * @return An integer representing the set of supported allocator features.
              */
-            allocator_feature_flags get_features() const noexcept { return 0; }
+            allocator_feature_flags get_features() const noexcept { return CCL_ALLOCATOR_FEATURE_OWNERSHIP_QUERY_BIT; }
 
             /**
              * Free any allocated memory and allow reuse.
              */
             void clear() noexcept { used_size = 0; }
+
+            bool owns(const void * const ptr CCLUNUSED) const {
+                return ptr >= memory && ptr < (memory + memory_size);
+            }
+
+            /**
+             * Return the amount of used local memory.
+             */
+            constexpr size_t get_used_memory_size() const noexcept { return used_size; }
     };
 }
 
