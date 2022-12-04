@@ -14,7 +14,6 @@ class LibcclConan(ConanFile):
     options = {}
     default_options = {}
     generators = ("cmake_find_package", "cmake_paths", "CMakeToolchain")
-    requires = "xxhash/0.8.1"
     exports_sources = (
         "include/*",
         "test/*",
@@ -22,12 +21,6 @@ class LibcclConan(ConanFile):
         "CMakeLists.txt",
         "README.md"
     )
-
-    def configure(self):
-        xxhash = self.options["xxhash"]
-
-        xxhash.shared = False
-        xxhash.utility = False
 
     def build(self):
         cmake = CMake(self)

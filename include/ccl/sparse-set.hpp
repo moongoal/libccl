@@ -24,7 +24,7 @@ namespace ccl {
             using const_reference_type = const T&;
             using allocator_type = Allocator;
             using hash_function_type = Hash;
-            using hash_type = typename Hash::hash_value_type;
+            using hash_type = hash_t;
             using size_type = uint32_t;
 
         private:

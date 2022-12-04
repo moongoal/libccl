@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
         struct S {
             int dummy;
             bool operator ==(const S& other) const { return dummy == other.dummy; }
+
+            constexpr hash_t hash() const noexcept {
+                return dummy;
+            }
         };
 
         using my_set = set<S>;

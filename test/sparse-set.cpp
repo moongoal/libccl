@@ -6,6 +6,10 @@ using namespace ccl;
 struct S {
     int a;
     float b;
+
+    constexpr hash_t hash() const noexcept {
+        return a ^ static_cast<hash_t>(b);
+    }
 };
 
 constexpr bool operator ==(const S& first, const S& second) {

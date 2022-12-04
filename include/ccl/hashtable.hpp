@@ -169,7 +169,7 @@ namespace ccl {
 
             using key_type = K;
             using value_type = V;
-            using hash_type = typename HashFunction::hash_value_type;
+            using hash_type = hash_t;
             using hash_function_type = HashFunction;
 
             using key_pointer = K*;

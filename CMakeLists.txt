@@ -20,7 +20,6 @@ enable_testing()
 
 option(CCL_ENABLE_TESTS "Enable unit tests" ON)
 
-find_package(xxHash REQUIRED)
 add_library(ccl INTERFACE)
 
 target_compile_features(
@@ -40,12 +39,6 @@ target_include_directories(
     INTERFACE
         $<INSTALL_INTERFACE:${CCL_INCLUDE_PATH}> $<BUILD_INTERFACE:${CCL_FULL_INCLUDE_PATH}>
         $<INSTALL_INTERFACE:${CCL_BUILD_INCLUDE_PATH}> $<BUILD_INTERFACE:${CCL_FULL_BUILD_INCLUDE_PATH}>
-)
-
-target_link_libraries(
-    ccl
-    INTERFACE
-        xxHash::xxhash
 )
 
 if(CCL_ENABLE_TESTS)

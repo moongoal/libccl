@@ -162,7 +162,7 @@ namespace ccl {
             using key_reference = K&;
 
             using const_key_reference = const K&;
-            using hash_type = typename HashFunction::hash_value_type;
+            using hash_type = hash_t;
             using hash_function_type = HashFunction;
 
             using allocator_type = Allocator;
