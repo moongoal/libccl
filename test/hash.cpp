@@ -75,11 +75,24 @@ int main(int argc, char **argv) {
         check(hash<double>{}(value) == *reinterpret_cast<const hash_t*>(&value));
     });
 
-    suite.add_test("hash long double", [] () {
-        const long double value = 5.443;
+    if constexpr(sizeof(double) == sizeof(long double)) {
+        suite.add_test("hash long double (size same as double)", [] () {
+            const long double value = 5.443;
 
-        check(hash<long double>{}(value) == *reinterpret_cast<const hash_t*>(&value));
-    });
+            check(hash<long double>{}(value) == *reinterpret_cast<const hash_t*>(&value));
+        });
+    } else {
+        suite.add_test("hash long double (size greater than double)", [] () {
+            union pun { long double n; uint64_t bits[2]; } x;
+
+            x.bits[0] = 0x123;
+            x.bits[1] = 0x666;
+
+            const hash_t expected_hash = (0x666ULL << 32) + 0x123;
+
+            check(hash<long double>{}(x.n) == expected_hash);
+        });
+    }
 
     suite.add_test("hash std::nullptr_t", [] () {
         check(hash<std::nullptr_t>{}(nullptr) == 0);
