@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
             x.bits[0] = 0x123;
             x.bits[1] = 0x666;
 
-            const hash_t expected_hash = (0x666ULL << 32) + 0x123;
+            const hash_t expected_hash = 0x123 ^ 0x666;
 
             check(hash<long double>{}(x.n) == expected_hash);
         });
