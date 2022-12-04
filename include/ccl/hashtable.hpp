@@ -152,9 +152,9 @@ namespace ccl {
      * @tparam Allocator The allocator type.
      */
     template<
-        typename K,
+        std::equality_comparable K,
         typename V,
-        typename HashFunction = hash<K>,
+        typed_hash_function<K> HashFunction = hash<K>,
         typename Allocator = allocator
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
@@ -395,6 +395,15 @@ namespace ccl {
                         return;
                     }
                 }
+            }
+
+            template<typename Iterator>
+            constexpr void erase(const Iterator& it) {
+                const size_type i = it.index;
+
+                std::destroy_at(&keys[i]);
+                std::destroy_at(&values[i]);
+                slot_map[i] = false;
             }
 
             CCLNODISCARD constexpr auto& at(const_key_reference key) const {

@@ -39,12 +39,26 @@ namespace ccl {
      * the templated `allocate()` member function to be defined.
      *
      * @tparam Allocator The allocator type.
+     * @tparam T The allocatable type.
      */
     template<typename Allocator, typename T>
     concept typed_allocator = requires(Allocator allocator, const size_t n, const int flags) {
         requires basic_allocator<Allocator>;
 
         { allocator.template allocate<T>(n, flags) } -> std::convertible_to<T*>;
+    };
+
+    /**
+     * A hash function capable of hashing a given type.
+     *
+     * @tparam Function The function type.
+     * @tparam T The hashable type.
+     */
+    template<typename Function, typename T>
+    concept typed_hash_function = requires(Function f, T object) {
+        requires std::integral<typename Function::hash_value_type>;
+
+        { f.operator()(object) } -> std::convertible_to<typename Function::hash_value_type>;
     };
 }
 

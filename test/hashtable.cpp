@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
         decltype(auto) value CCLUNUSED = x[1]; // Default-constructed
     });
 
-    suite.add_test("erase", [] () {
+    suite.add_test("erase key", [] () {
         using my_hashtable = hashtable<int, float>;
 
         my_hashtable x;
@@ -85,6 +85,24 @@ int main(int argc, char **argv) {
         throws<std::out_of_range>([&x]() {
             decltype(auto) v CCLUNUSED = x.at(1);
         });
+    });
+
+    suite.add_test("erase iterator", [] () {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        x.insert(1, 1);
+        x.insert(2, 3);
+        x.insert(3, 4);
+
+        const auto it = x.find(2);
+
+        x.erase(it);
+
+        check(x.contains(1));
+        check(!x.contains(2));
+        check(x.contains(3));
     });
 
     suite.add_test("emplace", [] () {
