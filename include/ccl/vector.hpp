@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <ccl/api.hpp>
-#include <ccl/allocator.hpp>
+#include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/util.hpp>
 #include <ccl/internal/optional-allocator.hpp>

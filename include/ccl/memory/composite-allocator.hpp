@@ -11,9 +11,9 @@
 #include <ccl/debug.hpp>
 #include <ccl/util.hpp>
 #include <ccl/concepts.hpp>
-#include <ccl/allocator.hpp>
+#include <ccl/memory/allocator.hpp>
 #include <ccl/compressed-pair.hpp>
-#include <ccl/local-allocator.hpp>
+#include <ccl/memory/local-allocator.hpp>
 
 namespace ccl {
     /**

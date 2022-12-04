@@ -11,7 +11,7 @@
 
 #include <type_traits>
 #include <ccl/api.hpp>
-#include <ccl/allocator.hpp>
+#include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 
 namespace ccl::internal {

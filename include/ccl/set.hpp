@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/definitions.hpp>
-#include <ccl/allocator.hpp>
+#include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/hash.hpp>

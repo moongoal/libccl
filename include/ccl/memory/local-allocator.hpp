@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <ccl/api.hpp>
 #include <ccl/definitions.hpp>
-#include <ccl/allocator.hpp>
+#include <ccl/memory/allocator.hpp>
 #include <ccl/util.hpp>
 
 namespace ccl {

@@ -1,6 +1,6 @@
 #include <ccl/test.hpp>
-#include <ccl/composite-allocator.hpp>
-#include <ccl/local-allocator.hpp>
+#include <ccl/memory/composite-allocator.hpp>
+#include <ccl/memory/local-allocator.hpp>
 
 using namespace ccl;
 

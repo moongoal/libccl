@@ -10,7 +10,7 @@
 #include <utility>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
-#include <ccl/allocator.hpp>
+#include <ccl/memory/allocator.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/tables/view.hpp>
 

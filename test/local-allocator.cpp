@@ -1,5 +1,5 @@
 #include <ccl/test.hpp>
-#include <ccl/local-allocator.hpp>
+#include <ccl/memory/local-allocator.hpp>
 
 using namespace ccl;
 
