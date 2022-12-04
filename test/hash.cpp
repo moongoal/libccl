@@ -81,8 +81,8 @@ int main(int argc, char **argv) {
         check(hash<long double>{}(value) == *reinterpret_cast<const hash_t*>(&value));
     });
 
-    suite.add_test("hash nullptr_t", [] () {
-        check(hash<nullptr_t>{}(nullptr) == 0);
+    suite.add_test("hash std::nullptr_t", [] () {
+        check(hash<std::nullptr_t>{}(nullptr) == 0);
     });
 
     suite.add_test("hash pointer", [] () {

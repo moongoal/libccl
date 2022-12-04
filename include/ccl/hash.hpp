@@ -53,8 +53,8 @@ namespace ccl {
     #undef CCL__DECL_HASH
 
     template<>
-    struct hash<nullptr_t> {
-        constexpr hash_t operator()(const nullptr_t&) {
+    struct hash<std::nullptr_t> {
+        constexpr hash_t operator()(const std::nullptr_t&) {
             return 0;
         }
     };
@@ -91,13 +91,17 @@ namespace ccl {
     template<>
     struct hash<long double> {
         constexpr hash_t operator()(const long double n) {
-            static_assert(sizeof(long double) == sizeof(double), "This architecture requires a different hash implementation for long double.");
+            static_assert(sizeof(long double) <= sizeof(double) * 2, "This compiler or architecture requires a different hash implementation for long double.");
 
-            union pun { double n; uint64_t bits; } x;
+            if constexpr (sizeof(long double) == sizeof(double)) {
+                return hash<double>{}(static_cast<double>(n));
+            } else {
+                union pun { long double n; uint64_t bits[2]; } x;
 
-            x.n = n;
+                x.n = n;
 
-            return static_cast<hash_t>(x.bits);
+                return static_cast<hash_t>(x.bits[0] ^ x.bits[1]);
+            }
         }
     };
 
