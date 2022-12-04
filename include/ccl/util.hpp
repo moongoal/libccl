@@ -217,6 +217,19 @@ namespace ccl {
 
         return (T*)((int_addr + mask) & ~mask);
     }
+
+    /**
+     * Return the size in bytes of one or more objects of the given type.
+     *
+     * @tparam T The type of the object.
+     * @param n The number of objects.
+     *
+     * @return The size in bytes of a hypothetical array of `n` objects of type `T`.
+     */
+    template<typename T>
+    constexpr size_t size_of(const size_t n = 1) noexcept {
+        return sizeof(T) * n;
+    }
 }
 
 #endif // CCL_UTIL_HPP

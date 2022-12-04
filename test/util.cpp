@@ -56,5 +56,10 @@ int main(int argc, char ** argv) {
         check(!is_type_in_pack<char, float, int>());
     });
 
+    suite.add_test("size_of", [] () {
+        check(size_of<int[24]>() == sizeof(int) * 24);
+        check(size_of<int>() == sizeof(int));
+    });
+
     return suite.main(argc, argv);
 }

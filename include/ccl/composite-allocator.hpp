@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
+#include <ccl/util.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/allocator.hpp>
 #include <ccl/compressed-pair.hpp>
@@ -94,7 +95,7 @@ namespace ccl {
              */
             template<typename T>
             CCLNODISCARD T* allocate(const size_t n, const int flags = 0) {
-                return reinterpret_cast<T*>(allocate(sizeof(T) * n, alignof(T), flags));
+                return reinterpret_cast<T*>(allocate(size_of<T>(n), alignof(T), flags));
             }
 
             /**

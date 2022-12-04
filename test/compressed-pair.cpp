@@ -12,7 +12,7 @@ int main(int argc, char ** argv) {
     suite.add_test("non empty, different types", [] () {
         compressed_pair<int, float> p{1, 2};
 
-        check(sizeof(p) == sizeof(int) * 2);
+        check(sizeof(p) == sizeof(int) + sizeof(float));
         check(p.first() == 1);
         check(p.second() == 2);
     });
