@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add clang clang-analyzer clang-libs clang-extra-tools cmake git samurai g++ llvm13 llvm13-libs llvm13-test-utils compiler-rt
+RUN apk add clang clang-analyzer clang-libs clang-extra-tools cmake git samurai g++ llvm14 llvm14-libs llvm14-test-utils compiler-rt
 RUN adduser -D build
 
 USER build

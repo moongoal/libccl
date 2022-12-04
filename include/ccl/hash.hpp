@@ -8,6 +8,7 @@
 
 #include <concepts>
 #include <utility>
+#include <span>
 #include <ccl/api.hpp>
 
 namespace ccl {
@@ -29,7 +30,23 @@ namespace ccl {
     template<typename T>
     concept hashable = internally_hashable<T> || externally_hashable<T>;
 
+    static constexpr hash_t fnv1a_prime = 0x100000001B3ULL;
+    static constexpr hash_t fnv1a_basis = 0xCBF29CE484222325ULL;
 
+    constexpr hash_t fnv1a_hash(
+        const size_t size,
+        const uint8_t * const data,
+        const hash_t initial = fnv1a_basis
+    ) noexcept {
+        hash_t result = initial;
+
+        for(size_t i = 0; i < size; ++i) {
+            result ^= data[i];
+            result *= fnv1a_prime;
+        }
+
+        return result;
+    }
 
     // Basic types
     #define CCL__DECL_HASH(T) template<> struct hash<T> { constexpr hash_t operator()(const T value) { return static_cast<T>(value); } }
@@ -92,18 +109,12 @@ namespace ccl {
 
     template<>
     struct hash<long double> {
-        constexpr hash_t operator()(const long double n) {
-            static_assert(sizeof(long double) <= sizeof(double) * 2, "This compiler or architecture requires a different hash implementation for long double.");
-
-            if constexpr (sizeof(long double) == sizeof(double)) {
-                return hash<double>{}(static_cast<double>(n));
-            } else {
-                union pun { long double n; uint64_t bits[2]; } x;
-
-                x.n = n;
-
-                return static_cast<hash_t>(x.bits[0] ^ x.bits[1]);
+        hash_t operator()(const long double &n) {
+            if constexpr(sizeof(double) != sizeof(long double)) {
+                return fnv1a_hash(sizeof(uint8_t) * 10, &reinterpret_cast<const uint8_t&>(n));
             }
+
+            return hash<double>{}(static_cast<double>(n));
         }
     };
 

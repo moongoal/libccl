@@ -83,13 +83,7 @@ int main(int argc, char **argv) {
 
 
     suite.add_test("hash long double (size greater than double)", [] () {
-        union pun { long double n; uint64_t bits[2]; } x;
-
-        x.n = 0.00000234;
-
-        const hash_t expected_hash = x.bits[0] ^ x.bits[1];
-
-        equals(hash<long double>{}(x.n), expected_hash);
+        equals(hash<long double>{}(0.00000234), 0xea6db4d3314d7b79ULL);
     }, [] () { return sizeof(long double) == sizeof(double); });
 
     suite.add_test("hash std::nullptr_t", [] () {
@@ -112,6 +106,16 @@ int main(int argc, char **argv) {
         const test_scoped_enum value = test_scoped_enum::one;
 
         equals(hash<test_scoped_enum>{}(value), static_cast<hash_t>(value));
+    });
+
+    suite.add_test("fnv1a empty", [] () {
+        equals(fnv1a_hash(0, nullptr), fnv1a_basis);
+    });
+
+    suite.add_test("fnv1a value", [] () {
+        const uint8_t value[] = { 0x61, 0x78, 0x95, 0x75, 0xac };
+
+        equals(fnv1a_hash(sizeof(value), value), 0x7242825e8642aa02ULL);
     });
 
     return suite.main(argc, argv);
