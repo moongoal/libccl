@@ -29,6 +29,8 @@ namespace ccl {
     template<typename T>
     concept hashable = internally_hashable<T> || externally_hashable<T>;
 
+
+
     // Basic types
     #define CCL__DECL_HASH(T) template<> struct hash<T> { constexpr hash_t operator()(const T value) { return static_cast<T>(value); } }
 

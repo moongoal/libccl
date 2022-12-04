@@ -75,23 +75,22 @@ int main(int argc, char **argv) {
         equals(hash<double>{}(value), *reinterpret_cast<const hash_t*>(&value));
     });
 
-    if constexpr(sizeof(double) == sizeof(long double)) {
-        suite.add_test("hash long double (size same as double)", [] () {
-            const long double value = 5.443;
+    suite.add_test("hash long double (size same as double)", [] () {
+        const long double value = 5.443;
 
-            equals(hash<long double>{}(value), *reinterpret_cast<const hash_t*>(&value));
-        });
-    } else {
-        suite.add_test("hash long double (size greater than double)", [] () {
-            union pun { long double n; uint64_t bits[2]; } x;
+        equals(hash<long double>{}(value), *reinterpret_cast<const hash_t*>(&value));
+    }, [] () { return sizeof(long double) != sizeof(double); });
 
-            x.n = 0.00000234;
 
-            const hash_t expected_hash = x.bits[0] ^ x.bits[1];
+    suite.add_test("hash long double (size greater than double)", [] () {
+        union pun { long double n; uint64_t bits[2]; } x;
 
-            equals(hash<long double>{}(x.n),  expected_hash);
-        });
-    }
+        x.n = 0.00000234;
+
+        const hash_t expected_hash = x.bits[0] ^ x.bits[1];
+
+        equals(hash<long double>{}(x.n), expected_hash);
+    }, [] () { return sizeof(long double) == sizeof(double); });
 
     suite.add_test("hash std::nullptr_t", [] () {
         equals(hash<std::nullptr_t>{}(nullptr), 0ULL);

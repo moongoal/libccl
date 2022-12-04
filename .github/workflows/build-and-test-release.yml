@@ -48,7 +48,7 @@ jobs:
         conan profile update settings.compiler.libcxx=libstdc++11 default &&
         conan profile update settings.build_type=${{env.BUILD_TYPE}} default
 
-    - name: Build
+    - name: Build and Test
       working-directory: ${{github.workspace}}
       run: conan create -pr:b default --build missing .
       env:
