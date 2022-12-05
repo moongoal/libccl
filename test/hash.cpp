@@ -130,5 +130,23 @@ int main(int argc, char **argv) {
         equals(fnv1a_hash(sizeof(value), value), 0x7242825e8642aa02ULL);
     });
 
+    suite.add_test("hash long double negation", [] () {
+        const long double value = 0.00000234;
+
+        differs(hash<long double>{}(value), hash<long double>{}(-value));
+    });
+
+    suite.add_test("hash double negation", [] () {
+        const double value = 0.00000234;
+
+        differs(hash<double>{}(value), hash<double>{}(-value));
+    });
+
+    suite.add_test("hash float negation", [] () {
+        const float value = 0.000234;
+
+        differs(hash<float>{}(value), hash<float>{}(-value));
+    });
+
     return suite.main(argc, argv);
 }
