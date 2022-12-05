@@ -129,10 +129,10 @@ namespace ccl {
             }
 
             constexpr first_reference first() noexcept { return _first; }
-            constexpr first_reference first() const noexcept { return _first; }
+            constexpr first_const_reference first() const noexcept { return _first; }
 
             constexpr second_reference second() noexcept { return _second; }
-            constexpr second_reference second() const noexcept { return _second; }
+            constexpr second_const_reference second() const noexcept { return _second; }
 
             private:
                 T _first;
@@ -239,10 +239,10 @@ namespace ccl {
             }
 
             constexpr first_reference first() noexcept { return *this; }
-            constexpr first_reference first() const noexcept { return *this; }
+            constexpr first_const_reference first() const noexcept { return *this; }
 
             constexpr second_reference second() noexcept { return *this; }
-            constexpr second_reference second() const noexcept { return *this; }
+            constexpr second_const_reference second() const noexcept { return *this; }
         };
 
         template<typename T>

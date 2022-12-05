@@ -81,7 +81,7 @@ namespace ccl {
                 const auto it = index_map.find(item);
 
                 if(it != index_map.end()) {
-                    const size_type index = static_cast<size_type>(it->second());
+                    const size_type index = static_cast<size_type>(*it->second());
 
                     data.erase(data.begin() + index);
                     index_map.erase(item);

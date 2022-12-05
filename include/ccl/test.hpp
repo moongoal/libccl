@@ -104,7 +104,7 @@ namespace ccl {
         }
     }
 
-    inline void equals(const auto value1, const auto value2) {
+    inline void equals(const auto& value1, const auto& value2) {
         if(value1 != value2) {
             std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
 
@@ -112,7 +112,7 @@ namespace ccl {
         }
     }
 
-    inline void differs(const auto value1, const auto value2) {
+    inline void differs(const auto& value1, const auto& value2) {
         if(value1 == value2) {
             std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
 

@@ -42,6 +42,16 @@ int main(int argc, char **argv) {
         }
     });
 
+    suite.add_test("operator *", []() {
+        using my_hashtable = hashtable<int, float>;
+
+        my_hashtable x;
+
+        x.insert(0, 1);
+
+        equals(*x.begin()->second(), 1);
+    });
+
     suite.add_test("at (not present)", []() {
         using my_hashtable = hashtable<int, float>;
 
@@ -158,8 +168,8 @@ int main(int argc, char **argv) {
 
         const auto it = x.begin();
 
-        check(it->first() == 1);
-        check(it->second() == 2);
+        check(*it->first() == 1);
+        check(*it->second() == 2);
         check(++it == x.end());
     });
 
@@ -174,8 +184,8 @@ int main(int argc, char **argv) {
 
         const auto it = --x.end();
 
-        check(it->first() == 1);
-        check(it->second() == 2);
+        check(*it->first() == 1);
+        check(*it->second() == 2);
         check(it == x.begin());
     });
 
@@ -211,8 +221,8 @@ int main(int argc, char **argv) {
         x.emplace(1, 1);
         x.emplace(2, 3);
 
-        check(x.find(1)->second() == 1);
-        check(x.find(2)->second() == 3);
+        check(*x.find(1)->second() == 1);
+        check(*x.find(2)->second() == 3);
     });
 
     suite.add_test("contains", []() {

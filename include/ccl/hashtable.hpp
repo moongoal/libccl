@@ -27,8 +27,8 @@ namespace ccl {
         using key_type = typename Hashtable::key_type;
         using value_type = typename Hashtable::value_type;
 
-        using key_value_pair = compressed_pair<key_type, value_type>;
-        using const_key_value_pair = compressed_pair<const key_type, const value_type>;
+        using key_value_pair = compressed_pair<key_type*, value_type*>;
+        using const_key_value_pair = compressed_pair<const key_type*, const value_type*>;
 
         using hashtable_type = Hashtable;
         using size_type = typename Hashtable::size_type;
@@ -55,11 +55,11 @@ namespace ccl {
             return *this;
         }
 
-        constexpr key_value_pair operator*() noexcept { return key_value_pair{ hashtable->keys[index], hashtable->values[index] }; }
-        constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ hashtable->keys[index], hashtable->values[index] }; }
+        constexpr key_value_pair operator*() noexcept { return key_value_pair{ &hashtable->keys[index], &hashtable->values[index] }; }
+        constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ &hashtable->keys[index], &hashtable->values[index] }; }
 
         constexpr key_value_pair* operator->() const noexcept {
-            pair = key_value_pair{ hashtable->keys[index], hashtable->values[index] };
+            pair = key_value_pair{ &hashtable->keys[index], &hashtable->values[index] };
 
             return &pair;
         }
@@ -284,14 +284,14 @@ namespace ccl {
                     new_slot_map.zero();
 
                     for(auto it = begin(); it < finish && keep_iterating; ++it) {
-                        const size_type new_index = compute_key_index(it->first(), new_capacity);
+                        const size_type new_index = compute_key_index(*it->first(), new_capacity);
                         const size_type last_chunk_index = wrap_index(new_index + CCL_HASHTABLE_CHUNK_SIZE, new_capacity);
                         bool item_added = false;
 
                         for(size_type i = new_index; i != last_chunk_index; i = wrap_index(++i, new_capacity)) {
                             if(!new_slot_map[i]) {
-                                std::construct_at(&new_keys[i], std::move(it->first()));
-                                std::construct_at(&new_values[i], std::move(it->second()));
+                                std::construct_at(&new_keys[i], std::move(*it->first()));
+                                std::construct_at(&new_values[i], std::move(*it->second()));
 
                                 std::destroy_at(&keys[it.index]);
                                 std::destroy_at(&values[it.index]);
