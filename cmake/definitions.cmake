@@ -7,3 +7,6 @@ set(CCL_SET_MINIMUM_CAPACITY 256)
 set(CCL_SET_KEY_CHUNK_SIZE 16)
 
 set(CCL_ALLOCATOR_DEFAULT_ALIGNMENT __STDCPP_DEFAULT_NEW_ALIGNMENT__)
+
+# Size of a generic page of data, as number of items
+set(CCL_PAGE_SIZE 4096)
