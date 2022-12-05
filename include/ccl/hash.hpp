@@ -17,22 +17,51 @@ namespace ccl {
     template<typename T>
     struct hash;
 
+    /**
+     * Hashable by implementation of a `hash<T>` specialisation.
+     */
     template<typename T>
     concept externally_hashable = requires(T object) {
         { hash<T>{}(object) } -> std::convertible_to<hash_t>;
     };
 
+    /**
+     * Hashable by implementation of a `hash()` member function.
+     */
     template<typename T>
     concept internally_hashable = requires(T object) {
         { object.hash() } -> std::convertible_to<hash_t>;
     };
 
+    /**
+     * Either externally or internally hashable.
+     */
     template<typename T>
     concept hashable = internally_hashable<T> || externally_hashable<T>;
 
+    /**
+     * FNV-1A prime number.
+     */
     static constexpr hash_t fnv1a_prime = 0x100000001B3ULL;
+
+    /**
+     * FNV-1A initial hash value.
+     */
     static constexpr hash_t fnv1a_basis = 0xCBF29CE484222325ULL;
 
+    /**
+     * FNV-1A non cryptographic hashing function:
+     *
+     * @param size Length of the array to hash.
+     * @param data Array to hash
+     * @param initial Initial hash value. Can be used to resume hashing.
+     *
+     * @return The hash of `size` bytes from `data`. Can  be passed as the
+     *  `initial` parameter of a following call to this function to resume
+     *  hashing.
+     *
+     * @see https://datatracker.ietf.org/doc/html/draft-eastlake-fnv-18
+     */
     constexpr hash_t fnv1a_hash(
         const size_t size,
         const uint8_t * const data,
@@ -120,11 +149,16 @@ namespace ccl {
         }
     };
 
+    /**
+     * General hash implementation used for internally hashable and (scoped) enumerations.
+     *
+     * @param T The type to hash.
+     */
     template<typename T>
     struct hash {
-        constexpr hash_t operator()(const T& value) {
-            static_assert(internally_hashable<T> || std::is_enum_v<T> || std::is_scoped_enum_v<T>);
+        static_assert(internally_hashable<T> || std::is_enum_v<T> || std::is_scoped_enum_v<T>);
 
+        constexpr hash_t operator()(const T& value) {
             if constexpr(internally_hashable<T>) {
                 return value.hash();
             } else {
