@@ -29,20 +29,6 @@ Unstable: 🔴
 * Ninja `>= 1.11.0`
 * Conan `>= 1.55.0`
 
-### Runtime dependencies
-
-* XXHash `>= 0.8.1`
-
-Runtime dependencies are, by default, managed by [Conan](https://conan.io). They are listed in the `conanfile.txt`. To build the runtime dependencies, run:
-
-```
-mkdir build
-cd build
-conan install --build -pr:b=<YOUR_PROFILE> ..
-```
-
-This will build and install the supported dependencies in the local cache.
-
 ## Building
 
 This library is built with cmake `>= 3.24.2`. Lower versions may work but are not supported. The following are example build commands for informational purposes only. The specific commands for your system may differ.
