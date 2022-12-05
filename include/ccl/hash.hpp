@@ -92,7 +92,7 @@ namespace ccl {
 
             x.n = n;
 
-            return static_cast<hash_t>(x.bits);
+            return static_cast<hash_t>(x.bits & ~(1UL << (sizeof(float) * 8 - 1)));
         }
     };
 
@@ -103,7 +103,7 @@ namespace ccl {
 
             x.n = n;
 
-            return static_cast<hash_t>(x.bits);
+            return static_cast<hash_t>(x.bits & ~(1ULL << (sizeof(double) * 8 - 1)));
         }
     };
 
@@ -111,7 +111,9 @@ namespace ccl {
     struct hash<long double> {
         hash_t operator()(const long double &n) {
             if constexpr(sizeof(double) != sizeof(long double)) {
-                return fnv1a_hash(sizeof(uint8_t) * 10, &reinterpret_cast<const uint8_t&>(n));
+                return n == 0
+                    ? 0
+                    : fnv1a_hash(sizeof(uint8_t) * 10, &reinterpret_cast<const uint8_t&>(n));
             }
 
             return hash<double>{}(static_cast<double>(n));

@@ -69,10 +69,18 @@ int main(int argc, char **argv) {
         equals(hash<float>{}(value), *reinterpret_cast<const uint32_t*>(&value));
     });
 
+    suite.add_test("hash float -0", [] () {
+        equals(hash<float>{}(-0), hash<float>{}(+0));
+    });
+
     suite.add_test("hash double", [] () {
         const double value = 5.443;
 
         equals(hash<double>{}(value), *reinterpret_cast<const hash_t*>(&value));
+    });
+
+    suite.add_test("hash double -0", [] () {
+        equals(hash<double>{}(-0), hash<double>{}(+0));
     });
 
     suite.add_test("hash long double (size same as double)", [] () {
@@ -85,6 +93,10 @@ int main(int argc, char **argv) {
     suite.add_test("hash long double (size greater than double)", [] () {
         equals(hash<long double>{}(0.00000234), 0xea6db4d3314d7b79ULL);
     }, [] () { return sizeof(long double) == sizeof(double); });
+
+    suite.add_test("hash long double -0", [] () {
+        equals(hash<long double>{}(-0), hash<long double>{}(+0));
+    });
 
     suite.add_test("hash std::nullptr_t", [] () {
         equals(hash<std::nullptr_t>{}(nullptr), 0ULL);
