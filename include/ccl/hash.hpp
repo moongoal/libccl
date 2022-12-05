@@ -121,7 +121,7 @@ namespace ccl {
 
             x.n = n;
 
-            return static_cast<hash_t>(x.bits & ~(1UL << (sizeof(float) * 8 - 1)));
+            return static_cast<hash_t>(x.bits ? x.bits : 0.0);
         }
     };
 
@@ -132,7 +132,7 @@ namespace ccl {
 
             x.n = n;
 
-            return static_cast<hash_t>(x.bits & ~(1ULL << (sizeof(double) * 8 - 1)));
+            return static_cast<hash_t>(x.bits ? x.bits : 0.0);
         }
     };
 
