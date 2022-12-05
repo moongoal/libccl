@@ -230,6 +230,32 @@ namespace ccl {
     constexpr size_t size_of(const size_t n = 1) noexcept {
         return sizeof(T) * n;
     }
+
+
+    template<typename T>
+    T* nullv() noexcept {
+        return reinterpret_cast<T*>(nullptr);
+    }
+
+    /**
+     * Resolves to a typed null pointer value container.
+     *
+     * @tparam The null pointer type.
+     */
+    template<typename T>
+    struct null_t {
+        using pointer = T*;
+
+        static constexpr pointer value = nullptr;
+    };
+
+    /**
+     * Resolves to a typed null pointer.
+     *
+     * @tparam The null pointer type.
+     */
+    template<typename T>
+    static constexpr T* null = null_t<T>::value;
 }
 
 #endif // CCL_UTIL_HPP

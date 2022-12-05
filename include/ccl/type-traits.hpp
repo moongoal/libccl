@@ -20,7 +20,7 @@ namespace ccl {
         using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
-        using element_type = ptrdiff_t;
+        using difference_type = ptrdiff_t;
     };
 }
 

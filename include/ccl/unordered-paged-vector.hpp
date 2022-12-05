@@ -15,6 +15,7 @@
 #include <ccl/memory/allocator.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/concepts.hpp>
+#include <ccl/util.hpp>
 
 namespace ccl {
     template<typename Vector>
@@ -34,7 +35,7 @@ namespace ccl {
             using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            explicit constexpr page_cloner(allocator_type * const allocator = nullptr) : alloc{allocator ? allocator : get_default_allocator()} {}
+            explicit constexpr page_cloner(allocator_type * const allocator = null<allocator_type>) : alloc{allocator ? allocator : get_default_allocator()} {}
 
             pointer clone(const pointer page) const {
                 const pointer new_page = alloc::get_allocator();
@@ -97,7 +98,7 @@ namespace ccl {
             constexpr const_pointer get_pages() const { return pages; }
 
         public:
-            constexpr unordered_paged_vector() noexcept : pages{nullptr}, last_page_size{0} {}
+            constexpr unordered_paged_vector() noexcept : last_page_size{0} {}
 
             constexpr unordered_paged_vector(const unordered_paged_vector& other) : pages{nullptr}, last_page_size{other.last_page_size} {
                 clone_pages_from(other.pages);
@@ -109,7 +110,7 @@ namespace ccl {
                 clear_all_pages();
             }
 
-            template<std::ranges::input_range Other>
+            template<typename Other>
             constexpr unordered_paged_vector& operator=(const Other& other) {
                 size_type total_size = 0;
 
