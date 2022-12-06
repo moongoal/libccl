@@ -19,7 +19,124 @@
 
 namespace ccl {
     template<typename Vector>
-    struct paged_vector_iterator;
+    struct paged_vector_iterator {
+        using iterator_category = std::contiguous_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = typename Vector::value_type;
+        using pointer = typename Vector::pointer;
+        using reference = typename Vector::reference;
+        using size_type = typename Vector::size_type;
+        using vector_type = Vector;
+
+        explicit constexpr paged_vector_iterator(
+            const vector_type &vector,
+            const size_type index = 0
+        ) noexcept
+            : vector{&vector},
+            index{index}
+        {}
+
+        constexpr paged_vector_iterator(const paged_vector_iterator &other) noexcept
+            : vector{other.vector},
+            index{other.index}
+        {}
+
+        constexpr paged_vector_iterator& operator =(const paged_vector_iterator &other) noexcept {
+            vector = other.vector;
+            index = other.index;
+
+            return *this;
+        }
+
+        constexpr reference operator*() const noexcept { return vector[index]; }
+        constexpr pointer operator->() const noexcept { return &vector[index]; }
+
+        constexpr paged_vector_iterator& operator +=(const difference_type n) noexcept {
+            index += n;
+            return *this;
+        }
+
+        constexpr paged_vector_iterator& operator -=(const difference_type n) noexcept {
+            index -= n;
+            return *this;
+        }
+
+        constexpr paged_vector_iterator operator +(const difference_type n) const noexcept {
+            return { vector, index + n };
+        }
+
+        constexpr paged_vector_iterator operator -(const difference_type n) const noexcept {
+            return { vector, index - n };
+        }
+
+        constexpr difference_type operator -(const paged_vector_iterator other) const noexcept {
+            return index - other.index;
+        }
+
+        constexpr reference operator[](const difference_type i) const noexcept {
+            return vector[i + index];
+        }
+
+        constexpr paged_vector_iterator& operator --() noexcept {
+            --index;
+            return *this;
+        }
+
+        constexpr paged_vector_iterator operator --(int) noexcept {
+            return { vector, index-- };
+        }
+
+        constexpr paged_vector_iterator& operator ++() noexcept {
+            ++index;
+            return *this;
+        }
+
+        constexpr paged_vector_iterator operator ++(int) noexcept {
+            return { vector, index++ };
+        }
+
+        private:
+            vector_type *vector;
+            size_type index;
+    };
+
+    template<typename Vector>
+    constexpr bool operator ==(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
+        return a.ptr == b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator !=(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
+        return a.ptr != b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator >(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
+        return a.ptr > b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator <(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
+        return a.ptr < b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator >=(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
+        return a.ptr >= b.ptr;
+    }
+
+    template<typename Vector>
+    constexpr bool operator <=(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
+        return a.ptr <= b.ptr;
+    }
+
+    template<typename Vector>
+    static constexpr paged_vector_iterator<Vector> operator +(
+        const typename paged_vector_iterator<Vector>::difference_type n,
+        const paged_vector_iterator<Vector> it
+    ) noexcept {
+        return paged_vector_iterator<Vector>{it.get_data() + n};
+    }
 
     template<typename T, typename Ptr, typed_allocator<T> Allocator>
     struct page_cloner {};
@@ -48,6 +165,8 @@ namespace ccl {
 
     template<typename T, typename Ptr = T*, typed_allocator<T> Allocator = allocator>
     class unordered_paged_vector : public internal::with_optional_allocator<Allocator> {
+        static_assert(is_power_2(CCL_PAGE_SIZE));
+
         public:
             using value_type = T;
             using pointer_traits = ccl::pointer_traits<Ptr>;
@@ -62,6 +181,7 @@ namespace ccl {
             using const_iterator = paged_vector_iterator<const unordered_paged_vector>;
 
             static constexpr size_type page_size = CCL_PAGE_SIZE;
+            static constexpr size_type page_size_shift_width = bitcount(page_size) - 1;
 
         private:
             using alloc = internal::with_optional_allocator<Allocator>;
@@ -73,7 +193,7 @@ namespace ccl {
             constexpr void clone_pages_from(const page_vector& v) {
                 cloner cloner{alloc::get_allocator()};
 
-                clear_all_pages();
+                clear();
 
                 pages.reserve(v.size());
 
@@ -82,16 +202,21 @@ namespace ccl {
                 }
             }
 
-            constexpr void clear_all_pages() {
+            constexpr void clear() {
                 for(const auto p : pages) {
+                    if constexpr(std::is_destructible_v<value_type>) {
+                        std::destroy(p, p + page_size);
+                    }
+
                     alloc::get_allocator()->deallocate(p);
                 }
 
                 pages.clear();
+                last_page_size = 0;
             }
 
             constexpr void update_last_page_size_from_total_size(const size_type total_size) {
-                last_page_size = total_size % page_size;
+                last_page_size = total_size & (page_size - 1);
             }
 
             constexpr pointer get_pages() { return pages; }
@@ -100,21 +225,23 @@ namespace ccl {
         public:
             constexpr unordered_paged_vector() noexcept : last_page_size{0} {}
 
-            constexpr unordered_paged_vector(const unordered_paged_vector& other) : pages{nullptr}, last_page_size{other.last_page_size} {
+            constexpr unordered_paged_vector(const unordered_paged_vector& other) {
                 clone_pages_from(other.pages);
+
+                last_page_size = other.last_page_size;
             }
 
             constexpr unordered_paged_vector(unordered_paged_vector &&other) : pages{std::move(other.pages)}, last_page_size{other.last_page_size} {}
 
             constexpr ~unordered_paged_vector() {
-                clear_all_pages();
+                clear();
             }
 
             template<typename Other>
             constexpr unordered_paged_vector& operator=(const Other& other) {
                 size_type total_size = 0;
 
-                clear_all_pages();
+                clear();
 
                 for(const auto &it : other) {
                     push_back(it);
@@ -159,7 +286,7 @@ namespace ccl {
             constexpr const_iterator cend() const noexcept { return const_iterator{pages, size()}; }
 
             constexpr size_type item_page(const size_type index) const {
-                return index / page_size;
+                return index >> page_size_shift_width;
             }
 
             constexpr size_type item_page(const iterator it) const {
@@ -171,7 +298,7 @@ namespace ccl {
             }
 
             constexpr size_type index_in_page(const size_type index) const {
-                return index % page_size;
+                return index & (page_size - 1);
             }
 
             constexpr size_type index_in_page(const iterator it) const {
