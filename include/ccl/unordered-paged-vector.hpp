@@ -7,6 +7,7 @@
 #ifndef CCL_UNORDERED_PAGED_VECTOR_HPP
 #define CCL_UNORDERED_PAGED_VECTOR_HPP
 
+#include <memory>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/vector.hpp>
@@ -201,12 +202,50 @@ namespace ccl {
                     pages.push_back(cloner.clone(p));
                 }
             }
-            constexpr void update_last_page_size_from_total_size(const size_type total_size) {
-                new_item_index = total_size & (page_size - 1);
+
+            static constexpr size_type compute_last_page_size(const size_type total_size) {
+                return total_size & (page_size - 1);
+            }
+
+            constexpr void update_new_item_index_from_total_size(const size_type total_size) {
+                new_item_index = compute_last_page_size(total_size);
             }
 
             constexpr pointer get_pages() { return pages; }
             constexpr const_pointer get_pages() const { return pages; }
+
+            constexpr void resize_grow(const size_type new_size) {
+                const size_type current_size = size();
+                const size_type current_page_count = pages.size();
+
+                reserve(new_size);
+
+                const size_type first_page_size_to_fill = min<size_type>(page_size, new_size) - new_item_index;
+                const size_type size_delta = new_size - current_size; // Precondition: new size > current size
+                const size_type new_page_count = (size_delta - first_page_size_to_fill) / page_size_shift_width;
+                const size_type last_page_size = compute_last_page_size(new_size);
+
+                // Default-construct first page items
+                const pointer first_page = pages[current_page_count - 1];
+
+                std::uninitialized_default_construct(first_page + new_item_index, first_page + page_size);
+
+                // Default-construct full page items
+                for(size_type i = 0; i < new_page_count; ++i) {
+                    std::uninitialized_default_construct(pages[current_page_count + i], pages[current_page_count + i] + page_size);
+                }
+
+                // Default-construct last page items
+                const pointer last_page = pages[pages.size() - 1];
+
+                std::uninitialized_default_construct(last_page, last_page + last_page_size);
+
+                // Update last page size
+                this->new_item_index = last_page_size;
+            }
+
+            constexpr void resize_shrink(const size_type new_size CCLUNUSED) {
+            }
 
         public:
             constexpr unordered_paged_vector(
@@ -241,7 +280,7 @@ namespace ccl {
                     total_size++;
                 }
 
-                update_last_page_size_from_total_size(total_size);
+                update_new_item_index_from_total_size(total_size);
 
                 return *this;
             }
@@ -381,6 +420,16 @@ namespace ccl {
                 reference new_item = get(pages.size() - 1, new_item_index);
                 std::uninitialized_copy(&value, &value + 1, &new_item);
                 new_item_index += 1;
+            }
+
+            constexpr void resize(const size_type new_size) {
+                const size_type current_size = size();
+
+                if(new_size > current_size) {
+                    resize_grow(new_size);
+                } else if(new_size < current_size) {
+                    resize_shrink(new_size);
+                }
             }
     };
 }

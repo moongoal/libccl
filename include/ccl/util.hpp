@@ -107,7 +107,7 @@ namespace ccl {
      * @return The argument with the min value.
      */
     template<typename FirstArg, typename ...Ts>
-    constexpr FirstArg min(FirstArg&& arg1, Ts&& ...args) noexcept {
+    constexpr FirstArg min(const FirstArg& arg1, Ts&& ...args) noexcept {
         if constexpr(sizeof...(args) > 0) {
             const auto arg2 = max(std::forward<Ts>(args)...);
 

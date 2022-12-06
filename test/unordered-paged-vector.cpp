@@ -141,23 +141,23 @@ int main(int argc, char **argv) {
         }
     );
 
-    // suite.add_test("resize (grow)", [] () {
-    //     vector<spy> v;
+    suite.add_test("resize (grow within page)", [] () {
+        test_vector<spy> v;
 
-    //     v.append(spy{});
-    //     v.append(spy{});
-    //     v.append(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
 
-    //     v.resize(4);
+        v.resize(4);
 
-    //     check(v[0].construction_magic == constructed_value);
-    //     check(v[1].construction_magic == constructed_value);
-    //     check(v[2].construction_magic == constructed_value);
-    //     check(v[3].construction_magic == constructed_value);
+        check(v[0].construction_magic == constructed_value);
+        check(v[1].construction_magic == constructed_value);
+        check(v[2].construction_magic == constructed_value);
+        check(v[3].construction_magic == constructed_value);
 
-    //     check(v.size() == 4);
-    //     check(v.capacity() == 4);
-    // });
+        check(v.size() == 4);
+        check(v.capacity() == test_vector<spy>::page_size);
+    });
 
     // suite.add_test("resize (grow from empty)", [] () {
     //     vector<spy> v;
@@ -177,9 +177,9 @@ int main(int argc, char **argv) {
     //     int destruction_counter = 0;
     //     vector<spy> v;
 
-    //     v.append(spy{});
-    //     v.append(spy{});
-    //     v.append(spy{});
+    //     v.push_back(spy{});
+    //     v.push_back(spy{});
+    //     v.push_back(spy{});
 
     //     for(auto &x : v) {
     //         x.on_destroy = [&destruction_counter] () { destruction_counter++; };
@@ -196,9 +196,9 @@ int main(int argc, char **argv) {
     //     int destruction_counter = 0;
     //     vector<spy> v;
 
-    //     v.append(spy{});
-    //     v.append(spy{});
-    //     v.append(spy{});
+    //     v.push_back(spy{});
+    //     v.push_back(spy{});
+    //     v.push_back(spy{});
 
     //     for(auto &x : v) {
     //         x.on_destroy = [&destruction_counter] () { destruction_counter++; };
@@ -225,9 +225,9 @@ int main(int argc, char **argv) {
     //     int destruction_counter = 0;
     //     vector<spy> v;
 
-    //     v.append(spy{});
-    //     v.append(spy{});
-    //     v.append(spy{});
+    //     v.push_back(spy{});
+    //     v.push_back(spy{});
+    //     v.push_back(spy{});
 
     //     for(auto &x : v) {
     //         x.on_destroy = [&destruction_counter] () { destruction_counter++; };
@@ -252,9 +252,9 @@ int main(int argc, char **argv) {
 
     //     {
     //         vector<spy> v;
-    //         v.append(spy{});
-    //         v.append(spy{});
-    //         v.append(spy{});
+    //         v.push_back(spy{});
+    //         v.push_back(spy{});
+    //         v.push_back(spy{});
 
     //         for(auto &x : v) {
     //             x.on_destroy = [&destruction_counter] () { destruction_counter++; };
