@@ -188,7 +188,7 @@ namespace ccl {
             using page_vector = vector<pointer, allocator>;
 
             page_vector pages;
-            size_type last_page_size;
+            size_type last_item_index; // Within last page
 
             constexpr void clone_pages_from(const page_vector& v) {
                 cloner cloner{alloc::get_allocator()};
@@ -212,26 +212,26 @@ namespace ccl {
                 }
 
                 pages.clear();
-                last_page_size = 0;
+                last_item_index = 0;
             }
 
             constexpr void update_last_page_size_from_total_size(const size_type total_size) {
-                last_page_size = total_size & (page_size - 1);
+                last_item_index = total_size & (page_size - 1);
             }
 
             constexpr pointer get_pages() { return pages; }
             constexpr const_pointer get_pages() const { return pages; }
 
         public:
-            constexpr unordered_paged_vector() noexcept : last_page_size{0} {}
+            constexpr unordered_paged_vector() noexcept : last_item_index{0} {}
 
             constexpr unordered_paged_vector(const unordered_paged_vector& other) {
                 clone_pages_from(other.pages);
 
-                last_page_size = other.last_page_size;
+                last_item_index = other.last_item_index;
             }
 
-            constexpr unordered_paged_vector(unordered_paged_vector &&other) : pages{std::move(other.pages)}, last_page_size{other.last_page_size} {}
+            constexpr unordered_paged_vector(unordered_paged_vector &&other) : pages{std::move(other.pages)}, last_item_index{other.last_item_index} {}
 
             constexpr ~unordered_paged_vector() {
                 clear();
@@ -257,20 +257,26 @@ namespace ccl {
             template<>
             constexpr unordered_paged_vector& operator=<unordered_paged_vector>(const unordered_paged_vector& other) {
                 clone_pages_from(other.pages);
-                last_page_size = other.last_page_size;
+                last_item_index = other.last_item_index;
 
                 return *this;
             }
 
             constexpr unordered_paged_vector& operator=(unordered_paged_vector &&other) {
                 pages = std::move(other.pages);
-                last_page_size = std::move(other.last_page_size);
+                last_item_index = std::move(other.last_item_index);
 
                 return *this;
             }
 
             constexpr size_type size() const noexcept {
-                return pages.size() * page_size + last_page_size;
+                const size_type page_count = pages.size();
+
+                return choose(
+                    (page_count - 1) * page_size,
+                    0ULL,
+                    page_count > 0
+                ) + last_item_index;
             }
 
             constexpr size_type capacity() const noexcept {
@@ -290,11 +296,11 @@ namespace ccl {
             }
 
             constexpr size_type item_page(const iterator it) const {
-                return item_page(it);
+                return item_page(it.index);
             }
 
             constexpr size_type item_page(const const_iterator it) const {
-                return item_page(it);
+                return item_page(it.index);
             }
 
             constexpr size_type index_in_page(const size_type index) const {
@@ -309,17 +315,61 @@ namespace ccl {
                 return index_in_page(it.index);
             }
 
-            constexpr reference operator[](const size_type index) const {
+            constexpr reference operator[](const size_type index) {
                 const size_type page_index = item_page(index);
                 const size_type item_index = index_in_page(index);
 
                 return get(page_index, item_index);
             }
 
-            constexpr reference get(const size_type page_index, const size_type item_index) const {
-                CCL_THROW_IF(page_index >= pages.size() || item_index >= last_page_size, std::out_of_range{"Index out of bounds."});
+            constexpr const_reference operator[](const size_type index) const {
+                const size_type page_index = item_page(index);
+                const size_type item_index = index_in_page(index);
+
+                return get(page_index, item_index);
+            }
+
+            constexpr reference operator[](const iterator it) const {
+                return operator[](it.index);
+            }
+
+            constexpr const_reference operator[](const const_iterator it) const {
+                return operator[](it.index);
+            }
+
+            constexpr reference get(const size_type page_index, const size_type item_index) {
+                CCL_THROW_IF(page_index >= pages.size() || item_index > last_item_index, std::out_of_range{"Index out of bounds."});
 
                 return pages[page_index][item_index];
+            }
+
+            constexpr const_reference get(const size_type page_index, const size_type item_index) const {
+                CCL_THROW_IF(page_index >= pages.size() || item_index > last_item_index, std::out_of_range{"Index out of bounds."});
+
+                return pages[page_index][item_index];
+            }
+
+            constexpr void reserve(const size_type new_capacity) {
+                const size_type current_capacity = capacity();
+
+                if(new_capacity > current_capacity) {
+                    const size_type actual_new_capacity = increase_capacity(current_capacity, new_capacity);
+                    const size_type new_page_count = max(1ULL, actual_new_capacity >> page_size_shift_width);
+
+                    for(size_t i = 0; i < new_page_count; ++i) {
+                        const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size);
+                        pages.push_back(new_page);
+                    }
+                }
+            }
+
+            constexpr void push_back(const_reference value) {
+                reserve(size() + 1);
+
+                reference new_item = get(pages.size() - 1, last_item_index);
+                std::uninitialized_copy(&value, &value + 1, &new_item);
+
+                last_item_index = (last_item_index + 1) & (page_size - 1);
             }
     };
 }

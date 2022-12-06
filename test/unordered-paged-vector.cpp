@@ -53,23 +53,23 @@ int main(int argc, char **argv) {
         }
     );
 
-    // suite.add_test(
-    //     "append",
-    //     []() {
-    //         vector<int> v;
+    suite.add_test(
+        "push_back",
+        []() {
+            unordered_paged_vector<int> v;
 
-    //         v.append(1);
-    //         v.append(2);
-    //         v.append(3);
+            v.push_back(1);
+            v.push_back(2);
+            v.push_back(3);
 
-    //         check(v[0] == 1);
-    //         check(v[1] == 2);
-    //         check(v[2] == 3);
+            check(v[0] == 1);
+            check(v[1] == 2);
+            check(v[2] == 3);
 
-    //         check(v.size() == 3);
-    //         check(v.capacity() == 4);
-    //     }
-    // );
+            check(v.size() == 3);
+            check(v.capacity() == unordered_paged_vector<int>::page_size);
+        }
+    );
 
     // suite.add_test(
     //     "prepend",
