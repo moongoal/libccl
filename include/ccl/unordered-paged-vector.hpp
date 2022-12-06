@@ -26,11 +26,13 @@ namespace ccl {
         using value_type = typename Vector::value_type;
         using pointer = typename Vector::pointer;
         using reference = typename Vector::reference;
+        using const_pointer = typename Vector::const_pointer;
+        using const_reference = typename Vector::const_reference;
         using size_type = typename Vector::size_type;
         using vector_type = Vector;
 
         explicit constexpr paged_vector_iterator(
-            const vector_type &vector,
+            vector_type &vector,
             const size_type index = 0
         ) noexcept
             : vector{&vector},
@@ -49,8 +51,11 @@ namespace ccl {
             return *this;
         }
 
-        constexpr reference operator*() const noexcept { return vector[index]; }
-        constexpr pointer operator->() const noexcept { return &vector[index]; }
+        constexpr reference operator*() noexcept { return (*vector)[index]; }
+        constexpr pointer operator->() noexcept { return &(*vector)[index]; }
+
+        constexpr const_reference operator*() const noexcept { return (*vector)[index]; }
+        constexpr const_pointer operator->() const noexcept { return &(*vector)[index]; }
 
         constexpr paged_vector_iterator& operator +=(const difference_type n) noexcept {
             index += n;
@@ -75,7 +80,7 @@ namespace ccl {
         }
 
         constexpr reference operator[](const difference_type i) const noexcept {
-            return vector[i + index];
+            return (*vector)[i + index];
         }
 
         constexpr paged_vector_iterator& operator --() noexcept {
@@ -96,39 +101,38 @@ namespace ccl {
             return { vector, index++ };
         }
 
-        private:
-            vector_type *vector;
-            size_type index;
+        vector_type *vector;
+        size_type index;
     };
 
     template<typename Vector>
     constexpr bool operator ==(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
-        return a.ptr == b.ptr;
+        return a.index == b.index;
     }
 
     template<typename Vector>
     constexpr bool operator !=(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
-        return a.ptr != b.ptr;
+        return a.index != b.index;
     }
 
     template<typename Vector>
     constexpr bool operator >(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
-        return a.ptr > b.ptr;
+        return a.index > b.index;
     }
 
     template<typename Vector>
     constexpr bool operator <(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
-        return a.ptr < b.ptr;
+        return a.index < b.index;
     }
 
     template<typename Vector>
     constexpr bool operator >=(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
-        return a.ptr >= b.ptr;
+        return a.index >= b.index;
     }
 
     template<typename Vector>
     constexpr bool operator <=(const paged_vector_iterator<Vector> &a, const paged_vector_iterator<Vector> &b) noexcept {
-        return a.ptr <= b.ptr;
+        return a.index <= b.index;
     }
 
     template<typename Vector>
@@ -222,26 +226,42 @@ namespace ccl {
 
                 const size_type first_page_size_to_fill = min<size_type>(page_size, new_size) - new_item_index;
                 const size_type size_delta = new_size - current_size; // Precondition: new size > current size
-                const size_type new_page_count = (size_delta - first_page_size_to_fill) / page_size_shift_width;
+                const size_type intermediate_page_count = (size_delta - first_page_size_to_fill) / page_size;
                 const size_type last_page_size = compute_last_page_size(new_size);
+                const bool is_single_page_grow = intermediate_page_count == 0;
 
                 // Default-construct first page items
-                const pointer first_page = pages[current_page_count - 1];
+                const size_type first_page_index = choose(current_page_count - 1, 0ULL, current_page_count);
+                const pointer first_page = pages[first_page_index];
+                const pointer first_page_start = first_page + new_item_index;
+                const pointer first_page_end = first_page + choose(new_item_index + size_delta, page_size, is_single_page_grow);
 
-                std::uninitialized_default_construct(first_page + new_item_index, first_page + page_size);
+                std::uninitialized_default_construct(first_page_start, first_page_end);
 
                 // Default-construct full page items
-                for(size_type i = 0; i < new_page_count; ++i) {
-                    std::uninitialized_default_construct(pages[current_page_count + i], pages[current_page_count + i] + page_size);
+                const size_type intermediate_page_base = first_page_index + 1;
+                const size_type intermediate_page_ceil = intermediate_page_count + intermediate_page_base;
+
+                for(size_type i = intermediate_page_base; i < intermediate_page_ceil; ++i) {
+                    const pointer page = pages[i];
+
+                    std::uninitialized_default_construct(page, page + page_size);
                 }
 
                 // Default-construct last page items
-                const pointer last_page = pages[pages.size() - 1];
+                const bool should_construct_last_page = (
+                    intermediate_page_count > 0
+                    || size_delta > page_size
+                );
 
-                std::uninitialized_default_construct(last_page, last_page + last_page_size);
+                if(should_construct_last_page) {
+                    const pointer last_page = pages[pages.size() - 1];
+
+                    std::uninitialized_default_construct(last_page, last_page + last_page_size);
+                }
 
                 // Update last page size
-                this->new_item_index = last_page_size;
+                this->new_item_index = choose(last_page_size, page_size, last_page_size);
             }
 
             constexpr void resize_shrink(const size_type new_size CCLUNUSED) {
@@ -305,24 +325,36 @@ namespace ccl {
             }
 
             constexpr void clear() {
-                for(const auto p : pages) {
+                const auto recycle = [this](const pointer page, const size_type page_size) {
                     if constexpr(std::is_destructible_v<value_type>) {
-                        std::destroy(p, p + page_size);
+                        std::destroy(page, page + page_size);
                     }
 
-                    alloc::get_allocator()->deallocate(p);
+                    alloc::get_allocator()->deallocate(page);
+                };
+
+                const auto begin = pages.begin();
+                const auto end = pages.end();
+
+                if(begin != end) {
+                    const auto last = end - 1;
+
+                    for(auto it = begin; it != last; ++it) {
+                        recycle(*it, page_size);
+                    }
+
+                    recycle(*last, new_item_index);
+
+                    pages.clear();
+                    new_item_index = 0;
                 }
-
-                pages.clear();
-                new_item_index = 0;
             }
-
 
             constexpr size_type size() const noexcept {
                 const size_type page_count = pages.size();
 
                 return choose(
-                    (page_count - 1) * page_size,
+                    (page_count - choose(1, 0, new_item_index)) * page_size,
                     0ULL,
                     page_count > 0
                 ) + new_item_index;
@@ -332,13 +364,13 @@ namespace ccl {
                 return pages.size() * page_size;
             }
 
-            constexpr iterator begin() noexcept { return iterator{pages, 0}; }
-            constexpr iterator end() noexcept { return iterator{pages, size()}; }
-            constexpr const_iterator begin() const noexcept { return const_iterator{pages, 0}; }
-            constexpr const_iterator end() const noexcept { return const_iterator{pages, size()}; }
+            constexpr iterator begin() noexcept { return iterator{*this, 0}; }
+            constexpr iterator end() noexcept { return iterator{*this, size()}; }
+            constexpr const_iterator begin() const noexcept { return const_iterator{*this, 0}; }
+            constexpr const_iterator end() const noexcept { return const_iterator{*this, size()}; }
 
-            constexpr const_iterator cbegin() const noexcept { return const_iterator{pages, 0}; }
-            constexpr const_iterator cend() const noexcept { return const_iterator{pages, size()}; }
+            constexpr const_iterator cbegin() const noexcept { return const_iterator{*this, 0}; }
+            constexpr const_iterator cend() const noexcept { return const_iterator{*this, size()}; }
 
             constexpr size_type item_page(const size_type index) const {
                 return index >> page_size_shift_width;
@@ -387,7 +419,18 @@ namespace ccl {
             }
 
             constexpr reference get(const size_type page_index, const size_type item_index) {
-                CCL_THROW_IF(page_index >= pages.size() || item_index > new_item_index, std::out_of_range{"Index out of bounds."});
+                CCL_THROW_IF(
+                    page_index >= pages.size()
+                    || (
+                        item_index
+                            > choose( // Use full page size for full pages, last page size for last page
+                                new_item_index,
+                                page_size,
+                                page_index == pages.size() - 1
+                            )
+                    ),
+                    std::out_of_range{"Index out of bounds."}
+                );
 
                 return pages[page_index][item_index];
             }

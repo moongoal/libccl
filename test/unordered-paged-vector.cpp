@@ -159,19 +159,69 @@ int main(int argc, char **argv) {
         check(v.capacity() == test_vector<spy>::page_size);
     });
 
-    // suite.add_test("resize (grow from empty)", [] () {
-    //     vector<spy> v;
+    suite.add_test("resize (grow outside of page)", [] () {
+        test_vector<spy> v;
 
-    //     v.resize(4);
+        v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
 
-    //     check(v[0].construction_magic == constructed_value);
-    //     check(v[1].construction_magic == constructed_value);
-    //     check(v[2].construction_magic == constructed_value);
-    //     check(v[3].construction_magic == constructed_value);
+        const size_t expected_size = test_vector<spy>::page_size * 3 + 5;
 
-    //     check(v.size() == 4);
-    //     check(v.capacity() == 4);
-    // });
+        v.resize(expected_size);
+
+        check(v.size() == expected_size);
+        check(v.capacity() == test_vector<spy>::page_size * 4);
+
+        for(const spy& s : v) {
+            check(s.construction_magic == constructed_value);
+        }
+    });
+
+    suite.add_test("resize (grow from empty, multiple pages)", [] () {
+        test_vector<spy> v;
+
+        const size_t expected_size = test_vector<spy>::page_size * 3 + 5;
+
+        v.resize(expected_size);
+
+        check(v.size() == expected_size);
+        check(v.capacity() == test_vector<spy>::page_size * 4);
+
+        for(const spy& s : v) {
+            check(s.construction_magic == constructed_value);
+        }
+    });
+
+    suite.add_test("resize (grow from empty, single page)", [] () {
+        test_vector<spy> v;
+
+        const size_t expected_size = 2;
+
+        v.resize(expected_size);
+
+        check(v.size() == expected_size);
+        check(v.capacity() == test_vector<spy>::page_size);
+
+        for(const spy& s : v) {
+            check(s.construction_magic == constructed_value);
+        }
+    });
+
+    suite.add_test("resize (grow from empty, first and last page)", [] () {
+        test_vector<spy> v;
+
+        const size_t expected_size = test_vector<spy>::page_size * 2;
+
+        v.resize(expected_size);
+
+        check(v.size() == expected_size);
+        check(v.capacity() == expected_size);
+
+        for(const spy& s : v) {
+            check(s.construction_magic == constructed_value);
+        }
+    });
 
     // suite.add_test("resize (shrink)", [] () {
     //     int destruction_counter = 0;
