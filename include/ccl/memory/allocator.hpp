@@ -14,6 +14,10 @@
 #endif // CCL_USER_DEFINED_ALLOCATOR
 
 namespace ccl {
+    class allocator;
+
+    allocator* CCLAPI get_default_allocator();
+
     enum allocation_flag_bits {
         #define CCL_VALUE(name, bitno) CCL_ALLOCATION_ ## name ## _BIT = 1 << bitno
 
@@ -134,6 +138,13 @@ namespace ccl {
              * @return An integer representing the set of supported allocator features.
              */
             allocator_feature_flags get_features() const noexcept;
+
+            /**
+             * Return the default allocator for this allocator type.
+             *
+             * @return The default allocator instance for this allocator.
+             */
+            static allocator* get_default() noexcept { return get_default_allocator(); }
     };
 
     /**
@@ -143,7 +154,16 @@ namespace ccl {
         public:
             CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
             CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const size_t alignment CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
-            void free(void * const ptr CCLUNUSED) {}
+            void deallocate(void * const ptr CCLUNUSED) {}
+
+            template<typename T>
+            CCLNODISCARD T* allocate(const size_t n CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
+
+            allocator_feature_flags get_features() const { return 0; }
+            CCLNODISCARD bool owns(const void * const ptr CCLUNUSED) const { return false; }
+            allocation_info get_allocation_info(const void* const ptr CCLUNUSED) const { return {}; }
+
+            static null_allocator* get_default() noexcept { return nullptr; }
     };
 
     #ifndef CCL_USER_DEFINED_ALLOCATOR

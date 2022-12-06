@@ -22,7 +22,7 @@ namespace ccl::internal {
         using allocator_type = Allocator;
 
         protected:
-            constexpr with_optional_allocator(allocator_type * const allocator = nullptr) noexcept : allocator{allocator} {}
+            constexpr with_optional_allocator(allocator_type * const allocator = nullptr) noexcept : allocator{allocator ? allocator : allocator_type::get_default()} {}
             constexpr with_optional_allocator(const with_optional_allocator &) = default;
             constexpr with_optional_allocator(with_optional_allocator &&) = default;
             ~with_optional_allocator() = default;
@@ -43,7 +43,7 @@ namespace ccl::internal {
     };
 
     template<typename Allocator>
-    struct with_optional_allocator<Allocator, false> : private Allocator {
+    struct with_optional_allocator<Allocator, true> : private Allocator {
         static_assert(basic_allocator<Allocator>);
 
         using allocator_type = Allocator;
@@ -61,7 +61,15 @@ namespace ccl::internal {
                 return *this;
             }
 
-            allocator_type *get_allocator() const noexcept { return this; }
+            allocator_type *get_allocator() const noexcept {
+                return const_cast<allocator_type*>(
+                    static_cast<const allocator_type*>(this)
+                );
+            }
+
+            allocator_type *get_allocator() noexcept {
+                return static_cast<allocator_type*>(this);
+            }
     };
 }
 

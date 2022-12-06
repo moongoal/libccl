@@ -152,7 +152,7 @@ namespace ccl {
             using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            explicit constexpr page_cloner(allocator_type * const allocator = null<allocator_type>) : alloc{allocator ? allocator : get_default_allocator()} {}
+            explicit constexpr page_cloner(allocator_type * const allocator = null<allocator_type>) : alloc{allocator} {}
 
             pointer clone(const pointer page) const {
                 const pointer new_page = alloc::get_allocator();
@@ -209,15 +209,21 @@ namespace ccl {
             constexpr const_pointer get_pages() const { return pages; }
 
         public:
-            constexpr unordered_paged_vector() noexcept : new_item_index{0} {}
+            constexpr unordered_paged_vector(
+                allocator_type * const allocator = nullptr
+            ) noexcept : alloc{allocator}, new_item_index{0} {}
 
-            constexpr unordered_paged_vector(const unordered_paged_vector& other) {
+            constexpr unordered_paged_vector(const unordered_paged_vector& other) : alloc::alloc{other.get_allocator()} {
                 clone_pages_from(other.pages);
 
                 new_item_index = other.new_item_index;
             }
 
-            constexpr unordered_paged_vector(unordered_paged_vector &&other) : pages{std::move(other.pages)}, new_item_index{other.new_item_index} {}
+            constexpr unordered_paged_vector(unordered_paged_vector &&other)
+                : alloc::alloc{std::move(other.get_allocator())},
+                pages{std::move(other.pages)},
+                new_item_index{other.new_item_index}
+            {}
 
             constexpr ~unordered_paged_vector() {
                 clear();
@@ -242,6 +248,8 @@ namespace ccl {
 
             template<>
             constexpr unordered_paged_vector& operator=<unordered_paged_vector>(const unordered_paged_vector& other) {
+                alloc::operator=(other);
+
                 clone_pages_from(other.pages);
                 new_item_index = other.new_item_index;
 
@@ -249,6 +257,8 @@ namespace ccl {
             }
 
             constexpr unordered_paged_vector& operator=(unordered_paged_vector &&other) {
+                alloc::operator=(std::move(other));
+
                 pages = std::move(other.pages);
                 new_item_index = std::move(other.new_item_index);
 

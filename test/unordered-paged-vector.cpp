@@ -2,9 +2,13 @@
 #include <functional>
 #include <ccl/features.hpp>
 #include <ccl/test.hpp>
+#include <ccl/test/counting-test-allocator.hpp>
 #include <ccl/unordered-paged-vector.hpp>
 
 using namespace ccl;
+
+template<typename T, typename Ptr = T*>
+using test_vector = unordered_paged_vector<T, Ptr, counting_test_allocator>;
 
 constexpr const auto skip_if_exceptions_disabled = []() {
     #ifdef CCL_FEATURE_EXCEPTIONS
@@ -46,7 +50,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "ctor",
         []() {
-            unordered_paged_vector<int> v;
+            test_vector<int> v;
 
             check(v.capacity() == 0);
             check(v.size() == 0);
@@ -56,7 +60,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "push_back",
         []() {
-            unordered_paged_vector<int> v;
+            test_vector<int> v;
 
             v.push_back(1);
             v.push_back(2);
@@ -67,13 +71,13 @@ int main(int argc, char **argv) {
             check(v[2] == 3);
 
             check(v.size() == 3);
-            check(v.capacity() == unordered_paged_vector<int>::page_size);
+            check(v.capacity() == test_vector<int>::page_size);
         }
     );
 
     suite.add_test(
         "reserve (less)", [] () {
-            unordered_paged_vector<int> v;
+            test_vector<int> v;
 
             v.push_back(1);
             v.push_back(2);
@@ -82,51 +86,51 @@ int main(int argc, char **argv) {
             v.reserve(1);
 
             check(v.size() == 3);
-            check(v.capacity() == unordered_paged_vector<int>::page_size);
+            check(v.capacity() == test_vector<int>::page_size);
         }
     );
 
     suite.add_test(
         "reserve (same, entire page)", [] () {
-            unordered_paged_vector<int> v;
+            test_vector<int> v;
 
-            for(size_t i = 0; i < unordered_paged_vector<int>::page_size; ++i) {
+            for(size_t i = 0; i < test_vector<int>::page_size; ++i) {
                 v.push_back(1);
             }
 
-            check(v.size() == unordered_paged_vector<int>::page_size);
-            check(v.capacity() == unordered_paged_vector<int>::page_size);
+            check(v.size() == test_vector<int>::page_size);
+            check(v.capacity() == test_vector<int>::page_size);
 
             v.reserve(v.capacity());
 
-            check(v.size() == unordered_paged_vector<int>::page_size);
-            check(v.capacity() == unordered_paged_vector<int>::page_size);
+            check(v.size() == test_vector<int>::page_size);
+            check(v.capacity() == test_vector<int>::page_size);
         }
     );
 
     suite.add_test(
         "reserve (more)", [] () {
-            unordered_paged_vector<int> v;
+            test_vector<int> v;
 
-            for(size_t i = 0; i < unordered_paged_vector<int>::page_size; ++i) {
+            for(size_t i = 0; i < test_vector<int>::page_size; ++i) {
                 v.push_back(1);
             }
 
-            check(v.size() == unordered_paged_vector<int>::page_size);
-            check(v.capacity() == unordered_paged_vector<int>::page_size);
+            check(v.size() == test_vector<int>::page_size);
+            check(v.capacity() == test_vector<int>::page_size);
 
             v.reserve(v.capacity() + 1);
 
-            check(v.size() == unordered_paged_vector<int>::page_size * 2);
-            check(v.capacity() == unordered_paged_vector<int>::page_size * 2);
+            check(v.size() == test_vector<int>::page_size * 2);
+            check(v.capacity() == test_vector<int>::page_size * 2);
         }
     );
 
     suite.add_test(
         "clear", []() {
-            unordered_paged_vector<int> v;
+            test_vector<int> v;
 
-            for(size_t i = 0; i < unordered_paged_vector<int>::page_size + 1; ++i) {
+            for(size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
                 v.push_back(1);
             }
 
@@ -295,7 +299,7 @@ int main(int argc, char **argv) {
     // }, skip_if_exceptions_disabled);
 
     suite.add_test("operator [] (invalid index)", []() {
-        unordered_paged_vector<int> v;
+        test_vector<int> v;
 
         throws<std::out_of_range>(
             [&] () {
@@ -305,7 +309,7 @@ int main(int argc, char **argv) {
 
         throws<std::out_of_range>(
             [&] () {
-                (*const_cast<const unordered_paged_vector<int>*>(&v))[0];
+                (*const_cast<const test_vector<int>*>(&v))[0];
             }
         );
     }, skip_if_exceptions_disabled);
