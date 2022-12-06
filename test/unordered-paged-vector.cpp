@@ -71,113 +71,71 @@ int main(int argc, char **argv) {
         }
     );
 
-    // suite.add_test(
-    //     "prepend",
-    //     []() {
-    //         vector<int> v;
+    suite.add_test(
+        "reserve (less)", [] () {
+            unordered_paged_vector<int> v;
 
-    //         v.prepend(1);
-    //         v.prepend(2);
-    //         v.prepend(3);
+            v.push_back(1);
+            v.push_back(2);
+            v.push_back(3);
 
-    //         check(v[0] == 3);
-    //         check(v[1] == 2);
-    //         check(v[2] == 1);
+            v.reserve(1);
 
-    //         check(v.size() == 3);
-    //         check(v.capacity() == 4);
-    //     }
-    // );
+            check(v.size() == 3);
+            check(v.capacity() == unordered_paged_vector<int>::page_size);
+        }
+    );
 
-    // suite.add_test(
-    //     "reserve (less)", [] () {
-    //         vector<int> v;
+    suite.add_test(
+        "reserve (same, entire page)", [] () {
+            unordered_paged_vector<int> v;
 
-    //         v.prepend(1);
-    //         v.prepend(2);
-    //         v.prepend(3);
+            for(size_t i = 0; i < unordered_paged_vector<int>::page_size; ++i) {
+                v.push_back(1);
+            }
 
-    //         int * const old_data = v.data();
+            check(v.size() == unordered_paged_vector<int>::page_size);
+            check(v.capacity() == unordered_paged_vector<int>::page_size);
 
-    //         v.reserve(1);
+            v.reserve(v.capacity());
 
-    //         check(v.size() == 3);
-    //         check(v.capacity() == 4);
-    //         check(v.data() == old_data);
-    //     }
-    // );
+            check(v.size() == unordered_paged_vector<int>::page_size);
+            check(v.capacity() == unordered_paged_vector<int>::page_size);
+        }
+    );
 
-    // suite.add_test(
-    //     "reserve (same)", [] () {
-    //         vector<int> v;
+    suite.add_test(
+        "reserve (more)", [] () {
+            unordered_paged_vector<int> v;
 
-    //         v.prepend(1);
-    //         v.prepend(2);
-    //         v.prepend(3);
+            for(size_t i = 0; i < unordered_paged_vector<int>::page_size; ++i) {
+                v.push_back(1);
+            }
 
-    //         int * const old_data = v.data();
+            check(v.size() == unordered_paged_vector<int>::page_size);
+            check(v.capacity() == unordered_paged_vector<int>::page_size);
 
-    //         v.reserve(v.capacity());
+            v.reserve(v.capacity() + 1);
 
-    //         check(v.size() == 3);
-    //         check(v.capacity() == 4);
-    //         check(v.data() == old_data);
-    //     }
-    // );
+            check(v.size() == unordered_paged_vector<int>::page_size * 2);
+            check(v.capacity() == unordered_paged_vector<int>::page_size * 2);
+        }
+    );
 
-    // suite.add_test(
-    //     "reserve (more)", [] () {
-    //         vector<int> v;
+    suite.add_test(
+        "clear", []() {
+            unordered_paged_vector<int> v;
 
-    //         v.prepend(1);
-    //         v.prepend(2);
-    //         v.prepend(3);
+            for(size_t i = 0; i < unordered_paged_vector<int>::page_size + 1; ++i) {
+                v.push_back(1);
+            }
 
-    //         int * const old_data = v.data();
+            v.clear();
 
-    //         v.reserve(5);
-
-    //         check(v.size() == 3);
-    //         check(v.capacity() == 8);
-    //         check(v.data() != old_data);
-
-    //         check(v[0] == 3);
-    //         check(v[1] == 2);
-    //         check(v[2] == 1);
-    //     }
-    // );
-
-    // suite.add_test(
-    //     "insert", []() {
-    //         vector<int> v;
-
-    //         v.insert(v.begin(), 1);
-    //         v.insert(v.end(), 2);
-    //         v.insert(v.begin() + 1, 3);
-
-    //         check(v[0] == 1);
-    //         check(v[1] == 3);
-    //         check(v[2] == 2);
-    //     }
-    // );
-
-    // suite.add_test(
-    //     "clear", []() {
-    //         vector<int> v;
-
-    //         v.append(1);
-    //         v.append(2);
-    //         v.append(3);
-
-    //         int * const old_data = v.data();
-
-    //         v.clear();
-
-    //         check(v.size() == 0);
-    //         check(v.capacity() == 4);
-    //         check(old_data == v.data());
-    //     }
-    // );
+            check(v.size() == 0);
+            check(v.capacity() == 0);
+        }
+    );
 
     // suite.add_test("resize (grow)", [] () {
     //     vector<spy> v;
