@@ -354,7 +354,7 @@ namespace ccl {
                 const size_type page_count = pages.size();
 
                 return choose(
-                    (page_count - choose(1, 0, new_item_index)) * page_size,
+                    (page_count - choose(1, 0, new_item_index)) << page_size_shift_width,
                     0ULL,
                     page_count > 0
                 ) + new_item_index;
