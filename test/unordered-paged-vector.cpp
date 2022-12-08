@@ -26,6 +26,7 @@ struct spy {
 
     spy() : construction_magic{constructed_value} {}
     spy(const auto& on_destroy) : construction_magic{constructed_value}, on_destroy{on_destroy} {}
+    spy(const spy&) = default;
 
     spy(spy&& other) : construction_magic{constructed_value}, on_destroy{other.on_destroy} {
         other.on_destroy = nullptr;
@@ -296,34 +297,34 @@ int main(int argc, char **argv) {
         check(destruction_counter == item_count - 2);
     });
 
-    // suite.add_test("ctor (copy)", [] () {
-    //     int destruction_counter = 0;
-    //     vector<spy> v;
+    suite.add_test("ctor (copy)", [] () {
+        int destruction_counter = 0;
+        test_vector<spy> v;
 
-    //     v.push_back(spy{});
-    //     v.push_back(spy{});
-    //     v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
 
-    //     for(auto &x : v) {
-    //         x.on_destroy = [&destruction_counter] () { destruction_counter++; };
-    //     }
+        for(auto &x : v) {
+            x.on_destroy = [&destruction_counter] () { destruction_counter++; };
+        }
 
-    //     vector v2{v};
+        test_vector<spy> v2{v};
 
-    //     check(destruction_counter == 0);
+        check(destruction_counter == 0);
 
-    //     check(v.size() == 3);
-    //     check(v.capacity() == 4);
+        check(v.size() == 3);
+        check(v.capacity() == test_vector<spy>::page_size);
 
-    //     check(v2.size() == 3);
-    //     check(v2.capacity() == 4);
+        check(v2.size() == 3);
+        check(v2.capacity() == test_vector<spy>::page_size);
 
-    //     check(v.data() != v2.data());
+        check(v2[0].construction_magic == constructed_value);
+        check(v2[1].construction_magic == constructed_value);
+        check(v2[2].construction_magic == constructed_value);
 
-    //     check(v2[0].construction_magic == constructed_value);
-    //     check(v2[1].construction_magic == constructed_value);
-    //     check(v2[2].construction_magic == constructed_value);
-    // });
+        check(v.get_pages().data() != v2.get_pages().data());
+    });
 
     // suite.add_test("ctor (move)", [] () {
     //     int destruction_counter = 0;

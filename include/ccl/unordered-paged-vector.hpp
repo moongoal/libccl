@@ -159,10 +159,17 @@ namespace ccl {
         public:
             explicit constexpr page_cloner(allocator_type * const allocator = null<allocator_type>) : alloc{allocator} {}
 
-            pointer clone(const pointer page) const {
-                const pointer new_page = alloc::get_allocator();
+            constexpr pointer clone(const pointer page) const {
+                return clone(page, CCL_PAGE_SIZE);
+            }
 
-                std::uninitialized_copy(page, page + CCL_PAGE_SIZE, new_page);
+            constexpr pointer clone(const pointer page, const size_t page_size) const {
+                CCL_THROW_IF(!page, std::invalid_argument{"Page must not be null."});
+                CCL_THROW_IF(!page_size, std::invalid_argument{"Page size must not be 0."});
+
+                const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size);
+
+                std::uninitialized_copy(page, page + page_size, new_page);
 
                 return new_page;
             }
@@ -195,15 +202,24 @@ namespace ccl {
             page_vector pages;
             size_type _size; // Item count
 
-            constexpr void clone_pages_from(const page_vector& v) {
+            constexpr void clone_pages_from(const unordered_paged_vector& v) {
                 cloner cloner{alloc::get_allocator()};
 
                 clear();
 
-                pages.reserve(v.size());
+                if(v.size()) {
+                    pages.reserve(v.size());
 
-                for(const auto p : v) {
-                    pages.push_back(cloner.clone(p));
+                    const auto start = v.pages.begin();
+                    const auto last = v.pages.end() - 1;
+
+                    for(auto it = start; it < last; ++it) {
+                        pages.push_back(cloner.clone(*it));
+                    }
+
+                    pages.push_back(
+                        cloner.clone(*last, v.next_item_index())
+                    );
                 }
             }
 
@@ -308,14 +324,13 @@ namespace ccl {
                 allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator}, _size{0} {}
 
-            constexpr unordered_paged_vector(const unordered_paged_vector& other) : alloc::alloc{other.get_allocator()} {
-                clone_pages_from(other.pages);
-
-                next_item_index() = other.next_item_index();
+            constexpr unordered_paged_vector(const unordered_paged_vector& other) : alloc{other.get_allocator()} {
+                clone_pages_from(other);
+                _size = other._size;
             }
 
             constexpr unordered_paged_vector(unordered_paged_vector &&other)
-                : alloc::alloc{std::move(other.get_allocator())},
+                : alloc{std::move(other.get_allocator())},
                 pages{std::move(other.pages)},
                 _size{other._size}
             {}
@@ -504,6 +519,9 @@ namespace ccl {
                     resize_shrink(new_size);
                 }
             }
+
+            constexpr page_vector& get_pages() { return pages; }
+            constexpr const page_vector& get_pages() const { return pages; }
     };
 }
 
