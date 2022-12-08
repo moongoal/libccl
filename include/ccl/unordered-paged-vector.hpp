@@ -388,12 +388,9 @@ namespace ccl {
 
             constexpr size_type size() const noexcept {
                 const size_type page_count = pages.size();
+                const size_type item_count_not_empty = ((page_count - 1) << page_size_shift_width) + new_item_index;
 
-                return choose(
-                    (page_count - choose(1, 0, new_item_index)) << page_size_shift_width,
-                    0ULL,
-                    page_count > 0
-                ) + new_item_index;
+                return choose(item_count_not_empty, 0ULL, page_count > 0);
             }
 
             constexpr size_type capacity() const noexcept {
