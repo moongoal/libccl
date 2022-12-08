@@ -24,8 +24,11 @@ struct spy {
     uint32_t construction_magic;
     std::function<void()> on_destroy;
 
-    spy() {
-        construction_magic = constructed_value;
+    spy() : construction_magic{constructed_value} {}
+    spy(const auto& on_destroy) : construction_magic{constructed_value}, on_destroy{on_destroy} {}
+
+    spy(spy&& other) : construction_magic{constructed_value}, on_destroy{other.on_destroy} {
+        other.on_destroy = nullptr;
     }
 
     ~spy() {
@@ -121,7 +124,7 @@ int main(int argc, char **argv) {
 
             v.reserve(v.capacity() + 1);
 
-            check(v.size() == test_vector<int>::page_size * 2);
+            check(v.size() == test_vector<int>::page_size);
             check(v.capacity() == test_vector<int>::page_size * 2);
         }
     );
@@ -259,6 +262,38 @@ int main(int argc, char **argv) {
         check(v.size() == 0);
         check(v.capacity() == test_vector<spy>::page_size);
         check(destruction_counter == 3);
+    });
+
+    suite.add_test("resize (shrink, multiple full pages only)", [] () {
+        const size_t item_count = test_vector<spy>::page_size * 5;
+        int destruction_counter = 0;
+        test_vector<spy> v;
+
+        for(size_t i = 0; i < item_count; ++i) {
+            v.push_back(spy{ [&destruction_counter] () { destruction_counter++; } });
+        }
+
+        v.resize(2);
+
+        check(v.size() == 2);
+        check(v.capacity() == item_count);
+        check(destruction_counter == item_count - 2);
+    });
+
+    suite.add_test("resize (shrink, multiple full pages w/partial last page)", [] () {
+        const size_t item_count = test_vector<spy>::page_size * 4 + 5;
+        int destruction_counter = 0;
+        test_vector<spy> v;
+
+        for(size_t i = 0; i < item_count; ++i) {
+            v.push_back(spy{ [&destruction_counter] () { destruction_counter++; } });
+        }
+
+        v.resize(2);
+
+        check(v.size() == 2);
+        check(v.capacity() == test_vector<spy>::page_size * 5);
+        check(destruction_counter == item_count - 2);
     });
 
     // suite.add_test("ctor (copy)", [] () {

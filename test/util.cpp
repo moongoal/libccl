@@ -26,6 +26,66 @@ int main(int argc, char ** argv) {
             check(increase_capacity(2, 2) == 2);
             check(increase_capacity(2, 7) == 8);
             check(increase_capacity(2, 1) == 2);
+            check(increase_capacity(2, 2) == 2);
+        }
+    );
+
+    suite.add_test(
+        "increase_capacity (capacity > threshold)",
+        [] () {
+            check(increase_capacity(4, 2) == 4);
+        }
+    );
+
+    suite.add_test(
+        "increase_capacity (capacity not power of two)",
+        [] () {
+            throws<std::invalid_argument>([] () {
+                check(increase_capacity(6, 2) == 4);
+            });
+        }
+    );
+
+    suite.add_test(
+        "increase_paged_capacity",
+        [] () {
+            check(increase_paged_capacity(4096, 4097, 4096) == 8192);
+            check(increase_paged_capacity(0, 100, 4096) == 4096);
+            check(increase_paged_capacity(4096, 4096, 4096) == 4096);
+        }
+    );
+
+    suite.add_test(
+        "increase_paged_capacity (capacity > threshold)",
+        [] () {
+            check(increase_paged_capacity(4096, 512, 4096) == 4096);
+        }
+    );
+
+    suite.add_test(
+        "increase_paged_capacity (capacity not a multiple of page size)",
+        [] () {
+            throws<std::invalid_argument>([] () {
+                increase_paged_capacity(2, 3, 4096);
+            });
+        }
+    );
+
+    suite.add_test(
+        "increase_paged_capacity (capacity not power of two)",
+        [] () {
+            throws<std::invalid_argument>([] () {
+                check(increase_paged_capacity(5, 2, 4096) == 4);
+            });
+        }
+    );
+
+    suite.add_test(
+        "increase_paged_capacity (page size not power of two)",
+        [] () {
+            throws<std::invalid_argument>([] () {
+                check(increase_paged_capacity(2, 2, 4097) == 4);
+            });
         }
     );
 

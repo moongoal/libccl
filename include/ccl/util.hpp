@@ -43,33 +43,6 @@ namespace ccl {
     }
 
     /**
-     * Increase capacity until it reaches or surpasses the value of
-     * `threshold`.
-     *
-     * @tparam T The capacity type.
-     *
-     * @param capacity The initial capacity value. Must be > 0 and a power of 2.
-     * @param threshold The minimum target capacity to reach. Can be any value.
-     *
-     * @return The new capacity.
-     */
-    template<typename T>
-    requires std::integral<T>
-    constexpr T increase_capacity(T capacity, const T threshold) {
-        CCL_ASSERT(capacity >= 0);
-
-        capacity = choose<T>(1, capacity, capacity == 0);
-
-        CCL_THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
-
-        while(capacity < threshold) {
-            capacity <<= 1;
-        }
-
-        return capacity;
-    }
-
-    /**
      * Find the maximum among the arguments.
      *
      * @tparam FirstArg The type of the first argument.
@@ -119,6 +92,61 @@ namespace ccl {
         } else {
             return arg1;
         }
+    }
+
+    /**
+     * Double capacity until it reaches or surpasses the value of
+     * `threshold`.
+     *
+     * @tparam T The capacity type.
+     *
+     * @param capacity The initial capacity value.
+     * @param threshold The minimum target capacity to reach. Must be >= capacity.
+     *
+     * @return The new capacity.
+     */
+    template<typename T>
+    requires std::integral<T>
+    constexpr T increase_capacity(T capacity, const T threshold) {
+        CCL_ASSERT(capacity >= 0);
+
+        capacity = max<T>(static_cast<T>(1), capacity);
+
+        CCL_THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
+
+        while(capacity < threshold) {
+            capacity <<= 1;
+        }
+
+        return capacity;
+    }
+
+    /**
+     * Increase capacity by the given size of the page until it reaches or
+     * surpasses the value of `threshold`.
+     *
+     * @tparam T The capacity type.
+     *
+     * @param capacity The initial capacity value. Must be a multiple of page_size.
+     * @param threshold The minimum target capacity to reach.
+     * @param page_size The size of the page. Must be > 0 and a power of 2.
+     *
+     * @return The new capacity.
+     */
+    template<typename T>
+    requires std::integral<T>
+    constexpr T increase_paged_capacity(T capacity, const T threshold, const T page_size) {
+        CCL_ASSERT(capacity >= 0);
+        CCL_ASSERT(page_size >= 0);
+
+        CCL_THROW_IF(!is_power_2(page_size), std::invalid_argument{"Page size must be a power of two."});
+        CCL_THROW_IF(capacity % page_size, std::invalid_argument{"Capacity must be a multiple of the page size."});
+
+        while(capacity < threshold) {
+            capacity += page_size;
+        }
+
+        return capacity;
     }
 
     /**
