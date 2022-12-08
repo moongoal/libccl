@@ -223,24 +223,43 @@ int main(int argc, char **argv) {
         }
     });
 
-    // suite.add_test("resize (shrink)", [] () {
-    //     int destruction_counter = 0;
-    //     vector<spy> v;
+    suite.add_test("resize (shrink, within first page)", [] () {
+        int destruction_counter = 0;
+        test_vector<spy> v;
 
-    //     v.push_back(spy{});
-    //     v.push_back(spy{});
-    //     v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
 
-    //     for(auto &x : v) {
-    //         x.on_destroy = [&destruction_counter] () { destruction_counter++; };
-    //     }
+        for(auto &x : v) {
+            x.on_destroy = [&destruction_counter] () { destruction_counter++; };
+        }
 
-    //     v.resize(2);
+        v.resize(2);
 
-    //     check(v.size() == 2);
-    //     check(v.capacity() == 4);
-    //     check(destruction_counter == 1);
-    // });
+        check(v.size() == 2);
+        check(v.capacity() == test_vector<spy>::page_size);
+        check(destruction_counter == 1);
+    });
+
+    suite.add_test("resize to 0 (shrink, within first page)", [] () {
+        int destruction_counter = 0;
+        test_vector<spy> v;
+
+        v.push_back(spy{});
+        v.push_back(spy{});
+        v.push_back(spy{});
+
+        for(auto &x : v) {
+            x.on_destroy = [&destruction_counter] () { destruction_counter++; };
+        }
+
+        v.resize(0);
+
+        check(v.size() == 0);
+        check(v.capacity() == test_vector<spy>::page_size);
+        check(destruction_counter == 3);
+    });
 
     // suite.add_test("ctor (copy)", [] () {
     //     int destruction_counter = 0;

@@ -265,6 +265,42 @@ namespace ccl {
             }
 
             constexpr void resize_shrink(const size_type new_size CCLUNUSED) {
+                auto page = pages.end() - 1;
+
+                if(new_size > page_size) {
+                    size_type actual_new_size = new_size;
+
+                    // Remove items from last page
+                    if(new_item_index) {
+                        if constexpr(std::is_destructible_v<value_type>) {
+                            std::destroy(*page, *page + new_item_index);
+                        }
+
+                        actual_new_size -= new_item_index;
+
+                        --page;
+                    }
+
+                    // Remove items from intermediate pages
+                    const size_type intermediate_page_count = actual_new_size >> page_size_shift_width;
+
+                    for(size_type i = 0; i < intermediate_page_count; ++i, --page) {
+                        std::destroy(page, page + page_size);
+                    }
+
+                    actual_new_size -= page_size * intermediate_page_count;
+                    new_item_index = page_size;
+
+                    // Remove items from first affected page
+                    if(actual_new_size) {
+                        std::destroy(*page + actual_new_size, *page + page_size);
+                    }
+                } else {
+                    // Remove items from first affected page
+                    std::destroy(*page + new_size, *page + new_item_index);
+                }
+
+                update_new_item_index_from_total_size(new_size);
             }
 
         public:
