@@ -436,33 +436,57 @@ int main(int argc, char **argv) {
     //     check(v.size() == 3);
     // });
 
-    // suite.add_test("operator = (copy - uninitialized)", [] () {
-    //     vector v{1, 2, 3};
-    //     vector<int> v2;
+    suite.add_test("operator = (copy - uninitialized)", [] () {
+        vector v{1, 2, 3};
+        test_vector<int> v2;
 
-    //     v2 = v;
+        v2 = v;
 
-    //     check(v2.size() == 3);
-    //     check(v2.capacity() == 4);
+        check(v2.size() == 3);
+        check(v2.capacity() == test_vector<int>::page_size);
 
-    //     check(v2[0] == 1);
-    //     check(v2[1] == 2);
-    //     check(v2[2] == 3);
-    // });
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
+    });
 
-    // suite.add_test("operator = (copy - initialized)", [] () {
-    //     vector v{1, 2, 3};
-    //     vector<int> v2{5, 6, 7};
+    suite.add_test("operator = (copy - initialized)", [] () {
+        vector v{1, 2, 3};
+        test_vector<int> v2;
 
-    //     v2 = v;
+        v2.push_back(5);
+        v2.push_back(18);
 
-    //     check(v2.size() == 3);
-    //     check(v2.capacity() == 4);
+        v2 = v;
 
-    //     check(v2[0] == 1);
-    //     check(v2[1] == 2);
-    //     check(v2[2] == 3);
-    // });
+        check(v2.size() == 3);
+        check(v2.capacity() == test_vector<int>::page_size);
+
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
+    });
+
+    suite.add_test("operator = (same type, copy)", [] () {
+        test_vector<int> v;
+        test_vector<int> v2{};
+
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+
+        v2.push_back(5);
+        v2.push_back(18);
+
+        v2 = v;
+
+        check(v2.size() == 3);
+        check(v2.capacity() == test_vector<int>::page_size);
+
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
+    });
 
     // suite.add_test("operator = (move)", [] () {
     //     vector v{1, 2, 3};

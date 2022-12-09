@@ -350,19 +350,16 @@ namespace ccl {
 
                 for(const auto &it : other) {
                     push_back(it);
-
-                    _size++;
                 }
 
                 return *this;
             }
 
-            template<>
-            constexpr unordered_paged_vector& operator=<unordered_paged_vector>(const unordered_paged_vector& other) {
+            constexpr unordered_paged_vector& operator=(const unordered_paged_vector& other) {
                 alloc::operator=(other);
 
-                clone_pages_from(other.pages);
-                next_item_index() = other.next_item_index();
+                clone_pages_from(other);
+                _size = other._size;
 
                 return *this;
             }
@@ -371,7 +368,7 @@ namespace ccl {
                 alloc::operator=(std::move(other));
 
                 pages = std::move(other.pages);
-                next_item_index() = std::move(other.next_item_index());
+                _size = std::move(other._size);
 
                 return *this;
             }
