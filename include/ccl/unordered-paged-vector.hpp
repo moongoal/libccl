@@ -346,17 +346,13 @@ namespace ccl {
 
             template<typename Other>
             constexpr unordered_paged_vector& operator=(const Other& other) {
-                size_type total_size = 0;
-
                 clear();
 
                 for(const auto &it : other) {
                     push_back(it);
 
-                    total_size++;
+                    _size++;
                 }
-
-                update_new_item_index_from_total_size(total_size);
 
                 return *this;
             }
