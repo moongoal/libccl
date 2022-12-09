@@ -488,22 +488,32 @@ int main(int argc, char **argv) {
         check(v2[2] == 3);
     });
 
-    // suite.add_test("operator = (move)", [] () {
-    //     vector v{1, 2, 3};
-    //     vector<int> v2{5, 6, 7};
+    suite.add_test("operator = (move)", [] () {
+        test_vector<int> v;
+        test_vector<int> v2;
 
-    //     v2 = std::move(v);
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
 
-    //     check(v.data() == nullptr);
+        v2.push_back(5);
+        v2.push_back(6);
+        v2.push_back(7);
 
-    //     check(v2.size() == 3);
-    //     check(v2.capacity() == 4);
-    //     check(v2.data() != nullptr);
+        const auto old_page_data = v.get_pages().data();
 
-    //     check(v2[0] == 1);
-    //     check(v2[1] == 2);
-    //     check(v2[2] == 3);
-    // });
+        v2 = std::move(v);
+
+        check(v.get_pages().data() == nullptr);
+
+        check(v2.size() == 3);
+        check(v2.capacity() == test_vector<int>::page_size);
+        check(v2.get_pages().data() == old_page_data);
+
+        check(v2[0] == 1);
+        check(v2[1] == 2);
+        check(v2[2] == 3);
+    });
 
     // suite.add_test("ctor (range)", [] () {
     //     std::forward_list<int> my_list {1, 2, 3, 4, 5};

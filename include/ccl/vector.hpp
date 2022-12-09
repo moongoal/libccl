@@ -354,8 +354,8 @@ namespace ccl {
             }
 
             constexpr void clear() noexcept {
-                if constexpr(std::is_destructible_v<T>) {
-                    std::for_each(begin(), end(), [](reference item) { item.~T(); });
+                if constexpr(!std::is_trivially_destructible_v<T>) {
+                    std::destroy(begin(), end());
                 }
 
                 _size = 0;

@@ -435,14 +435,16 @@ namespace ccl {
             }
 
             constexpr void clear() {
-                for(size_type i = 0; i < _capacity; ++i) {
-                    if constexpr(std::is_destructible_v<K>) {
+                if constexpr(!std::is_trivially_destructible_v<K>) {
+                    for(size_type i = 0; i < _capacity; ++i) {
                         if(slot_map[i]) {
                             std::destroy_at(&keys[i]);
                         }
                     }
+                }
 
-                    if constexpr(std::is_destructible_v<V>) {
+                if constexpr(!std::is_trivially_destructible_v<V>) {
+                    for(size_type i = 0; i < _capacity; ++i) {
                         if(slot_map[i]) {
                             std::destroy_at(&values[i]);
                         }

@@ -288,7 +288,7 @@ namespace ccl {
                 if(actual_size > page_size) {
                     // Remove items from last page
                     if(next_item_index()) {
-                        if constexpr(std::is_destructible_v<value_type>) {
+                        if constexpr(!std::is_trivially_destructible_v<value_type>) {
                             std::destroy(*page, *page + next_item_index());
                         }
 
@@ -300,7 +300,7 @@ namespace ccl {
                     // Remove items from intermediate pages
                     const size_type intermediate_page_count = (actual_size >> page_size_shift_width) - 1;
 
-                    if constexpr(std::is_destructible_v<value_type>) {
+                    if constexpr(!std::is_trivially_destructible_v<value_type>) {
                         for(size_type i = 0; i < intermediate_page_count; ++i, --page) {
                             std::destroy(*page, *page + page_size);
                         }
@@ -309,14 +309,14 @@ namespace ccl {
                     actual_size -= page_size * intermediate_page_count;
 
                     // Remove items from first affected page
-                    if constexpr(std::is_destructible_v<value_type>) {
+                    if constexpr(!std::is_trivially_destructible_v<value_type>) {
                         if(actual_size) {
                             std::destroy(*page + new_size, *page + page_size);
                         }
                     }
                 } else {
                     // Remove items from first affected page
-                    if constexpr(std::is_destructible_v<value_type>) {
+                    if constexpr(!std::is_trivially_destructible_v<value_type>) {
                         std::destroy(*page + new_size, *page + next_item_index());
                     }
                 }
@@ -341,7 +341,7 @@ namespace ccl {
             {}
 
             constexpr ~unordered_paged_vector() {
-                clear();
+                destroy();
             }
 
             template<typename Other>
@@ -377,26 +377,37 @@ namespace ccl {
                 const auto begin = pages.begin();
                 const auto end = pages.end();
 
-                if(begin != end) {
-                    const auto recycle = [this](const pointer page, const size_type page_size) {
-                        if constexpr(std::is_destructible_v<value_type>) {
+                if constexpr(!std::is_trivially_destructible_v<value_type>) {
+                    if(begin != end) {
+                        const auto recycle = [](const pointer page, const size_type page_size) {
                             std::destroy(page, page + page_size);
+                        };
+
+                        const auto last = end - 1;
+
+                        for(auto it = begin; it != last; ++it) {
+                            recycle(*it, page_size);
                         }
 
-                        alloc::get_allocator()->deallocate(page);
-                    };
+                        recycle(*last, next_item_index());
 
-                    const auto last = end - 1;
-
-                    for(auto it = begin; it != last; ++it) {
-                        recycle(*it, page_size);
                     }
-
-                    recycle(*last, next_item_index());
-
-                    pages.clear();
-                    _size = 0;
                 }
+
+                _size = 0;
+            }
+
+            /**
+             * Like clear but also release all allocated memory.
+             */
+            constexpr void destroy() {
+                clear();
+
+                for(const auto p : pages) {
+                    alloc::get_allocator()->deallocate(p);
+                }
+
+                pages.clear();
             }
 
             constexpr size_type size() const noexcept {
