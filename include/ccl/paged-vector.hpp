@@ -68,11 +68,11 @@ namespace ccl {
         }
 
         constexpr paged_vector_iterator operator +(const difference_type n) const noexcept {
-            return { vector, index + n };
+            return paged_vector_iterator{ *vector, index + n };
         }
 
         constexpr paged_vector_iterator operator -(const difference_type n) const noexcept {
-            return { vector, index - n };
+            return paged_vector_iterator{ *vector, index - n };
         }
 
         constexpr difference_type operator -(const paged_vector_iterator other) const noexcept {
@@ -89,7 +89,7 @@ namespace ccl {
         }
 
         constexpr paged_vector_iterator operator --(int) noexcept {
-            return { vector, index-- };
+            return paged_vector_iterator{ *vector, index-- };
         }
 
         constexpr paged_vector_iterator& operator ++() noexcept {
@@ -98,7 +98,7 @@ namespace ccl {
         }
 
         constexpr paged_vector_iterator operator ++(int) noexcept {
-            return { vector, index++ };
+            return paged_vector_iterator{ *vector, index++ };
         }
 
         vector_type *vector;
@@ -231,7 +231,7 @@ namespace ccl {
                 return compute_last_page_size(_size);
             }
 
-            constexpr void resize_grow(const size_type new_size) {
+            constexpr void grow(const size_type new_size) {
                 const size_type current_size = size();
                 const size_type current_page_count = _pages.size();
 
@@ -281,7 +281,7 @@ namespace ccl {
                 _size = new_size;
             }
 
-            constexpr void resize_shrink(const size_type new_size CCLUNUSED) {
+            constexpr void shrink(const size_type new_size CCLUNUSED) {
                 auto page = _pages.end() - 1;
                 size_type actual_size = size();
 
@@ -322,6 +322,26 @@ namespace ccl {
                 }
 
                 _size = new_size;
+            }
+
+            constexpr iterator make_room(iterator it, const size_type n = 1) {
+                CCL_ASSERT(it >= begin() || it <= end());
+                CCL_ASSERT(n >= 1);
+
+                reserve(_size + n);
+
+                const auto old_end = end();
+                _size += n;
+
+                if(it < old_end) {
+                    std::move_backward(
+                        it,
+                        old_end,
+                        end()
+                    );
+                }
+
+                return it;
             }
 
         public:
@@ -524,10 +544,19 @@ namespace ccl {
                 const size_type current_size = size();
 
                 if(new_size > current_size) {
-                    resize_grow(new_size);
+                    grow(new_size);
                 } else if(new_size < current_size) {
-                    resize_shrink(new_size);
+                    shrink(new_size);
                 }
+            }
+
+            constexpr void insert(iterator where, const_reference value) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                where = make_room(where);
+                CCL_ASSERT(where >= begin() || where <= end());
+
+                std::construct_at(std::to_address(where), value);
             }
 
             constexpr page_vector& pages() { return _pages; }

@@ -32,6 +32,12 @@ struct spy {
         other.on_destroy = nullptr;
     }
 
+    constexpr spy& operator=(const spy& other) {
+        on_destroy = other.on_destroy;
+
+        return *this;
+    }
+
     ~spy() {
         if(on_destroy) {
             on_destroy();
@@ -371,6 +377,45 @@ int main(int argc, char **argv) {
 
         check(destruction_counter == 3);
     });
+
+    suite.add_test(
+        "insert", []() {
+            test_vector<int> v;
+
+            v.insert(v.begin(), 1);
+            v.insert(v.end(), 2);
+            v.insert(v.begin() + 1, 3);
+
+            check(v[0] == 1);
+            check(v[1] == 3);
+            check(v[2] == 2);
+        }
+    );
+
+    suite.add_test(
+        "insert (multi pages)", []() {
+            test_vector<int> v;
+
+            const size_t initial_item_count = test_vector<int>::page_size - 2;
+
+            for(size_t i = 0; i < initial_item_count; ++i) {
+                v.push_back(666);
+            }
+
+            v.insert(v.begin(), 1);
+            v.insert(v.end(), 2);
+            v.insert(v.begin() + 1, 3);
+
+            check(v[0] == 1);
+            check(v[1] == 3);
+            check(v[v.size() - 1] == 2);
+            check(v.size() == initial_item_count + 3);
+
+            for(size_t i = 2; i < initial_item_count + 2; ++i) {
+                equals(v[i], 666);
+            }
+        }
+    );
 
     // suite.add_test("insert rvalue (invalid iterator)", [] () {
     //     vector<int> v;
