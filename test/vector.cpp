@@ -319,7 +319,7 @@ int main(int argc, char **argv) {
         );
     }, skip_if_exceptions_disabled);
 
-    suite.add_test("insert rvalue (invalid iterator)", [] () {
+    suite.add_test("insert lvalue (invalid iterator)", [] () {
         struct test_struct { int i; };
         vector<test_struct> v;
         test_struct x;

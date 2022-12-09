@@ -39,6 +39,10 @@ struct spy {
     }
 
     ~spy() {
+        if(!construction_magic) {
+            std::abort();
+        }
+
         if(on_destroy) {
             on_destroy();
         }
@@ -150,6 +154,23 @@ int main(int argc, char **argv) {
             check(v.capacity() == test_vector<int>::page_size * 2);
         }
     );
+
+    suite.add_test("clear twice", []() {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
+        test_vector<spy> v;
+
+        for(size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
+            v.push_back(spy { on_destroy });
+        }
+
+        v.clear();
+        v.clear();
+
+        check(v.size() == 0);
+        check(v.capacity() == test_vector<int>::page_size * 2);
+        equals<int, int>(destruction_counter, test_vector<int>::page_size + 1);
+    });
 
     suite.add_test("resize (grow within page)", [] () {
         test_vector<spy> v;
@@ -417,39 +438,56 @@ int main(int argc, char **argv) {
         }
     );
 
-    // suite.add_test("insert rvalue (invalid iterator)", [] () {
-    //     vector<int> v;
+    suite.add_test("insert rvalue", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
 
-    //     throws<std::out_of_range>(
-    //         [&v] () {
-    //             v.insert(v.begin() - 1, 0);
-    //         }
-    //     );
+        {
+            test_vector<spy> v;
 
-    //     throws<std::out_of_range>(
-    //         [&v] () {
-    //             v.insert(v.end() + 1, 0);
-    //         }
-    //     );
-    // }, skip_if_exceptions_disabled);
+            for(size_t i = 0; i < test_vector<spy>::page_size * 2; ++i) {
+                v.insert(v.end(), spy{ on_destroy });
+            }
 
-    // suite.add_test("insert rvalue (invalid iterator)", [] () {
-    //     struct test_struct { int i; };
-    //     vector<test_struct> v;
-    //     test_struct x;
+            equals(destruction_counter, 0);
+        }
 
-    //     throws<std::out_of_range>(
-    //         [&] () {
-    //             v.insert(v.begin() - 1, x);
-    //         }
-    //     );
+        equals<int, int>(destruction_counter, test_vector<spy>::page_size * 2);
+    });
 
-    //     throws<std::out_of_range>(
-    //         [&] () {
-    //             v.insert(v.end() + 1, x);
-    //         }
-    //     );
-    // }, skip_if_exceptions_disabled);
+    suite.add_test("insert rvalue (invalid iterator)", [] () {
+        test_vector<int> v;
+
+        throws<std::out_of_range>(
+            [&v] () {
+                v.insert(v.begin() - 1, 0);
+            }
+        );
+
+        throws<std::out_of_range>(
+            [&v] () {
+                v.insert(v.end() + 1, 0);
+            }
+        );
+    }, skip_if_exceptions_disabled);
+
+    suite.add_test("insert lvalue (invalid iterator)", [] () {
+        struct test_struct { int i; };
+        vector<test_struct> v;
+        test_struct x;
+
+        throws<std::out_of_range>(
+            [&] () {
+                v.insert(v.begin() - 1, x);
+            }
+        );
+
+        throws<std::out_of_range>(
+            [&] () {
+                v.insert(v.end() + 1, x);
+            }
+        );
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("operator [] (invalid index)", []() {
         test_vector<int> v;

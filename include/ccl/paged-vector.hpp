@@ -396,22 +396,20 @@ namespace ccl {
             }
 
             constexpr void clear() {
-                const auto begin = _pages.begin();
-                const auto end = _pages.end();
-
                 if constexpr(!std::is_trivially_destructible_v<value_type>) {
-                    if(begin != end) {
+                    if(!_pages.is_empty()) {
+                        size_type remaining_size = size();
+                        auto it = _pages.begin();
+
                         const auto recycle = [](const pointer page, const size_type page_size) {
                             std::destroy(page, page + page_size);
                         };
 
-                        const auto last = end - 1;
-
-                        for(auto it = begin; it != last; ++it) {
+                        for(; remaining_size > page_size; remaining_size -= page_size, ++it) {
                             recycle(*it, page_size);
                         }
 
-                        recycle(*last, next_item_index());
+                        recycle(*it, remaining_size);
                     }
                 }
 
@@ -557,6 +555,15 @@ namespace ccl {
                 CCL_ASSERT(where >= begin() || where <= end());
 
                 std::construct_at(std::to_address(where), value);
+            }
+
+            constexpr void insert(iterator where, T&& value) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                where = make_room(where);
+                CCL_ASSERT(where >= begin() || where <= end());
+
+                std::construct_at(std::to_address(where), std::move(value));
             }
 
             constexpr page_vector& pages() { return _pages; }
