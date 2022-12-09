@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
             v.clear();
 
             check(v.size() == 0);
-            check(v.capacity() == 0);
+            check(v.capacity() == test_vector<int>::page_size * 2);
         }
     );
 

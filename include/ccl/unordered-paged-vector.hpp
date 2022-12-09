@@ -197,7 +197,7 @@ namespace ccl {
 
         private:
             using alloc = internal::with_optional_allocator<Allocator>;
-            using page_vector = vector<pointer, allocator>;
+            using page_vector = vector<pointer, allocator_type>;
 
             page_vector pages;
             size_type _size; // Item count
@@ -205,7 +205,7 @@ namespace ccl {
             constexpr void clone_pages_from(const unordered_paged_vector& v) {
                 cloner cloner{alloc::get_allocator()};
 
-                clear();
+                destroy();
 
                 if(v.size()) {
                     pages.reserve(v.size());
@@ -367,6 +367,8 @@ namespace ccl {
             constexpr unordered_paged_vector& operator=(unordered_paged_vector &&other) {
                 alloc::operator=(std::move(other));
 
+                destroy();
+
                 pages = std::move(other.pages);
                 _size = std::move(other._size);
 
@@ -390,7 +392,6 @@ namespace ccl {
                         }
 
                         recycle(*last, next_item_index());
-
                     }
                 }
 
@@ -407,7 +408,7 @@ namespace ccl {
                     alloc::get_allocator()->deallocate(p);
                 }
 
-                pages.clear();
+                pages.destroy();
             }
 
             constexpr size_type size() const noexcept {

@@ -232,7 +232,10 @@ namespace ccl {
             void destroy() noexcept {
                 clear();
 
-                alloc::get_allocator()->deallocate(_data);
+                if(_data) {
+                    alloc::get_allocator()->deallocate(_data);
+                }
+
                 _capacity = 0;
                 _data = nullptr;
             }
@@ -277,8 +280,10 @@ namespace ccl {
                     const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
 
-                    std::uninitialized_move(begin(), end(), new_data);
-                    alloc::get_allocator()->deallocate(_data);
+                    if(_data) {
+                        std::uninitialized_move(begin(), end(), new_data);
+                        alloc::get_allocator()->deallocate(_data);
+                    }
 
                     _data = new_data;
                     _capacity = actual_new_capacity;
