@@ -244,7 +244,12 @@ namespace ccl {
                 const bool is_single_page_grow = intermediate_page_count == 0;
 
                 // Default-construct first page items
-                const size_type first_page_index = choose(current_page_count - 1, 0ULL, current_page_count);
+                const size_type first_page_index = choose(
+                    current_page_count - 1,
+                    static_cast<size_type>(0),
+                    current_page_count
+                );
+
                 const pointer first_page = pages[first_page_index];
                 const pointer first_page_start = first_page + next_item_index();
                 const pointer first_page_end = first_page + choose(next_item_index() + size_delta, page_size, is_single_page_grow);
