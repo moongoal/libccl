@@ -4,8 +4,8 @@
  * A vector whose data is split into pages.
  * Certain operations of this vector do not guarantee item ordering preservation.
  */
-#ifndef CCL_UNORDERED_PAGED_VECTOR_HPP
-#define CCL_UNORDERED_PAGED_VECTOR_HPP
+#ifndef CCL_PAGED_VECTOR_HPP
+#define CCL_PAGED_VECTOR_HPP
 
 #include <memory>
 #include <ccl/api.hpp>
@@ -135,12 +135,12 @@ namespace ccl {
         return a.index <= b.index;
     }
 
-    template<typename Vector>
-    static constexpr paged_vector_iterator<Vector> operator +(
-        const typename paged_vector_iterator<Vector>::difference_type n,
-        const paged_vector_iterator<Vector> it
+    template<typename ...Args>
+    static constexpr paged_vector_iterator<Args...> operator +(
+        const typename paged_vector_iterator<Args...>::difference_type n,
+        const paged_vector_iterator<Args...> it
     ) noexcept {
-        return paged_vector_iterator<Vector>{it.get_data() + n};
+        return paged_vector_iterator<Args...>{*it.vector, n};
     }
 
     template<typename T, typename Ptr, typed_allocator<T> Allocator>
@@ -176,7 +176,7 @@ namespace ccl {
     };
 
     template<typename T, typename Ptr = T*, typed_allocator<T> Allocator = allocator>
-    class unordered_paged_vector : public internal::with_optional_allocator<Allocator> {
+    class paged_vector : public internal::with_optional_allocator<Allocator> {
         static_assert(is_power_2(CCL_PAGE_SIZE));
 
         public:
@@ -189,8 +189,8 @@ namespace ccl {
             using size_type = size_t;
             using allocator_type = Allocator;
             using cloner = page_cloner<value_type, pointer, allocator_type>;
-            using iterator = paged_vector_iterator<unordered_paged_vector>;
-            using const_iterator = paged_vector_iterator<const unordered_paged_vector>;
+            using iterator = paged_vector_iterator<paged_vector>;
+            using const_iterator = paged_vector_iterator<const paged_vector>;
 
             static constexpr size_type page_size = CCL_PAGE_SIZE;
             static constexpr size_type page_size_shift_width = bitcount(page_size) - 1;
@@ -199,25 +199,25 @@ namespace ccl {
             using alloc = internal::with_optional_allocator<Allocator>;
             using page_vector = vector<pointer, allocator_type>;
 
-            page_vector pages;
+            page_vector _pages;
             size_type _size; // Item count
 
-            constexpr void clone_pages_from(const unordered_paged_vector& v) {
+            constexpr void clone_pages_from(const paged_vector& v) {
                 cloner cloner{alloc::get_allocator()};
 
                 destroy();
 
                 if(v.size()) {
-                    pages.reserve(v.size());
+                    _pages.reserve(v.size());
 
-                    const auto start = v.pages.begin();
-                    const auto last = v.pages.end() - 1;
+                    const auto start = v._pages.begin();
+                    const auto last = v._pages.end() - 1;
 
                     for(auto it = start; it < last; ++it) {
-                        pages.push_back(cloner.clone(*it));
+                        _pages.push_back(cloner.clone(*it));
                     }
 
-                    pages.push_back(
+                    _pages.push_back(
                         cloner.clone(*last, v.next_item_index())
                     );
                 }
@@ -233,7 +233,7 @@ namespace ccl {
 
             constexpr void resize_grow(const size_type new_size) {
                 const size_type current_size = size();
-                const size_type current_page_count = pages.size();
+                const size_type current_page_count = _pages.size();
 
                 reserve(new_size);
 
@@ -250,7 +250,7 @@ namespace ccl {
                     current_page_count
                 );
 
-                const pointer first_page = pages[first_page_index];
+                const pointer first_page = _pages[first_page_index];
                 const pointer first_page_start = first_page + next_item_index();
                 const pointer first_page_end = first_page + choose(next_item_index() + size_delta, page_size, is_single_page_grow);
 
@@ -261,7 +261,7 @@ namespace ccl {
                 const size_type intermediate_page_ceil = intermediate_page_count + intermediate_page_base;
 
                 for(size_type i = intermediate_page_base; i < intermediate_page_ceil; ++i) {
-                    const pointer page = pages[i];
+                    const pointer page = _pages[i];
 
                     std::uninitialized_default_construct(page, page + page_size);
                 }
@@ -273,7 +273,7 @@ namespace ccl {
                 );
 
                 if(should_construct_last_page) {
-                    const pointer last_page = pages[pages.size() - 1];
+                    const pointer last_page = _pages[_pages.size() - 1];
 
                     std::uninitialized_default_construct(last_page, last_page + last_page_size);
                 }
@@ -282,7 +282,7 @@ namespace ccl {
             }
 
             constexpr void resize_shrink(const size_type new_size CCLUNUSED) {
-                auto page = pages.end() - 1;
+                auto page = _pages.end() - 1;
                 size_type actual_size = size();
 
                 if(actual_size > page_size) {
@@ -325,27 +325,27 @@ namespace ccl {
             }
 
         public:
-            constexpr unordered_paged_vector(
+            constexpr paged_vector(
                 allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator}, _size{0} {}
 
-            constexpr unordered_paged_vector(const unordered_paged_vector& other) : alloc{other.get_allocator()} {
+            constexpr paged_vector(const paged_vector& other) : alloc{other.get_allocator()} {
                 clone_pages_from(other);
                 _size = other._size;
             }
 
-            constexpr unordered_paged_vector(unordered_paged_vector &&other)
+            constexpr paged_vector(paged_vector &&other)
                 : alloc{std::move(other.get_allocator())},
-                pages{std::move(other.pages)},
+                _pages{std::move(other._pages)},
                 _size{other._size}
             {}
 
-            constexpr ~unordered_paged_vector() {
+            constexpr ~paged_vector() {
                 destroy();
             }
 
             template<typename Other>
-            constexpr unordered_paged_vector& operator=(const Other& other) {
+            constexpr paged_vector& operator=(const Other& other) {
                 clear();
 
                 for(const auto &it : other) {
@@ -355,7 +355,7 @@ namespace ccl {
                 return *this;
             }
 
-            constexpr unordered_paged_vector& operator=(const unordered_paged_vector& other) {
+            constexpr paged_vector& operator=(const paged_vector& other) {
                 alloc::operator=(other);
 
                 clone_pages_from(other);
@@ -364,20 +364,20 @@ namespace ccl {
                 return *this;
             }
 
-            constexpr unordered_paged_vector& operator=(unordered_paged_vector &&other) {
+            constexpr paged_vector& operator=(paged_vector &&other) {
                 alloc::operator=(std::move(other));
 
                 destroy();
 
-                pages = std::move(other.pages);
+                _pages = std::move(other._pages);
                 _size = std::move(other._size);
 
                 return *this;
             }
 
             constexpr void clear() {
-                const auto begin = pages.begin();
-                const auto end = pages.end();
+                const auto begin = _pages.begin();
+                const auto end = _pages.end();
 
                 if constexpr(!std::is_trivially_destructible_v<value_type>) {
                     if(begin != end) {
@@ -404,11 +404,11 @@ namespace ccl {
             constexpr void destroy() {
                 clear();
 
-                for(const auto p : pages) {
+                for(const auto p : _pages) {
                     alloc::get_allocator()->deallocate(p);
                 }
 
-                pages.destroy();
+                _pages.destroy();
             }
 
             constexpr size_type size() const noexcept {
@@ -416,7 +416,7 @@ namespace ccl {
             }
 
             constexpr size_type capacity() const noexcept {
-                return pages.size() * page_size;
+                return _pages.size() * page_size;
             }
 
             constexpr iterator begin() noexcept { return iterator{*this, 0}; }
@@ -473,7 +473,7 @@ namespace ccl {
 
                 CCL_THROW_IF(index >= _size, std::out_of_range{"Index out of bounds."});
 
-                return pages[page_index][item_index];
+                return _pages[page_index][item_index];
             }
 
             constexpr const_reference get(const size_type index) const {
@@ -482,7 +482,7 @@ namespace ccl {
 
                 CCL_THROW_IF(index >= _size, std::out_of_range{"Index out of bounds."});
 
-                return pages[page_index][item_index];
+                return _pages[page_index][item_index];
             }
 
             constexpr void reserve(const size_type new_capacity) {
@@ -491,11 +491,11 @@ namespace ccl {
                 if(new_capacity > current_capacity) {
                     const size_type actual_new_capacity = increase_paged_capacity(current_capacity, new_capacity, page_size);
                     const size_type new_page_count = max(1ULL, actual_new_capacity >> page_size_shift_width);
-                    const size_type page_to_add_count = new_page_count - pages.size();
+                    const size_type page_to_add_count = new_page_count - _pages.size();
 
                     for(size_t i = 0; i < page_to_add_count; ++i) {
                         const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size);
-                        pages.push_back(new_page);
+                        _pages.push_back(new_page);
                     }
                 }
             }
@@ -530,9 +530,9 @@ namespace ccl {
                 }
             }
 
-            constexpr page_vector& get_pages() { return pages; }
-            constexpr const page_vector& get_pages() const { return pages; }
+            constexpr page_vector& pages() { return _pages; }
+            constexpr const page_vector& pages() const { return _pages; }
     };
 }
 
-#endif // CCL_UNORDERED_PAGED_VECTOR_HPP
+#endif // CCL_PAGED_VECTOR_HPP

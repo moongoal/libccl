@@ -3,12 +3,12 @@
 #include <ccl/features.hpp>
 #include <ccl/test.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
-#include <ccl/unordered-paged-vector.hpp>
+#include <ccl/paged-vector.hpp>
 
 using namespace ccl;
 
 template<typename T, typename Ptr = T*>
-using test_vector = unordered_paged_vector<T, Ptr, counting_test_allocator>;
+using test_vector = paged_vector<T, Ptr, counting_test_allocator>;
 
 constexpr const auto skip_if_exceptions_disabled = []() {
     #ifdef CCL_FEATURE_EXCEPTIONS
@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
         check(v2[1].construction_magic == constructed_value);
         check(v2[2].construction_magic == constructed_value);
 
-        check(v.get_pages().data() != v2.get_pages().data());
+        check(v.pages().data() != v2.pages().data());
     });
 
     suite.add_test("ctor (move)", [] () {
@@ -338,11 +338,11 @@ int main(int argc, char **argv) {
         test_vector<spy> v2{std::move(v)};
 
         check(destruction_counter == 0);
-        check(v.get_pages().data() == nullptr);
+        check(v.pages().data() == nullptr);
 
         check(v2.size() == 3);
         check(v2.capacity() == test_vector<spy>::page_size);
-        check(v2.get_pages().data() != nullptr);
+        check(v2.pages().data() != nullptr);
 
         check(v2[0].construction_magic == constructed_value);
         check(v2[1].construction_magic == constructed_value);
@@ -355,7 +355,7 @@ int main(int argc, char **argv) {
 
         check(v2.size() == 0);
         check(v2.capacity() == 0);
-        check(v2.get_pages().data() == nullptr);
+        check(v2.pages().data() == nullptr);
     });
 
     suite.add_test("dtor", [] () {
@@ -486,15 +486,15 @@ int main(int argc, char **argv) {
         v2.push_back(6);
         v2.push_back(7);
 
-        const auto old_page_data = v.get_pages().data();
+        const auto old_page_data = v.pages().data();
 
         v2 = std::move(v);
 
-        check(v.get_pages().data() == nullptr);
+        check(v.pages().data() == nullptr);
 
         check(v2.size() == 3);
         check(v2.capacity() == test_vector<int>::page_size);
-        check(v2.get_pages().data() == old_page_data);
+        check(v2.pages().data() == old_page_data);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
