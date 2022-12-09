@@ -326,48 +326,51 @@ int main(int argc, char **argv) {
         check(v.get_pages().data() != v2.get_pages().data());
     });
 
-    // suite.add_test("ctor (move)", [] () {
-    //     int destruction_counter = 0;
-    //     vector<spy> v;
+    suite.add_test("ctor (move)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
+        test_vector<spy> v;
 
-    //     v.push_back(spy{});
-    //     v.push_back(spy{});
-    //     v.push_back(spy{});
+        v.push_back(spy{on_destroy});
+        v.push_back(spy{on_destroy});
+        v.push_back(spy{on_destroy});
 
-    //     for(auto &x : v) {
-    //         x.on_destroy = [&destruction_counter] () { destruction_counter++; };
-    //     }
+        test_vector<spy> v2{std::move(v)};
 
-    //     vector v2{std::move(v)};
+        check(destruction_counter == 0);
+        check(v.get_pages().data() == nullptr);
 
-    //     check(destruction_counter == 0);
-    //     check(v.data() == nullptr);
+        check(v2.size() == 3);
+        check(v2.capacity() == test_vector<spy>::page_size);
+        check(v2.get_pages().data() != nullptr);
 
-    //     check(v2.size() == 3);
-    //     check(v2.capacity() == 4);
-    //     check(v2.data() != nullptr);
+        check(v2[0].construction_magic == constructed_value);
+        check(v2[1].construction_magic == constructed_value);
+        check(v2[2].construction_magic == constructed_value);
+    });
 
-    //     check(v2[0].construction_magic == constructed_value);
-    //     check(v2[1].construction_magic == constructed_value);
-    //     check(v2[2].construction_magic == constructed_value);
-    // });
+    suite.add_test("ctor (move, empty)", [] () {
+        test_vector<spy> v;
+        test_vector<spy> v2{std::move(v)};
 
-    // suite.add_test("dtor", [] () {
-    //     int destruction_counter = 0;
+        check(v2.size() == 0);
+        check(v2.capacity() == 0);
+        check(v2.get_pages().data() == nullptr);
+    });
 
-    //     {
-    //         vector<spy> v;
-    //         v.push_back(spy{});
-    //         v.push_back(spy{});
-    //         v.push_back(spy{});
+    suite.add_test("dtor", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
 
-    //         for(auto &x : v) {
-    //             x.on_destroy = [&destruction_counter] () { destruction_counter++; };
-    //         }
-    //     }
+        {
+            test_vector<spy> v;
+            v.push_back(spy{on_destroy});
+            v.push_back(spy{on_destroy});
+            v.push_back(spy{on_destroy});
+        }
 
-    //     check(destruction_counter == 3);
-    // });
+        check(destruction_counter == 3);
+    });
 
     // suite.add_test("insert rvalue (invalid iterator)", [] () {
     //     vector<int> v;
@@ -418,23 +421,6 @@ int main(int argc, char **argv) {
             }
         );
     }, skip_if_exceptions_disabled);
-
-    // suite.add_test("resize (0)", [] () {
-    //     vector<int> v{1, 2, 3};
-
-    //     v.resize(0);
-
-    //     check(v.size() == 0);
-    // });
-
-    // suite.add_test("ctor (initializer list)", []() {
-    //     vector v{1, 2, 3};
-
-    //     check(v[0] == 1);
-    //     check(v[1] == 2);
-    //     check(v[2] == 3);
-    //     check(v.size() == 3);
-    // });
 
     suite.add_test("operator = (copy - uninitialized)", [] () {
         vector v{1, 2, 3};
