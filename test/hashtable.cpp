@@ -1,13 +1,17 @@
 #include <ccl/test.hpp>
 #include <ccl/hashtable.hpp>
+#include <ccl/test/counting-test-allocator.hpp>
 
 using namespace ccl;
+
+template<typename K, typename V, typename H = hash<K>>
+using test_map = hashtable<K, V, H, counting_test_allocator>;
 
 int main(int argc, char **argv) {
     test_suite suite;
 
     suite.add_test("insert one", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -17,7 +21,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("insert grow", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -29,7 +33,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator []", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -43,7 +47,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator *", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -53,7 +57,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("at (not present)", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -63,7 +67,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("at", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -77,7 +81,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator [] not present", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -85,7 +89,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase key", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -98,7 +102,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase iterator", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -116,7 +120,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("emplace", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -126,7 +130,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (range)", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         vector<compressed_pair<int, float>> v {
             make_pair(1, 2.f),
@@ -142,7 +146,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (range w/allocator)", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         vector<compressed_pair<int, float>> v {
             make_pair(1, 2.f),
@@ -150,7 +154,7 @@ int main(int argc, char **argv) {
             make_pair(3, 3.f)
         };
 
-        my_hashtable x { v, get_default_allocator() };
+        my_hashtable x { v, counting_test_allocator::get_default() };
 
         check(x[1] == 2);
         check(x[2] == 3);
@@ -158,13 +162,13 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("begin", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         vector<compressed_pair<int, float>> v {
             make_pair(1, 2.f)
         };
 
-        my_hashtable x { v, get_default_allocator() };
+        my_hashtable x { v, counting_test_allocator::get_default() };
 
         const auto it = x.begin();
 
@@ -174,13 +178,13 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("last", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         vector<compressed_pair<int, float>> v {
             make_pair(1, 2.f)
         };
 
-        my_hashtable x { v, get_default_allocator() };
+        my_hashtable x { v, counting_test_allocator::get_default() };
 
         const auto it = --x.end();
 
@@ -190,7 +194,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("clear", [] () {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         vector<compressed_pair<int, float>> v {
             make_pair(1, 2.f),
@@ -198,7 +202,7 @@ int main(int argc, char **argv) {
             make_pair(3, 3.f)
         };
 
-        my_hashtable x { v, get_default_allocator() };
+        my_hashtable x { v, counting_test_allocator::get_default() };
 
         x.clear();
 
@@ -206,7 +210,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("find (not present)", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -214,7 +218,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("find", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
@@ -226,7 +230,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("contains", []() {
-        using my_hashtable = hashtable<int, float>;
+        using my_hashtable = test_map<int, float>;
 
         my_hashtable x;
 
