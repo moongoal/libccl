@@ -593,17 +593,17 @@ int main(int argc, char **argv) {
         check(v.size() == 3);
     });
 
-    // suite.add_test("ctor (range)", [] () {
-    //     std::forward_list<int> my_list {1, 2, 3, 4, 5};
-    //     vector<int> v{my_list};
+    suite.add_test("ctor (range)", [] () {
+        std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        test_vector<int> v{my_list};
 
-    //     check(v.size() == 5);
-    //     check(v[0] == 1);
-    //     check(v[1] == 2);
-    //     check(v[2] == 3);
-    //     check(v[3] == 4);
-    //     check(v[4] == 5);
-    // });
+        check(v.size() == 5);
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+        check(v[3] == 4);
+        check(v[4] == 5);
+    });
 
     suite.add_test("insert (ranges)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};

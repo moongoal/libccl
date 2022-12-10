@@ -369,12 +369,16 @@ namespace ccl {
                 _size = values.size();
             }
 
-            template<std::ranges::input_range Range>
-            constexpr paged_vector(
-                const Range &range,
-                allocator_type * const allocator = nullptr
-            ) noexcept : alloc{allocator} {
-                insert(begin(), range);
+            template<std::ranges::input_range InputRange>
+            constexpr paged_vector(const InputRange& input, allocator_type * const allocator = nullptr)
+            : paged_vector{allocator} {
+                const size_type input_size = std::abs(std::ranges::distance(input));
+
+                if(input_size > 0) {
+                    reserve(input_size);
+                    _size = input_size;
+                    std::uninitialized_copy(input.begin(), input.end(), begin());
+                }
             }
 
             constexpr ~paged_vector() {
