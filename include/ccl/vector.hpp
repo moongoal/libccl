@@ -293,18 +293,19 @@ namespace ccl {
             constexpr void insert(iterator where, const_reference item) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
+                const bool must_assign = where != end();
                 where = make_room(where);
 
                 CCL_ASSERT(where >= begin() || where <= end());
 
-                std::construct_at(
-                    std::to_address(where),
-                    item
-                );
+                if(must_assign) {
+                    *where = item;
+                } else {
+                    std::construct_at(std::to_address(where), std::move(item));
+                }
             }
 
-            template <typename InputRange>
-            requires std::ranges::input_range<InputRange>
+            template <std::ranges::input_range InputRange>
             constexpr void insert(iterator where, InputRange input) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
@@ -313,7 +314,7 @@ namespace ccl {
                 if(input_size > 0) {
                     where = make_room(where, input_size);
 
-                    std::ranges::copy(input, begin());
+                    std::ranges::copy(input, where);
                 }
             }
 
@@ -321,9 +322,14 @@ namespace ccl {
             constexpr reference emplace_at(iterator where, Args&& ...args) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
+                const bool must_destroy = where != end();
                 where = make_room(where);
 
                 CCL_ASSERT(where >= begin() || where <= end());
+
+                if(must_destroy) {
+                    std::destroy_at(std::to_address(where));
+                }
 
                 std::construct_at(
                     std::to_address(where),

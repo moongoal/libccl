@@ -429,6 +429,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("insert (ranges)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        std::forward_list<int> my_list2 {6};
         vector<int> v { 123 };
 
         v.insert(
@@ -436,13 +437,19 @@ int main(int argc, char **argv) {
             my_list
         );
 
-        check(v.size() == 6);
+        v.insert(
+            v.end(),
+            my_list2
+        );
+
+        check(v.size() == 7);
         check(v[0] == 1);
         check(v[1] == 2);
         check(v[2] == 3);
         check(v[3] == 4);
         check(v[4] == 5);
         check(v[5] == 123);
+        check(v[6] == 6);
     });
 
     suite.add_test("insert (ranges - invalid)", [] () {

@@ -360,6 +360,14 @@ namespace ccl {
                 _size{other._size}
             {}
 
+            template<typename Range>
+            constexpr paged_vector(
+                const Range &range,
+                allocator_type * const allocator = nullptr
+            ) noexcept : alloc{allocator} {
+                insert(begin(), range);
+            }
+
             constexpr ~paged_vector() {
                 destroy();
             }
@@ -562,19 +570,42 @@ namespace ccl {
             constexpr void insert(iterator where, const_reference value) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
+                const bool must_assign = where != end();
                 where = make_room(where);
                 CCL_ASSERT(where >= begin() || where <= end());
 
-                std::construct_at(std::to_address(where), value);
+                if(must_assign) {
+                    *where = value;
+                } else {
+                    std::construct_at(std::to_address(where), value);
+                }
             }
 
             constexpr void insert(iterator where, T&& value) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
+                const bool must_assign = where != end();
                 where = make_room(where);
                 CCL_ASSERT(where >= begin() || where <= end());
 
-                std::construct_at(std::to_address(where), std::move(value));
+                if(must_assign) {
+                    *where = value;
+                } else {
+                    std::construct_at(std::to_address(where), std::move(value));
+                }
+            }
+
+            template<std::ranges::input_range Range>
+            constexpr void insert(iterator where, const Range &range) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                const size_type input_size = std::abs(std::ranges::distance(range));
+
+                if(input_size > 0) {
+                    where = make_room(where, input_size);
+
+                    std::ranges::copy(range, where);
+                }
             }
 
             constexpr page_vector& pages() { return _pages; }

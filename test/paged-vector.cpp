@@ -596,23 +596,29 @@ int main(int argc, char **argv) {
     //     check(v[4] == 5);
     // });
 
-    // suite.add_test("insert (ranges)", [] () {
-    //     std::forward_list<int> my_list {1, 2, 3, 4, 5};
-    //     vector<int> v { 123 };
+    suite.add_test("insert (ranges)", [] () {
+        std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        std::forward_list<int> my_list2 {6};
+        test_vector<int> v;
 
-    //     v.insert(
-    //         v.begin(),
-    //         my_list
-    //     );
+        v.insert(
+            v.begin(),
+            my_list
+        );
 
-    //     check(v.size() == 6);
-    //     check(v[0] == 1);
-    //     check(v[1] == 2);
-    //     check(v[2] == 3);
-    //     check(v[3] == 4);
-    //     check(v[4] == 5);
-    //     check(v[5] == 123);
-    // });
+        v.insert(
+            v.end(),
+            my_list2
+        );
+
+        check(v.size() == 6);
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+        check(v[3] == 4);
+        check(v[4] == 5);
+        check(v[5] == 6);
+    });
 
     // suite.add_test("insert (ranges - invalid)", [] () {
     //     std::forward_list<int> my_list {1, 2, 3, 4, 5};
