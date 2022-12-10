@@ -494,11 +494,15 @@ namespace ccl {
                 return get(index);
             }
 
+            constexpr reference operator[](const iterator it) {
+                return operator[](it.index);
+            }
+
             constexpr const_reference operator[](const size_type index) const {
                 return get(index);
             }
 
-            constexpr reference operator[](const iterator it) const {
+            constexpr const_reference operator[](const iterator it) const {
                 return operator[](it.index);
             }
 
@@ -623,6 +627,43 @@ namespace ccl {
 
             constexpr page_vector& pages() { return _pages; }
             constexpr const page_vector& pages() const { return _pages; }
+
+            template<typename ...Args>
+            constexpr reference emplace_at(iterator where, Args&& ...args) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                const bool must_destroy = where != end();
+                where = make_room(where);
+
+                CCL_ASSERT(where >= begin() || where <= end());
+
+                if(must_destroy) {
+                    std::destroy_at(std::to_address(where));
+                }
+
+                std::construct_at(
+                    std::to_address(where),
+                    std::forward<Args>(args)...
+                );
+
+                return *where;
+            }
+
+            constexpr void erase(const iterator start, const iterator finish) {
+                CCL_THROW_IF(start < begin() || start > end(), std::out_of_range{"Iterator out of range."});
+                CCL_THROW_IF(finish < begin() || finish > end(), std::out_of_range{"Iterator out of range."});
+
+                static_assert(std::is_move_assignable_v<T>);
+
+                std::move(finish, end(), start);
+                std::destroy(finish, end());
+
+                _size -= finish - start;
+            }
+
+            constexpr void erase(const iterator it) {
+                erase(it, it + 1);
+            }
     };
 }
 

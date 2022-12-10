@@ -648,28 +648,49 @@ int main(int argc, char **argv) {
         });
     }, skip_if_exceptions_disabled);
 
-    // suite.add_test("emplace_at", [] () {
-    //     vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
-    //     v.emplace_at(v.begin() + 1, dummy{4});
+    suite.add_test("emplace_at", [] () {
+        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+        v.emplace_at(v.begin() + 1, dummy{4});
 
-    //     check(v[0].value == 2);
-    //     check(v[1].value == 5);
-    //     check(v[2].value == 3);
-    //     check(v[3].value == 4);
-    //     check(v.size() == 4);
-    // });
+        check(v[0].value == 2);
+        check(v[1].value == 5);
+        check(v[2].value == 3);
+        check(v[3].value == 4);
+        check(v.size() == 4);
+    });
 
-    // suite.add_test("emplace_at (invalid iterator)", [] () {
-    //     vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+    suite.add_test("emplace_at (full page)", [] () {
+        test_vector<dummy> v;
+        const size_t item_count = test_vector<dummy>::page_size;
 
-    //     throws<std::out_of_range>([&] () {
-    //         v.emplace_at(v.begin() - 1, dummy{4});
-    //     });
+        for(size_t i = 0; i < item_count; ++i) {
+            v.emplace_at(v.end(), dummy{998});
+        }
 
-    //     throws<std::out_of_range>([&] () {
-    //         v.emplace_at(v.end() + 1, dummy{4});
-    //     });
-    // }, skip_if_exceptions_disabled);
+        v.emplace_at(v.begin() + 1, dummy{4});
+
+        equals<size_t, size_t>(v.size(), item_count + 1);
+        equals<size_t, size_t>(v.capacity(), test_vector<dummy>::page_size * 2);
+
+        equals(v[v.begin()].value, 999);
+        equals(v[v.begin() + 1].value, 5);
+
+        for(size_t i = 0; i < item_count - 2; ++i) {
+            equals(v[v.begin() + 2 + i].value, 999);
+        }
+    });
+
+    suite.add_test("emplace_at (invalid iterator)", [] () {
+        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+
+        throws<std::out_of_range>([&] () {
+            v.emplace_at(v.begin() - 1, dummy{4});
+        });
+
+        throws<std::out_of_range>([&] () {
+            v.emplace_at(v.end() + 1, dummy{4});
+        });
+    }, skip_if_exceptions_disabled);
 
     suite.add_test("emplace", [] () {
         test_vector<dummy> v;
@@ -701,71 +722,71 @@ int main(int argc, char **argv) {
         equals((v.end() - 1)->value, 5);
     });
 
-    // suite.add_test("erase (last)", [] () {
-    //     vector<int> v { 1, 2, 3 };
+    suite.add_test("erase (last)", [] () {
+        test_vector<int> v { 1, 2, 3 };
 
-    //     v.erase(v.begin() + 2, v.end());
+        v.erase(v.begin() + 2, v.end());
 
-    //     check(v.size() == 2);
-    //     check(v.begin() + 2 == v.end());
-    //     check(v[0] == 1);
-    //     check(v[1] == 2);
-    // });
+        check(v.size() == 2);
+        check(v.begin() + 2 == v.end());
+        check(v[0] == 1);
+        check(v[1] == 2);
+    });
 
-    // suite.add_test("erase (first)", [] () {
-    //     vector<int> v { 1, 2, 3 };
+    suite.add_test("erase (first)", [] () {
+        test_vector<int> v { 1, 2, 3 };
 
-    //     v.erase(v.begin(), v.end() - 2);
+        v.erase(v.begin(), v.end() - 2);
 
-    //     check(v.size() == 2);
-    //     check(v.begin() + 2 == v.end());
-    //     check(v[0] == 2);
-    //     check(v[1] == 3);
-    // });
+        check(v.size() == 2);
+        check(v.begin() + 2 == v.end());
+        check(v[0] == 2);
+        check(v[1] == 3);
+    });
 
-    // suite.add_test("erase (middle)", [] () {
-    //     vector<int> v { 1, 2, 3 };
+    suite.add_test("erase (middle)", [] () {
+        test_vector<int> v { 1, 2, 3 };
 
-    //     v.erase(v.begin() + 1, v.end() - 1);
+        v.erase(v.begin() + 1, v.end() - 1);
 
-    //     check(v.size() == 2);
-    //     check(v.begin() + 2 == v.end());
-    //     check(v[0] == 1);
-    //     check(v[1] == 3);
-    // });
+        check(v.size() == 2);
+        check(v.begin() + 2 == v.end());
+        check(v[0] == 1);
+        check(v[1] == 3);
+    });
 
-    // suite.add_test("erase (same)", [] () {
-    //     vector<int> v { 1, 2, 3 };
+    suite.add_test("erase (same)", [] () {
+        test_vector<int> v { 1, 2, 3 };
 
-    //     v.erase(v.begin(), v.begin());
+        v.erase(v.begin(), v.begin());
 
-    //     check(v.size() == 3);
-    //     check(v.begin() + 3 == v.end());
-    //     check(v[0] == 1);
-    //     check(v[1] == 2);
-    //     check(v[2] == 3);
-    // });
+        check(v.size() == 3);
+        check(v.begin() + 3 == v.end());
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+    });
 
-    // suite.add_test("erase (all)", [] () {
-    //     vector<int> v { 1, 2, 3 };
+    suite.add_test("erase (all)", [] () {
+        test_vector<int> v { 1, 2, 3 };
 
-    //     v.erase(v.begin(), v.end());
+        v.erase(v.begin(), v.end());
 
-    //     check(v.size() == 0);
-    //     check(v.begin() == v.end());
-    // });
+        check(v.size() == 0);
+        check(v.begin() == v.end());
+    });
 
-    // suite.add_test("erase (invalid iterators)", [] () {
-    //     vector<int> v { 1, 2, 3 };
+    suite.add_test("erase (invalid iterators)", [] () {
+        test_vector<int> v { 1, 2, 3 };
 
-    //     throws<std::out_of_range>([&v] () {
-    //         v.erase(v.begin() - 1, v.end());
-    //     });
+        throws<std::out_of_range>([&v] () {
+            v.erase(v.begin() - 1, v.end());
+        });
 
-    //     throws<std::out_of_range>([&v] () {
-    //         v.erase(v.begin(), v.end() + 1);
-    //     });
-    // });
+        throws<std::out_of_range>([&v] () {
+            v.erase(v.begin(), v.end() + 1);
+        });
+    });
 
     return suite.main(argc, argv);
 }
