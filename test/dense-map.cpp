@@ -1,7 +1,11 @@
 #include <ccl/test.hpp>
 #include <ccl/dense-map.hpp>
+#include <ccl/test/counting-test-allocator.hpp>
 
 using namespace ccl;
+
+template<typename K, typename V>
+using test_map = dense_map<K, V, counting_test_allocator>;
 
 struct S {
     int a;
@@ -30,7 +34,7 @@ int main(int argc, char **argv) {
     test_suite suite;
 
     suite.add_test("insert ref", [] () {
-        dense_map<int, S> map;
+        test_map<int, S> map;
 
         map.insert(1, { 1, 2.0 });
         map.insert(2, { 2, 3.0 });
@@ -41,7 +45,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("remove", [] () {
-        dense_map<int, S> map;
+        test_map<int, S> map;
 
         map.insert(1, { 1, 2.0 });
         map.insert(2, { 2, 3.0 });
@@ -54,7 +58,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("contains", [] () {
-        dense_map<int, S> map;
+        test_map<int, S> map;
 
         map.insert(1, { 1, 1 });
         map.insert(2, { 2, 3.0 });
@@ -65,7 +69,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("begin_values/end_values", [] () {
-        dense_map<S, S> map;
+        test_map<S, S> map;
 
         map.insert({ 1, 2.0 }, { 1, 2.0 });
         map.insert({ 2, 3.0 }, { 2, 3.0 });
@@ -80,7 +84,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("begin/end", [] () {
-        dense_map<S, S> map;
+        test_map<S, S> map;
         int n = 0;
 
         map.insert({ 1, 2.0 }, { 1, 2.0 });

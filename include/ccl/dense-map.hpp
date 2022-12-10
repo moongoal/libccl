@@ -161,6 +161,8 @@ template<typename Map>
             using const_iterator = dense_map_iterator<const dense_map>;
 
         private:
+            using alloc = internal::with_optional_allocator<Allocator>;
+
             data_vector_type data;
             index_map_type index_map;
 
@@ -180,20 +182,16 @@ template<typename Map>
             }
 
         public:
-            constexpr dense_map(
-                allocator_type * const allocator = nullptr
-            ) : internal::with_optional_allocator<Allocator>(
-                allocator ? allocator : get_default_allocator()
-            ) {}
+            constexpr dense_map(allocator_type * const allocator = nullptr) : alloc{allocator} {}
 
             constexpr dense_map(const dense_map &other)
-                : internal::with_optional_allocator<Allocator>(other.get_allocator()),
+                : alloc{other.get_allocator()},
                 data{other.data},
                 index_map{other.index_map}
             {}
 
             constexpr dense_map(dense_map &&other)
-                : internal::with_optional_allocator<Allocator>(other.get_allocator()),
+                : alloc{other.get_allocator()},
                 data{std::move(other.data)},
                 index_map{std::move(other.index_map)}
             {}
