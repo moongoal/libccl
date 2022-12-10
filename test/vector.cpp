@@ -6,14 +6,6 @@
 
 using namespace ccl;
 
-constexpr const auto skip_if_exceptions_disabled = []() {
-    #ifdef CCL_FEATURE_EXCEPTIONS
-        return false;
-    #else // CCL_FEATURE_EXCEPTIONS
-        return true;
-    #endif // CCL_FEATURE_EXCEPTIONS
-};
-
 constexpr uint32_t constructed_value = 0x1234;
 
 struct spy {

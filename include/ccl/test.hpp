@@ -145,6 +145,14 @@ namespace ccl {
 
         fail();
     }
+
+    constexpr const auto skip_if_exceptions_disabled = []() {
+        #ifdef CCL_FEATURE_EXCEPTIONS
+            return false;
+        #else // CCL_FEATURE_EXCEPTIONS
+            return true;
+        #endif // CCL_FEATURE_EXCEPTIONS
+    };
 }
 
 #endif // CCL_TEST_HPP
