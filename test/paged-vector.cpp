@@ -584,6 +584,15 @@ int main(int argc, char **argv) {
         check(v2[2] == 3);
     });
 
+    suite.add_test("ctor (initializer list)", []() {
+        test_vector<int> v{1, 2, 3};
+
+        check(v[0] == 1);
+        check(v[1] == 2);
+        check(v[2] == 3);
+        check(v.size() == 3);
+    });
+
     // suite.add_test("ctor (range)", [] () {
     //     std::forward_list<int> my_list {1, 2, 3, 4, 5};
     //     vector<int> v{my_list};
@@ -620,24 +629,24 @@ int main(int argc, char **argv) {
         check(v[5] == 6);
     });
 
-    // suite.add_test("insert (ranges - invalid)", [] () {
-    //     std::forward_list<int> my_list {1, 2, 3, 4, 5};
-    //     vector<int> v { 123 };
+    suite.add_test("insert (ranges - invalid)", [] () {
+        std::forward_list<int> my_list {1, 2, 3, 4, 5};
+        test_vector<int> v;
 
-    //     throws<std::out_of_range>([&] () {
-    //         v.insert(
-    //             v.begin() - 1,
-    //             my_list
-    //         );
-    //     });
+        throws<std::out_of_range>([&] () {
+            v.insert(
+                v.begin() - 1,
+                my_list
+            );
+        });
 
-    //     throws<std::out_of_range>([&] () {
-    //         v.insert(
-    //             v.end() + 1,
-    //             my_list
-    //         );
-    //     });
-    // }, skip_if_exceptions_disabled);
+        throws<std::out_of_range>([&] () {
+            v.insert(
+                v.end() + 1,
+                my_list
+            );
+        });
+    }, skip_if_exceptions_disabled);
 
     // suite.add_test("emplace_at", [] () {
     //     vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };

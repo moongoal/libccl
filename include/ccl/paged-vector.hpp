@@ -360,7 +360,16 @@ namespace ccl {
                 _size{other._size}
             {}
 
-            template<typename Range>
+            constexpr paged_vector(
+                std::initializer_list<T> values,
+                allocator_type * const allocator = nullptr
+            ) : alloc{allocator} {
+                reserve(values.size());
+                std::uninitialized_copy(values.begin(), values.end(), begin());
+                _size = values.size();
+            }
+
+            template<std::ranges::input_range Range>
             constexpr paged_vector(
                 const Range &range,
                 allocator_type * const allocator = nullptr
