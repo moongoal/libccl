@@ -538,6 +538,17 @@ namespace ccl {
                 std::uninitialized_copy(&value, &value + 1, &new_item);
             }
 
+            template<typename ...Args>
+            constexpr void emplace(Args&& ...args) {
+                const size_type old_size = _size;
+
+                reserve(size() + 1);
+                _size += 1;
+
+                reference new_item = get(old_size);
+                std::construct_at(&new_item, std::forward<Args>(args)...);
+            }
+
             constexpr void resize(const size_type new_size) {
                 const size_type current_size = size();
 

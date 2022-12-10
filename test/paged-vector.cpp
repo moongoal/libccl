@@ -656,17 +656,35 @@ int main(int argc, char **argv) {
     //     });
     // }, skip_if_exceptions_disabled);
 
-    // suite.add_test("emplace", [] () {
-    //     vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+    suite.add_test("emplace", [] () {
+        test_vector<dummy> v;
 
-    //     v.emplace(dummy{4});
+        v.push_back(dummy{1});
+        v.push_back(dummy{2});
+        v.push_back(dummy{3});
 
-    //     check(v[0].value == 2);
-    //     check(v[1].value == 3);
-    //     check(v[2].value == 4);
-    //     check(v[3].value == 5);
-    //     check(v.size() == 4);
-    // });
+        v.emplace(dummy{4});
+
+        check(v[0].value == 2);
+        check(v[1].value == 3);
+        check(v[2].value == 4);
+        check(v[3].value == 5);
+        check(v.size() == 4);
+    });
+
+    suite.add_test("emplace page full", [] () {
+        test_vector<dummy> v;
+
+        for(size_t i = 0; i < test_vector<dummy>::page_size; ++i) {
+            v.push_back(dummy{1});
+        }
+
+        v.emplace(dummy{4});
+
+        equals<int, int>(v.size(), test_vector<dummy>::page_size + 1);
+        equals<int, int>(v.capacity(), test_vector<dummy>::page_size * 2);
+        equals((v.end() - 1)->value, 5);
+    });
 
     // suite.add_test("erase (last)", [] () {
     //     vector<int> v { 1, 2, 3 };
