@@ -1,7 +1,3 @@
-#ifdef CCL_FEATURE_HASH_STL_TYPES
-    #include <string>
-#endif // CCL_FEATURE_HASH_STL_TYPES
-
 #include <ccl/test.hpp>
 #include <ccl/hash.hpp>
 
