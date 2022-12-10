@@ -60,6 +60,7 @@ namespace ccl {
 
             bool execute() const {
                 bool all_success = true;
+                int passed = 0, failed = 0, skipped = 0;
 
                 for(const auto &t : tests) {
                     std::string state_tag = "[ PASS ]";
@@ -67,18 +68,30 @@ namespace ccl {
                     if(!t->should_skip()) {
                         try {
                             t->execute();
+                            passed += 1;
                         } catch (test_failed_exception& exc) {
                             state_tag = "[*FAIL*]";
                             all_success = false;
+                            failed += 1;
                         }
                     } else {
                         state_tag = "[ SKIP ]";
+                        skipped += 1;
                     }
 
                     if(ostream) {
                         *ostream << state_tag << ' ' << t->get_name() << std::endl;
                     }
                 }
+
+                const int non_skipped = passed + failed;
+                const float pass_ratio = (non_skipped == 0) ? 1 : static_cast<float>(passed) / non_skipped;
+
+                ostream->precision(2);
+
+                *ostream << "\nSUMMARY\n\tTotal: " << tests.size() << '\n';
+                *ostream << "\tP/F/S: " << passed << '/' << failed << '/' << skipped << '\n';
+                *ostream << "\tPass ratio: " << pass_ratio << std::endl;
 
                 return all_success;
             }
