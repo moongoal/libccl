@@ -365,8 +365,8 @@ namespace ccl {
                 allocator_type * const allocator = nullptr
             ) : alloc{allocator} {
                 reserve(values.size());
-                std::uninitialized_copy(values.begin(), values.end(), begin());
                 _size = values.size();
+                std::uninitialized_copy(values.begin(), values.end(), begin());
             }
 
             template<std::ranges::input_range InputRange>
