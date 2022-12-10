@@ -84,14 +84,16 @@ namespace ccl {
                     }
                 }
 
-                const int non_skipped = passed + failed;
-                const float pass_ratio = (non_skipped == 0) ? 1 : static_cast<float>(passed) / non_skipped;
+                if(ostream) {
+                    const int non_skipped = passed + failed;
+                    const float pass_ratio = (non_skipped == 0) ? 1 : static_cast<float>(passed) / non_skipped;
 
-                ostream->precision(2);
+                    ostream->precision(2);
 
-                *ostream << "\nSUMMARY\n\tTotal: " << tests.size() << '\n';
-                *ostream << "\tP/F/S: " << passed << '/' << failed << '/' << skipped << '\n';
-                *ostream << "\tPass ratio: " << pass_ratio << std::endl;
+                    *ostream << "\nSUMMARY\n\tTotal: " << tests.size() << '\n';
+                    *ostream << "\tP/F/S: " << passed << '/' << failed << '/' << skipped << '\n';
+                    *ostream << "\tPass ratio: " << pass_ratio << std::endl;
+                }
 
                 return all_success;
             }
