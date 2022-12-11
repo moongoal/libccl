@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
             make_pair(3, 3.f)
         };
 
-        my_hashtable x { v, counting_test_allocator::get_default() };
+        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
 
         check(x[1] == 2);
         check(x[2] == 3);
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
             make_pair(1, 2.f)
         };
 
-        my_hashtable x { v, counting_test_allocator::get_default() };
+        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
 
         const auto it = x.begin();
 
@@ -184,7 +184,7 @@ int main(int argc, char **argv) {
             make_pair(1, 2.f)
         };
 
-        my_hashtable x { v, counting_test_allocator::get_default() };
+        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
 
         const auto it = --x.end();
 
@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
             make_pair(3, 3.f)
         };
 
-        my_hashtable x { v, counting_test_allocator::get_default() };
+        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
 
         x.clear();
 

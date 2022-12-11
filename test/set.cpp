@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
         using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
-        my_set x { v, counting_test_allocator::get_default() };
+        my_set x { v,  get_default_allocator<counting_test_allocator>() };
 
         check(x.contains(1));
         check(x.contains(2));
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
         using my_set = test_set<int>;
 
         vector<int> v { 1 };
-        my_set x { v, counting_test_allocator::get_default() };
+        my_set x { v,  get_default_allocator<counting_test_allocator>() };
 
         const auto it = x.begin();
 
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
         using my_set = test_set<int>;
 
         vector<int> v { 2, 1 };
-        my_set x { v, counting_test_allocator::get_default() };
+        my_set x { v,  get_default_allocator<counting_test_allocator>() };
 
         const auto it = --x.end();
 
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
         using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
-        my_set x { v, counting_test_allocator::get_default() };
+        my_set x { v,  get_default_allocator<counting_test_allocator>() };
 
         x.clear();
 

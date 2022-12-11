@@ -183,7 +183,7 @@ namespace ccl {
         public:
             explicit constexpr vector(
                 allocator_type * const allocator = nullptr
-            ) : alloc{allocator ? allocator : get_default_allocator<allocator_type>()}
+            ) : alloc{allocator}
             {}
 
             constexpr vector(const vector &other) : vector{other.get_allocator()} {

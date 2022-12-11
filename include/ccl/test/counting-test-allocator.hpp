@@ -63,7 +63,8 @@ namespace ccl {
     #ifdef CCL_ALLOCATOR_IMPL
         static counting_test_allocator s_counting_allocator;
 
-        counting_test_allocator* CCLAPI counting_test_allocator::get_default() {
+        template<>
+        counting_test_allocator* get_default_allocator() {
             return &s_counting_allocator;
         }
     #endif // CCL_ALLOCATOR_IMPL

@@ -22,7 +22,7 @@ namespace ccl::internal {
         using allocator_type = Allocator;
 
         protected:
-            constexpr with_optional_allocator(allocator_type * const allocator = nullptr) noexcept : allocator{allocator ? allocator : allocator_type::get_default()} {}
+            constexpr with_optional_allocator(allocator_type * const allocator = nullptr) noexcept : allocator{allocator ? allocator : get_default_allocator<allocator_type>()} {}
             constexpr with_optional_allocator(const with_optional_allocator &) = default;
             constexpr with_optional_allocator(with_optional_allocator &&) = default;
             ~with_optional_allocator() = default;

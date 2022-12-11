@@ -138,13 +138,6 @@ namespace ccl {
              * @return An integer representing the set of supported allocator features.
              */
             allocator_feature_flags get_features() const noexcept;
-
-            /**
-             * Return the default allocator for this allocator type.
-             *
-             * @return The default allocator instance for this allocator.
-             */
-            static allocator* get_default() noexcept { return get_default_allocator(); }
     };
 
     /**
@@ -162,8 +155,6 @@ namespace ccl {
             allocator_feature_flags get_features() const { return 0; }
             CCLNODISCARD bool owns(const void * const ptr CCLUNUSED) const { return false; }
             allocation_info get_allocation_info(const void* const ptr CCLUNUSED) const { return {}; }
-
-            static null_allocator* get_default() noexcept { return nullptr; }
     };
 
     #ifndef CCL_USER_DEFINED_ALLOCATOR
