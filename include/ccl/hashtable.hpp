@@ -315,8 +315,10 @@ namespace ccl {
                     }
                 } while(!done);
 
-                alloc::get_allocator()->deallocate(keys);
-                alloc::get_allocator()->deallocate(values);
+                if(keys) {
+                    alloc::get_allocator()->deallocate(keys);
+                    alloc::get_allocator()->deallocate(values);
+                }
 
                 _capacity = new_capacity;
                 slot_map = std::move(new_slot_map);

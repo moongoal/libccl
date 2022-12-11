@@ -255,7 +255,7 @@ namespace ccl {
             }
 
             constexpr vector& operator =(vector &&other) {
-                clear();
+                destroy();
 
                 internal::with_optional_allocator<Allocator>::operator =(std::move(other));
 

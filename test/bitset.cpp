@@ -169,5 +169,29 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("operator = (move)", [] () {
+        test_bitset x;
+        test_bitset y;
+
+        x.push_back_set();
+        y.push_back_set();
+
+        y = std::move(x);
+    });
+
+    suite.add_test("operator = (copy)", [] () {
+        test_bitset x;
+        test_bitset y;
+
+        for(size_t i = 0; i < test_bitset::bits_per_cluster; ++i) {
+            x.push_back_set();
+        }
+
+        x.push_back_set();
+        y.push_back_set();
+
+        y = x;
+    });
+
     return suite.main(argc, argv);
 }
