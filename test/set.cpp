@@ -1,4 +1,4 @@
-#include <ccl/test.hpp>
+#include <ccl/test/test.hpp>
 #include <ccl/set.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 

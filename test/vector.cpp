@@ -1,7 +1,7 @@
 #include <forward_list>
 #include <functional>
 #include <ccl/features.hpp>
-#include <ccl/test.hpp>
+#include <ccl/test/test.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 

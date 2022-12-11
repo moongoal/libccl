@@ -19,7 +19,7 @@
 #include <ccl/macros.hpp>
 #include <ccl/maybe.hpp>
 #include <ccl/set.hpp>
-#include <ccl/test.hpp>
+#include <ccl/test/test.hpp>
 #include <ccl/util.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/version.hpp>

@@ -1,4 +1,4 @@
-#include <ccl/test.hpp>
+#include <ccl/test/test.hpp>
 #include <ccl/util.hpp>
 #include <ccl/maybe.hpp>
 
