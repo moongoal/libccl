@@ -1,7 +1,11 @@
 #include <ccl/test.hpp>
 #include <ccl/sparse-set.hpp>
+#include <ccl/test/counting-test-allocator.hpp>
 
 using namespace ccl;
+
+template<typename K, typename H = hash<K>>
+using test_set = sparse_set<K, H, counting_test_allocator>;
 
 struct S {
     int a;
@@ -24,7 +28,7 @@ int main(int argc, char **argv) {
     test_suite suite;
 
     suite.add_test("insert ref", [] () {
-        sparse_set<S> set;
+        test_set<S> set;
 
         set.insert({ 1, 2.0 });
         set.insert({ 2, 3.0 });
@@ -35,7 +39,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("remove", [] () {
-        sparse_set<S> set;
+        test_set<S> set;
 
         const S s2{ 2, 3.0 };
 
@@ -50,7 +54,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("contains", [] () {
-        sparse_set<S> set;
+        test_set<S> set;
 
         const S s1{ 1, 1 };
         const S s2{ 2, 3.0 };
@@ -64,7 +68,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("begin/end", [] () {
-        sparse_set<S> set;
+        test_set<S> set;
 
         set.insert({ 1, 2.0 });
         set.insert({ 2, 3.0 });

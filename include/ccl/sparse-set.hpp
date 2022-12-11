@@ -16,7 +16,7 @@
 #include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl {
-    template<typename T, typed_allocator<T> Allocator = allocator, typed_hash_function<T> Hash = hash<T>>
+    template<typename T, typed_hash_function<T> Hash = hash<T>, typed_allocator<T> Allocator = allocator>
     class sparse_set : internal::with_optional_allocator<Allocator> {
         public:
             using value_type = T;
@@ -52,9 +52,8 @@ namespace ccl {
         public:
             constexpr sparse_set(
                 allocator_type * const allocator = nullptr
-            ) : internal::with_optional_allocator<Allocator>(
-                allocator ? allocator : get_default_allocator()
-            ) {}
+            ) : internal::with_optional_allocator<Allocator>(allocator)
+            {}
 
             constexpr sparse_set(const sparse_set &other)
                 : internal::with_optional_allocator<Allocator>(other.get_allocator()),
