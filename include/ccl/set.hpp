@@ -208,7 +208,10 @@ namespace ccl {
 
             void destroy() noexcept {
                 slot_map.destroy();
-                alloc::get_allocator()->deallocate(keys);
+
+                if(keys) {
+                    alloc::get_allocator()->deallocate(keys);
+                }
 
                 _capacity = 0;
                 keys = nullptr;
@@ -227,6 +230,8 @@ namespace ccl {
             }
 
             constexpr set& operator =(set &&other) {
+                destroy();
+
                 alloc::operator =(std::move(other));
                 slot_map = std::move(other.slot_map);
                 keys = std::move(other.keys);
@@ -280,7 +285,9 @@ namespace ccl {
                     }
                 } while(!done);
 
-                alloc::get_allocator()->deallocate(keys);
+                if(keys) {
+                    alloc::get_allocator()->deallocate(keys);
+                }
 
                 _capacity = new_capacity;
                 slot_map = std::move(new_slot_map);

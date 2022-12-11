@@ -1,13 +1,17 @@
 #include <ccl/test.hpp>
 #include <ccl/set.hpp>
+#include <ccl/test/counting-test-allocator.hpp>
 
 using namespace ccl;
+
+template<typename K, typename H = hash<K>>
+using test_set = set<K, H, counting_test_allocator>;
 
 int main(int argc, char **argv) {
     test_suite suite;
 
     suite.add_test("insert one", []() {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         my_set x;
 
@@ -27,7 +31,7 @@ int main(int argc, char **argv) {
             }
         };
 
-        using my_set = set<S>;
+        using my_set = test_set<S>;
 
         my_set x;
 
@@ -37,7 +41,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("insert grow", []() {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         my_set x;
 
@@ -53,7 +57,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("insert iterators", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
         my_set x;
@@ -66,7 +70,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("insert range", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
         my_set x;
@@ -79,7 +83,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         my_set x;
 
@@ -90,7 +94,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (range)", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
         my_set x { v };
@@ -101,10 +105,10 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (range w/allocator)", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
-        my_set x { v, get_default_allocator() };
+        my_set x { v, counting_test_allocator::get_default() };
 
         check(x.contains(1));
         check(x.contains(2));
@@ -112,10 +116,10 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("begin", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 1 };
-        my_set x { v, get_default_allocator() };
+        my_set x { v, counting_test_allocator::get_default() };
 
         const auto it = x.begin();
 
@@ -124,10 +128,10 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("last", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 2, 1 };
-        my_set x { v, get_default_allocator() };
+        my_set x { v, counting_test_allocator::get_default() };
 
         const auto it = --x.end();
 
@@ -135,10 +139,10 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("clear", [] () {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         vector<int> v { 1, 2, 3 };
-        my_set x { v, get_default_allocator() };
+        my_set x { v, counting_test_allocator::get_default() };
 
         x.clear();
 
@@ -146,7 +150,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("find (not present)", []() {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         my_set x;
 
@@ -154,7 +158,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("find", []() {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         my_set x;
 
@@ -166,7 +170,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("contains", []() {
-        using my_set = set<int>;
+        using my_set = test_set<int>;
 
         my_set x;
 
