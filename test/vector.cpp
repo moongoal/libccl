@@ -3,8 +3,12 @@
 #include <ccl/features.hpp>
 #include <ccl/test.hpp>
 #include <ccl/vector.hpp>
+#include <ccl/test/counting-test-allocator.hpp>
 
 using namespace ccl;
+
+template<typename T>
+using test_vector = vector<T, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 
@@ -38,7 +42,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "ctor",
         []() {
-            vector<int> v;
+            test_vector<int> v;
 
             check(v.capacity() == 0);
             check(v.size() == 0);
@@ -49,7 +53,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "append",
         []() {
-            vector<int> v;
+            test_vector<int> v;
 
             v.append(1);
             v.append(2);
@@ -67,7 +71,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "prepend",
         []() {
-            vector<int> v;
+            test_vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
@@ -84,7 +88,7 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "reserve (less)", [] () {
-            vector<int> v;
+            test_vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
@@ -102,7 +106,7 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "reserve (same)", [] () {
-            vector<int> v;
+            test_vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
@@ -120,7 +124,7 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "reserve (more)", [] () {
-            vector<int> v;
+            test_vector<int> v;
 
             v.prepend(1);
             v.prepend(2);
@@ -142,7 +146,7 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "insert", []() {
-            vector<int> v;
+            test_vector<int> v;
 
             v.insert(v.begin(), 1);
             v.insert(v.end(), 2);
@@ -156,7 +160,7 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "clear", []() {
-            vector<int> v;
+            test_vector<int> v;
 
             v.append(1);
             v.append(2);
@@ -173,7 +177,7 @@ int main(int argc, char **argv) {
     );
 
     suite.add_test("resize (grow)", [] () {
-        vector<spy> v;
+        test_vector<spy> v;
 
         v.append(spy{});
         v.append(spy{});
@@ -191,7 +195,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (grow from empty)", [] () {
-        vector<spy> v;
+        test_vector<spy> v;
 
         v.resize(4);
 
@@ -206,7 +210,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("resize (shrink)", [] () {
         int destruction_counter = 0;
-        vector<spy> v;
+        test_vector<spy> v;
 
         v.append(spy{});
         v.append(spy{});
@@ -225,7 +229,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("ctor (copy)", [] () {
         int destruction_counter = 0;
-        vector<spy> v;
+        test_vector<spy> v;
 
         v.append(spy{});
         v.append(spy{});
@@ -235,7 +239,7 @@ int main(int argc, char **argv) {
             x.on_destroy = [&destruction_counter] () { destruction_counter++; };
         }
 
-        vector v2{v};
+        test_vector<spy> v2{v};
 
         check(destruction_counter == 0);
 
@@ -254,7 +258,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("ctor (move)", [] () {
         int destruction_counter = 0;
-        vector<spy> v;
+        test_vector<spy> v;
 
         v.append(spy{});
         v.append(spy{});
@@ -264,7 +268,7 @@ int main(int argc, char **argv) {
             x.on_destroy = [&destruction_counter] () { destruction_counter++; };
         }
 
-        vector v2{std::move(v)};
+        test_vector<spy> v2{std::move(v)};
 
         check(destruction_counter == 0);
         check(v.data() == nullptr);
@@ -282,7 +286,7 @@ int main(int argc, char **argv) {
         int destruction_counter = 0;
 
         {
-            vector<spy> v;
+            test_vector<spy> v;
             v.append(spy{});
             v.append(spy{});
             v.append(spy{});
@@ -296,7 +300,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("insert rvalue (invalid iterator)", [] () {
-        vector<int> v;
+        test_vector<int> v;
 
         throws<std::out_of_range>(
             [&v] () {
@@ -313,7 +317,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("insert lvalue (invalid iterator)", [] () {
         struct test_struct { int i; };
-        vector<test_struct> v;
+        test_vector<test_struct> v;
         test_struct x;
 
         throws<std::out_of_range>(
@@ -330,7 +334,7 @@ int main(int argc, char **argv) {
     }, skip_if_exceptions_disabled);
 
     suite.add_test("operator [] (invalid index)", []() {
-        vector<int> v;
+        test_vector<int> v;
 
         throws<std::out_of_range>(
             [&] () {
@@ -340,13 +344,13 @@ int main(int argc, char **argv) {
 
         throws<std::out_of_range>(
             [&] () {
-                (*const_cast<const vector<int>*>(&v))[0];
+                (*const_cast<const test_vector<int>*>(&v))[0];
             }
         );
     }, skip_if_exceptions_disabled);
 
     suite.add_test("resize (0)", [] () {
-        vector<int> v{1, 2, 3};
+        test_vector<int> v{1, 2, 3};
 
         v.resize(0);
 
@@ -354,7 +358,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (initializer list)", []() {
-        vector v{1, 2, 3};
+        test_vector<int> v{1, 2, 3};
 
         check(v[0] == 1);
         check(v[1] == 2);
@@ -363,8 +367,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator = (copy - uninitialized)", [] () {
-        vector v{1, 2, 3};
-        vector<int> v2;
+        test_vector<int> v{1, 2, 3};
+        test_vector<int> v2;
 
         v2 = v;
 
@@ -377,8 +381,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator = (copy - initialized)", [] () {
-        vector v{1, 2, 3};
-        vector<int> v2{5, 6, 7};
+        test_vector<int> v{1, 2, 3};
+        test_vector<int> v2{5, 6, 7};
 
         v2 = v;
 
@@ -391,8 +395,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator = (move)", [] () {
-        vector v{1, 2, 3};
-        vector<int> v2{5, 6, 7};
+        test_vector<int> v{1, 2, 3};
+        test_vector<int> v2{5, 6, 7};
 
         v2 = std::move(v);
 
@@ -409,7 +413,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("ctor (range)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
-        vector<int> v{my_list};
+        test_vector<int> v{my_list};
 
         check(v.size() == 5);
         check(v[0] == 1);
@@ -422,7 +426,7 @@ int main(int argc, char **argv) {
     suite.add_test("insert (ranges)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         std::forward_list<int> my_list2 {6};
-        vector<int> v { 123 };
+        test_vector<int> v { 123 };
 
         v.insert(
             v.begin(),
@@ -446,7 +450,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("insert (ranges - invalid)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
-        vector<int> v { 123 };
+        test_vector<int> v { 123 };
 
         throws<std::out_of_range>([&] () {
             v.insert(
@@ -464,7 +468,7 @@ int main(int argc, char **argv) {
     }, skip_if_exceptions_disabled);
 
     suite.add_test("emplace_at", [] () {
-        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
         v.emplace_at(v.begin() + 1, dummy{4});
 
         check(v[0].value == 2);
@@ -475,7 +479,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("emplace_at (invalid iterator)", [] () {
-        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
 
         throws<std::out_of_range>([&] () {
             v.emplace_at(v.begin() - 1, dummy{4});
@@ -487,7 +491,7 @@ int main(int argc, char **argv) {
     }, skip_if_exceptions_disabled);
 
     suite.add_test("emplace", [] () {
-        vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
 
         v.emplace(dummy{4});
 
@@ -499,7 +503,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (last)", [] () {
-        vector<int> v { 1, 2, 3 };
+        test_vector<int> v { 1, 2, 3 };
 
         v.erase(v.begin() + 2, v.end());
 
@@ -510,7 +514,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (first)", [] () {
-        vector<int> v { 1, 2, 3 };
+        test_vector<int> v { 1, 2, 3 };
 
         v.erase(v.begin(), v.end() - 2);
 
@@ -521,7 +525,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (middle)", [] () {
-        vector<int> v { 1, 2, 3 };
+        test_vector<int> v { 1, 2, 3 };
 
         v.erase(v.begin() + 1, v.end() - 1);
 
@@ -532,7 +536,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (same)", [] () {
-        vector<int> v { 1, 2, 3 };
+        test_vector<int> v { 1, 2, 3 };
 
         v.erase(v.begin(), v.begin());
 
@@ -544,7 +548,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (all)", [] () {
-        vector<int> v { 1, 2, 3 };
+        test_vector<int> v { 1, 2, 3 };
 
         v.erase(v.begin(), v.end());
 
@@ -553,7 +557,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (invalid iterators)", [] () {
-        vector<int> v { 1, 2, 3 };
+        test_vector<int> v { 1, 2, 3 };
 
         throws<std::out_of_range>([&v] () {
             v.erase(v.begin() - 1, v.end());
