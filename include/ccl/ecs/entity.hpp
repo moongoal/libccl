@@ -9,24 +9,18 @@
 #include <ccl/api.hpp>
 #include <ccl/handle.hpp>
 
-namespace ccl {
-    struct generic_entity_tag_t {};
+namespace ccl::ecs {
+    struct entity_tag_t {};
 
     /**
      * The entity handle type.
-     *
-     * @tparam EntityType The entity type. Defaults to a generic entity type.
      */
-    template<typename EntityType = generic_entity_tag_t>
-    using entity_t = versioned_handle<EntityType>;
+    using entity_t = versioned_handle<entity_tag_t>;
 
     /**
      * An entity ID is the raw, unversioned handle value.
-     *
-     * @tparam EntityType The entity type.
      */
-    template<typename EntityType>
-    using entity_id_t = typename entity_t<EntityType>::value_type;
+    using entity_id_t = typename entity_t::value_type;
 }
 
 #endif // CCL_ECS_ENTITY_HPP

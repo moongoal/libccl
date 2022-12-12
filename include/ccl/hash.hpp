@@ -50,7 +50,7 @@ namespace ccl {
     static constexpr hash_t fnv1a_basis = 0xCBF29CE484222325ULL;
 
     /**
-     * FNV-1A non cryptographic hashing function:
+     * FNV-1A non cryptographic hashing function.
      *
      * @param size Length of the array to hash.
      * @param data Array to hash
