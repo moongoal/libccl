@@ -51,5 +51,32 @@ int main(int argc, char **argv) {
         equals(g->cast<int>().get(), 2);
     }, skip_if_typechecking_disabled);
 
+    suite.add_test("operator = (copy)", [] () {
+        object source{2};
+        object dest{5};
+        generic_object * const gdest = &dest;
+
+        (*gdest) = source;
+
+        equals(dest.get(), 2);
+    });
+
+    suite.add_test("operator = (move)", [] () {
+        int destruction_count = 0;
+        const auto on_destroy = [&destruction_count] () { destruction_count += 1; };
+
+        {
+            object source{spy{}};
+            object dest{5};
+            generic_object * const gdest = &dest;
+
+            source.get().on_destroy = on_destroy;
+
+            (*gdest) = std::move(source);
+        }
+
+        equals(destruction_count, 1);
+    });
+
     return suite.main(argc, argv);
 }

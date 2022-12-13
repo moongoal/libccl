@@ -16,6 +16,9 @@ namespace ccl::ecs {
     struct generic_object {
         virtual ~generic_object() = default;
 
+        virtual generic_object& operator =(const generic_object &other) = 0;
+        virtual generic_object& operator =(generic_object &&other) = 0;
+
         template<typename T>
         constexpr object<T>& cast() {
             return *
@@ -52,6 +55,22 @@ namespace ccl::ecs {
             constexpr object(const T& value) : value{value} {}
             constexpr object(const T&& value) : value{std::move(value)} {}
             virtual ~object() = default;
+
+            virtual generic_object& operator =(const generic_object &other) override {
+                const object<T>& obj = other.cast<T>();
+
+                value = obj.value;
+
+                return *this;
+            }
+
+            virtual generic_object& operator =(generic_object &&other) override {
+                decltype(auto) obj = reinterpret_cast<object<T>&&>(other);
+
+                value = std::move(obj.value);
+
+                return *this;
+            }
 
             constexpr T& get() { return value; }
             constexpr const T& get() const { return value; }
