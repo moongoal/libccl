@@ -48,6 +48,7 @@ namespace ccl::ecs {
         T value;
 
         public:
+            constexpr object() = default;
             constexpr object(const T& value) : value{value} {}
             constexpr object(const T&& value) : value{std::move(value)} {}
             virtual ~object() = default;

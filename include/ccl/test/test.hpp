@@ -146,7 +146,15 @@ namespace ccl {
         fail();
     }
 
-    constexpr const auto skip_if_exceptions_disabled = []() {
+    constexpr const auto skip_if_typechecking_disabled = [] () -> bool {
+        #ifdef CCL_FEATURE_TYPECHECK_CASTS
+            return false;
+        #else // CCL_FEATURE_TYPECHECK_CASTS
+            return true;
+        #endif // CCL_FEATURE_TYPECHECK_CASTS
+    };
+
+    constexpr const auto skip_if_exceptions_disabled = [] () -> bool {
         #ifdef CCL_FEATURE_EXCEPTIONS
             return false;
         #else // CCL_FEATURE_EXCEPTIONS
