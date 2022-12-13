@@ -16,6 +16,7 @@
 #include <ccl/dense-map.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/paged-vector.hpp>
+#include <ccl/ecs/object.hpp>
 
 namespace ccl::ecs {
     template<basic_allocator Allocator>
@@ -26,12 +27,8 @@ namespace ccl::ecs {
             using allocator_type = Allocator;
             using size_type = uint32_t;
             using entity_index_collection = hashtable<entity_type, size_type, hash<entity_type>, allocator_type>;
-
-            template<typename T>
-            using typed_component = paged_vector<T, T*, allocator_type>;
-
-            using untyped_component = void*;
-            using component_collection = hashtable<size_t, untyped_component, allocator_type>;
+            using component = paged_vector<generic_object, generic_object*, allocator_type>;
+            using component_collection = hashtable<size_t, component, allocator_type>;
 
         private:
             /**
@@ -84,20 +81,26 @@ namespace ccl::ecs {
             }
 
             /**
-             * Get an existing component.
+             * Get an existing component for an existing entity.
              *
              * @tparam T The component type.
              *
-             * @return A const reference to the component.
+             * @param e The entity.
+             *
+             * @return A const reference to the entity's component.
              */
             template<typename T>
-            constexpr const typed_component<T>& get_component() const {
+            constexpr const T& get_component(const entity_type e) const {
                 const size_t component_hash = typeid(T).hash_code();
-                const auto it = components.find(component_hash);
+                const auto component_it = components.find(component_hash);
+                const auto entity_it = entity_index_map.find(e);
 
-                CCL_THROW_IF(it == components.end(), std::out_of_range{"Component not present in archetype."});
+                CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
+                CCL_THROW_IF(entity_it == entity_it.end(), std::out_of_range{"Entity not present in archetype."});
 
-                return *reinterpret_cast<const typed_component<T>*>(*it);
+                const auto entity_component = component_it->operator[](*entity_it);
+
+                return entity_component.template cast<T>().get();
             }
 
             /**
