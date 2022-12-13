@@ -8,15 +8,13 @@
 
 #include <span>
 #include <typeinfo>
+#include <memory>
 #include <ccl/api.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/ecs/entity.hpp>
 #include <ccl/hashtable.hpp>
-#include <ccl/dense-map.hpp>
-#include <ccl/vector.hpp>
-#include <ccl/paged-vector.hpp>
-#include <ccl/ecs/object.hpp>
+#include <ccl/ecs/component.hpp>
 
 namespace ccl::ecs {
     template<basic_allocator Allocator>
@@ -27,8 +25,8 @@ namespace ccl::ecs {
             using allocator_type = Allocator;
             using size_type = uint32_t;
             using entity_index_collection = hashtable<entity_type, size_type, hash<entity_type>, allocator_type>;
-            using component = paged_vector<generic_object, generic_object*, allocator_type>;
-            using component_collection = hashtable<size_t, component, allocator_type>;
+            using component_pointer = std::unique_ptr<generic_component>;
+            using component_collection = hashtable<size_t, component_pointer, allocator_type>;
 
         private:
             /**
