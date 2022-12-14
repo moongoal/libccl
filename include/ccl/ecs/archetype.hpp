@@ -10,10 +10,9 @@
 #include <typeinfo>
 #include <memory>
 #include <ccl/api.hpp>
-#include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
-#include <ccl/ecs/entity.hpp>
 #include <ccl/hashtable.hpp>
+#include <ccl/ecs/entity.hpp>
 #include <ccl/ecs/component.hpp>
 
 namespace ccl::ecs {
@@ -76,6 +75,23 @@ namespace ccl::ecs {
                 const size_t component_hash = typeid(T).hash_code();
 
                 return components.contains(component_hash);
+            }
+
+            /**
+             * Get an existing component collection.
+             *
+             * @tparam T The component type.
+             *
+             * @return The component collection.
+             */
+            template<typename T>
+            constexpr const generic_component* get_component() const {
+                const size_t component_hash = typeid(T).hash_code();
+                const auto component_it = components.find(component_hash);
+
+                CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
+
+                return component_it->get();
             }
 
             /**

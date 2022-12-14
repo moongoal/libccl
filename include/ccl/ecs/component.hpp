@@ -17,6 +17,8 @@ namespace ccl::ecs {
     struct generic_component {
         virtual ~generic_component() = default;
 
+        virtual size_t size() const = 0;
+
         template<typename T, typed_allocator<T> Allocator>
         constexpr component<T, Allocator>& cast() {
             return *
@@ -57,6 +59,10 @@ namespace ccl::ecs {
         public:
             constexpr auto& get() { return items; }
             constexpr const auto& get() const { return items; }
+
+            virtual size_t size() const override {
+                return items.size();
+            }
     };
 }
 
