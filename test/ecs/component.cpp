@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
         test_component<int> c;
 
         c.get().emplace(2);
-        generic_component * const g = &c;
+        component_i * const g = &c;
 
         equals(g->cast<int, counting_test_allocator>().get()[0], 2);
     }, skip_if_typechecking_disabled);

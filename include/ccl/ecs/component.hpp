@@ -14,8 +14,8 @@ namespace ccl::ecs {
     template<typename T, typed_allocator<T> Allocator>
     class component;
 
-    struct generic_component {
-        virtual ~generic_component() = default;
+    struct component_i {
+        virtual ~component_i() = default;
 
         virtual size_t size() const = 0;
 
@@ -47,7 +47,7 @@ namespace ccl::ecs {
     };
 
     template<typename T, typed_allocator<T> Allocator>
-    class component : public generic_component {
+    class component : public component_i {
         public:
             using value_type = T;
             using allocator_type = Allocator;

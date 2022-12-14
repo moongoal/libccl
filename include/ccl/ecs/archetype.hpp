@@ -24,7 +24,7 @@ namespace ccl::ecs {
             using allocator_type = Allocator;
             using size_type = uint32_t;
             using entity_index_collection = hashtable<entity_type, size_type, hash<entity_type>, allocator_type>;
-            using component_pointer = std::unique_ptr<generic_component>;
+            using component_pointer = std::unique_ptr<component_i>;
             using component_collection = hashtable<size_t, component_pointer, allocator_type>;
 
         private:
@@ -85,7 +85,7 @@ namespace ccl::ecs {
              * @return The component collection.
              */
             template<typename T>
-            constexpr const generic_component* get_component() const {
+            constexpr const component_i* get_component() const {
                 const size_t component_hash = typeid(T).hash_code();
                 const auto component_it = components.find(component_hash);
 

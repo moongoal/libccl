@@ -28,7 +28,7 @@ namespace ccl::ecs {
 
         private:
             size_t index = 0; // Ref iteration index
-            std::array<generic_component*, component_count> refs;
+            std::array<component_i*, component_count> refs;
 
             template<typename CurrentComponent, typename ...RestComponents>
             static void set_view_components(view& v, const archetype_type& arch, const size_t index = 0) {
@@ -40,7 +40,7 @@ namespace ccl::ecs {
             }
 
             template<typename T, typename CurrentComponent, typename ...RestComponents>
-            const generic_component* get_generic_component(const size_t i = 0) const {
+            const component_i* get_generic_component(const size_t i = 0) const {
                 if constexpr(std::is_same_v<T, CurrentComponent>) {
                     return refs[i];
                 }
@@ -68,7 +68,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr const typename component<T, Allocator>::value_type& get() const {
-                const generic_component * const g = get_generic_component<T, Components...>();
+                const component_i * const g = get_generic_component<T, Components...>();
 
                 return g->template cast<T, Allocator>()[index];
             }
