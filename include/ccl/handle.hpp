@@ -34,7 +34,12 @@ namespace ccl {
             using object_type = ObjectType;
             using underlying_type::value_type;
             using packed_integer::operator typename underlying_type::value_type;
-            using packed_integer::operator=;
+
+            constexpr versioned_handle& operator=(const versioned_handle& other) {
+                underlying_type::operator=(other);
+
+                return *this;
+            }
 
             constexpr versioned_handle() = default;
             constexpr versioned_handle(const versioned_handle&) = default;
