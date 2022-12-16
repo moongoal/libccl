@@ -32,15 +32,15 @@ namespace ccl {
      * @tparam Size The size of the local memory area in bytes.
      * @tparam Policy The allocator policy.
      */
-    template<size_t Size, local_allocator_policy Policy = local_allocator_policy::throw_exception>
+    template<std::size_t Size, local_allocator_policy Policy = local_allocator_policy::throw_exception>
     class local_allocator {
         public:
-            static constexpr size_t memory_size = Size;
+            static constexpr std::size_t memory_size = Size;
             static constexpr local_allocator_policy policy = Policy;
 
         private:
             uint8_t memory[memory_size];
-            size_t used_size;
+            std::size_t used_size;
 
         public:
             local_allocator() : used_size{0} {}
@@ -53,7 +53,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const size_t n_bytes, const int flags = 0) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const int flags = 0) {
                 return allocate(n_bytes, CCL_ALLOCATOR_DEFAULT_ALIGNMENT, flags);
             }
 
@@ -66,11 +66,11 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const size_t n_bytes, const size_t alignment, const int flags CCLUNUSED = 0) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const int flags CCLUNUSED = 0) {
                 uint8_t * const aligned_memory = align_address(memory, alignment);
-                const size_t padding = aligned_memory - memory;
-                const size_t allocation_size = n_bytes + padding;
-                const size_t remaining_size = memory_size - used_size;
+                const std::size_t padding = aligned_memory - memory;
+                const std::size_t allocation_size = n_bytes + padding;
+                const std::size_t remaining_size = memory_size - used_size;
 
                 if(allocation_size > remaining_size) {
                     if constexpr (policy == local_allocator_policy::throw_exception) {
@@ -94,7 +94,7 @@ namespace ccl {
              * @return A pointer to the newly allocated memory.
              */
             template<typename T>
-            CCLNODISCARD T* allocate(const size_t n, const int flags = 0) {
+            CCLNODISCARD T* allocate(const std::size_t n, const int flags = 0) {
                 return reinterpret_cast<T*>(allocate(size_of<T>(n), alignof(T), flags));
             }
 
@@ -133,7 +133,7 @@ namespace ccl {
             /**
              * Return the amount of used local memory.
              */
-            constexpr size_t get_used_memory_size() const noexcept { return used_size; }
+            constexpr std::size_t get_used_memory_size() const noexcept { return used_size; }
     };
 }
 

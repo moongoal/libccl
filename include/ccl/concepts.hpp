@@ -21,8 +21,8 @@ namespace ccl {
     template<typename Allocator>
     concept basic_allocator = requires(
         Allocator alloc,
-        const size_t n_bytes,
-        const size_t alignment,
+        const std::size_t n_bytes,
+        const std::size_t alignment,
         const int flags,
         void * const ptr
     ) {
@@ -42,7 +42,7 @@ namespace ccl {
      * @tparam T The allocatable type.
      */
     template<typename Allocator, typename T>
-    concept typed_allocator = requires(Allocator allocator, const size_t n, const int flags) {
+    concept typed_allocator = requires(Allocator allocator, const std::size_t n, const int flags) {
         requires basic_allocator<Allocator>;
 
         { allocator.template allocate<T>(n, flags) } -> std::convertible_to<T*>;

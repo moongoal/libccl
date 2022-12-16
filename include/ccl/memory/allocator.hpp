@@ -59,12 +59,12 @@ namespace ccl {
         /**
          * Total size of the allocation.
          */
-        size_t size;
+        std::size_t size;
 
         /**
          * Alignment constraint used when allocating.
          */
-        size_t alignment;
+        std::size_t alignment;
     };
 
     class CCLAPI allocator {
@@ -77,7 +77,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const size_t n_bytes, const int flags = 0);
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const int flags = 0);
 
             /**
              * Allocate memory.
@@ -88,7 +88,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const size_t n_bytes, const size_t alignment, const int flags = 0);
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const int flags = 0);
 
             /**
              * Typed allocate with default alignment constraint.
@@ -99,7 +99,7 @@ namespace ccl {
              * @return A pointer to the newly allocated memory.
              */
             template<typename T>
-            CCLNODISCARD T* allocate(const size_t n, const int flags = 0) {
+            CCLNODISCARD T* allocate(const std::size_t n, const int flags = 0) {
                 return reinterpret_cast<T*>(allocate(size_of<T>(n), alignof(T), flags));
             }
 
@@ -145,12 +145,12 @@ namespace ccl {
      */
     class null_allocator {
         public:
-            CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
-            CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const size_t alignment CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
+            CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
+            CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const std::size_t alignment CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
             void deallocate(void * const ptr CCLUNUSED) {}
 
             template<typename T>
-            CCLNODISCARD T* allocate(const size_t n CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
+            CCLNODISCARD T* allocate(const std::size_t n CCLUNUSED, const int flags CCLUNUSED = 0) { return nullptr; }
 
             allocator_feature_flags get_features() const { return 0; }
             CCLNODISCARD bool owns(const void * const ptr CCLUNUSED) const { return false; }
@@ -158,11 +158,11 @@ namespace ccl {
     };
 
     #ifndef CCL_USER_DEFINED_ALLOCATOR
-        inline void *allocator::allocate(const size_t n_bytes, const int flags CCLUNUSED) {
+        inline void *allocator::allocate(const std::size_t n_bytes, const int flags CCLUNUSED) {
             return ::malloc(n_bytes);
         }
 
-        inline void *allocator::allocate(const size_t n_bytes, const size_t alignment CCLUNUSED, const int flags CCLUNUSED) {
+        inline void *allocator::allocate(const std::size_t n_bytes, const std::size_t alignment CCLUNUSED, const int flags CCLUNUSED) {
             return ::malloc(n_bytes);
         }
 

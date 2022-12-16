@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
         "reserve (same, entire page)", [] () {
             test_vector<int> v;
 
-            for(size_t i = 0; i < test_vector<int>::page_size; ++i) {
+            for(std::size_t i = 0; i < test_vector<int>::page_size; ++i) {
                 v.push_back(1);
             }
 
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
         "reserve (more)", [] () {
             test_vector<int> v;
 
-            for(size_t i = 0; i < test_vector<int>::page_size; ++i) {
+            for(std::size_t i = 0; i < test_vector<int>::page_size; ++i) {
                 v.push_back(1);
             }
 
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
         "clear", []() {
             test_vector<int> v;
 
-            for(size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
+            for(std::size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
                 v.push_back(1);
             }
 
@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
         const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
         test_vector<spy> v;
 
-        for(size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
+        for(std::size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
             v.push_back(spy { on_destroy });
         }
 
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
         v.push_back(spy{});
         v.push_back(spy{});
 
-        const size_t expected_size = test_vector<spy>::page_size * 3 + 5;
+        const std::size_t expected_size = test_vector<spy>::page_size * 3 + 5;
 
         v.resize(expected_size);
 
@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
     suite.add_test("resize (grow from empty, multiple pages)", [] () {
         test_vector<spy> v;
 
-        const size_t expected_size = test_vector<spy>::page_size * 3 + 5;
+        const std::size_t expected_size = test_vector<spy>::page_size * 3 + 5;
 
         v.resize(expected_size);
 
@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
     suite.add_test("resize (grow from empty, single page)", [] () {
         test_vector<spy> v;
 
-        const size_t expected_size = 2;
+        const std::size_t expected_size = 2;
 
         v.resize(expected_size);
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
     suite.add_test("resize (grow from empty, first and last page)", [] () {
         test_vector<spy> v;
 
-        const size_t expected_size = test_vector<spy>::page_size * 2;
+        const std::size_t expected_size = test_vector<spy>::page_size * 2;
 
         v.resize(expected_size);
 
@@ -285,11 +285,11 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (shrink, multiple full pages only)", [] () {
-        const size_t item_count = test_vector<spy>::page_size * 5;
+        const std::size_t item_count = test_vector<spy>::page_size * 5;
         int destruction_counter = 0;
         test_vector<spy> v;
 
-        for(size_t i = 0; i < item_count; ++i) {
+        for(std::size_t i = 0; i < item_count; ++i) {
             v.push_back(spy{ [&destruction_counter] () { destruction_counter++; } });
         }
 
@@ -301,11 +301,11 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (shrink, multiple full pages w/partial last page)", [] () {
-        const size_t item_count = test_vector<spy>::page_size * 4 + 5;
+        const std::size_t item_count = test_vector<spy>::page_size * 4 + 5;
         int destruction_counter = 0;
         test_vector<spy> v;
 
-        for(size_t i = 0; i < item_count; ++i) {
+        for(std::size_t i = 0; i < item_count; ++i) {
             v.push_back(spy{ [&destruction_counter] () { destruction_counter++; } });
         }
 
@@ -409,9 +409,9 @@ int main(int argc, char **argv) {
         "insert (multi pages)", []() {
             test_vector<int> v;
 
-            const size_t initial_item_count = test_vector<int>::page_size - 2;
+            const std::size_t initial_item_count = test_vector<int>::page_size - 2;
 
-            for(size_t i = 0; i < initial_item_count; ++i) {
+            for(std::size_t i = 0; i < initial_item_count; ++i) {
                 v.push_back(666);
             }
 
@@ -424,7 +424,7 @@ int main(int argc, char **argv) {
             check(v[v.size() - 1] == 2);
             check(v.size() == initial_item_count + 3);
 
-            for(size_t i = 2; i < initial_item_count + 2; ++i) {
+            for(std::size_t i = 2; i < initial_item_count + 2; ++i) {
                 equals(v[i], 666);
             }
         }
@@ -437,7 +437,7 @@ int main(int argc, char **argv) {
         {
             test_vector<spy> v;
 
-            for(size_t i = 0; i < test_vector<spy>::page_size * 2; ++i) {
+            for(std::size_t i = 0; i < test_vector<spy>::page_size * 2; ++i) {
                 v.insert(v.end(), spy{ on_destroy });
             }
 
@@ -653,21 +653,21 @@ int main(int argc, char **argv) {
 
     suite.add_test("emplace_at (full page)", [] () {
         test_vector<dummy> v;
-        const size_t item_count = test_vector<dummy>::page_size;
+        const std::size_t item_count = test_vector<dummy>::page_size;
 
-        for(size_t i = 0; i < item_count; ++i) {
+        for(std::size_t i = 0; i < item_count; ++i) {
             v.emplace_at(v.end(), dummy{998});
         }
 
         v.emplace_at(v.begin() + 1, dummy{4});
 
-        equals<size_t, size_t>(v.size(), item_count + 1);
-        equals<size_t, size_t>(v.capacity(), test_vector<dummy>::page_size * 2);
+        equals<std::size_t, std::size_t>(v.size(), item_count + 1);
+        equals<std::size_t, std::size_t>(v.capacity(), test_vector<dummy>::page_size * 2);
 
         equals(v[v.begin()].value, 999);
         equals(v[v.begin() + 1].value, 5);
 
-        for(size_t i = 0; i < item_count - 2; ++i) {
+        for(std::size_t i = 0; i < item_count - 2; ++i) {
             equals(v[v.begin() + 2 + i].value, 999);
         }
     });
@@ -703,7 +703,7 @@ int main(int argc, char **argv) {
     suite.add_test("emplace page full", [] () {
         test_vector<dummy> v;
 
-        for(size_t i = 0; i < test_vector<dummy>::page_size; ++i) {
+        for(std::size_t i = 0; i < test_vector<dummy>::page_size; ++i) {
             v.push_back(dummy{1});
         }
 

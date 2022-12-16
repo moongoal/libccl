@@ -20,7 +20,7 @@ namespace ccl {
      * @tparam T The underlying unsigned integer type.
      * @tparam LowPartSize The size in bits of the lower part.
      */
-    template<std::unsigned_integral T, size_t LowPartSize = sizeof(T) * 4>
+    template<std::unsigned_integral T, std::size_t LowPartSize = sizeof(T) * 4>
     class packed_integer {
         static_assert(LowPartSize > 0 && LowPartSize < sizeof(T) * 8, "LowPartSize out of bounds.");
 
@@ -30,12 +30,12 @@ namespace ccl {
             /**
              * The size of the low part, in bits.
              */
-            static constexpr size_t low_part_size = LowPartSize;
+            static constexpr std::size_t low_part_size = LowPartSize;
 
             /**
              * The number of bits to shift the value to retrieve the high part.
              */
-            static constexpr size_t high_part_shift_bits = LowPartSize;
+            static constexpr std::size_t high_part_shift_bits = LowPartSize;
 
             /**
              * The mask to apply to the value to retrieve the low part.
@@ -109,12 +109,12 @@ namespace ccl {
         return a.get() == b.get();
     }
 
-    template<typename T, size_t LowPartSize>
+    template<typename T, std::size_t LowPartSize>
     constexpr bool operator==(const packed_integer<T, LowPartSize> a, const T b) {
         return a.get() == b;
     }
 
-    template<typename T, size_t LowPartSize>
+    template<typename T, std::size_t LowPartSize>
     constexpr bool operator==(const T a, const packed_integer<T, LowPartSize> b) {
         return a == b.get();
     }

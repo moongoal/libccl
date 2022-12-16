@@ -21,7 +21,7 @@ namespace ccl {
     class bitset {
         public:
             using cluster_type = uint64_t;
-            using size_type = size_t;
+            using size_type = std::size_t;
             using allocator_type = Allocator;
             using iterator = bitset_iterator<allocator_type>;
             using const_iterator = const bitset_iterator<allocator_type>;
@@ -64,8 +64,8 @@ namespace ccl {
                     }
             };
 
-            static constexpr size_t bits_per_cluster = sizeof(cluster_type) * 8;
-            static constexpr size_t cluster_size_bitcount = bitcount(bits_per_cluster) - 1;
+            static constexpr std::size_t bits_per_cluster = sizeof(cluster_type) * 8;
+            static constexpr std::size_t cluster_size_bitcount = bitcount(bits_per_cluster) - 1;
 
             explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}

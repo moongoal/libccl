@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
         equals(n.low(), 0ULL);
         equals<unsigned, unsigned>(my_int::low_part_size, 32);
         equals<unsigned, unsigned>(my_int::high_part_shift_bits, 32);
-        equals<size_t, size_t>(my_int::low_part_mask, 0xffffffff);
+        equals<std::size_t, std::size_t>(my_int::low_part_mask, 0xffffffff);
     });
 
     suite.add_test("ctor (default, uneven)", [] () {
@@ -24,9 +24,9 @@ int main(int argc, char **argv) {
 
         equals<unsigned, unsigned>(my_int::low_part_size, 48);
         equals<unsigned, unsigned>(my_int::high_part_shift_bits, 48);
-        equals<size_t, size_t>(my_int::low_part_mask, 0xffffffffffff);
-        equals<size_t, size_t>(my_int::low_part_max, (1ULL << 48) - 1);
-        equals<size_t, size_t>(my_int::high_part_max, (1ULL << 16) - 1);
+        equals<std::size_t, std::size_t>(my_int::low_part_mask, 0xffffffffffff);
+        equals<std::size_t, std::size_t>(my_int::low_part_max, (1ULL << 48) - 1);
+        equals<std::size_t, std::size_t>(my_int::high_part_max, (1ULL << 16) - 1);
     });
 
     suite.add_test("ctor (value)", [] () {

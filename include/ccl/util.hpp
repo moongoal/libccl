@@ -160,8 +160,8 @@ namespace ccl {
      * @return The total bit count of the value to the highest set bit.
      */
     template<std::integral T>
-    constexpr size_t bitcount(T n) noexcept {
-        size_t count = 0;
+    constexpr std::size_t bitcount(T n) noexcept {
+        std::size_t count = 0;
 
         while(n) {
             n >>= 1;
@@ -220,10 +220,10 @@ namespace ccl {
      *
      * @return The aligned size. Aligned sizes are always >= than `orig_size`.
      */
-    constexpr size_t align_size(const size_t orig_size, const size_t alignment) noexcept {
+    constexpr std::size_t align_size(const std::size_t orig_size, const std::size_t alignment) noexcept {
         CCL_ASSERT(is_power_2(alignment));
 
-        size_t const mask = alignment - 1;
+        std::size_t const mask = alignment - 1;
 
         return (orig_size + mask) & ~mask;
     }
@@ -255,7 +255,7 @@ namespace ccl {
      * @return The size in bytes of a hypothetical array of `n` objects of type `T`.
      */
     template<typename T>
-    constexpr size_t size_of(const size_t n = 1) noexcept {
+    constexpr std::size_t size_of(const std::size_t n = 1) noexcept {
         return sizeof(T) * n;
     }
 

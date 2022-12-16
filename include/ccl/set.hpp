@@ -155,7 +155,7 @@ namespace ccl {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            using size_type = size_t;
+            using size_type = std::size_t;
 
             using key_type = K;
             using key_pointer = K*;

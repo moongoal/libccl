@@ -24,14 +24,14 @@ namespace ccl::ecs {
         public:
             using archetype_type = archetype<Allocator>;
 
-            static constexpr size_t component_count = sizeof...(Components);
+            static constexpr std::size_t component_count = sizeof...(Components);
 
         private:
-            size_t index = 0; // Ref iteration index
+            std::size_t index = 0; // Ref iteration index
             std::array<component_i*, component_count> refs;
 
             template<typename CurrentComponent, typename ...RestComponents>
-            static void set_view_components(view& v, const archetype_type& arch, const size_t index = 0) {
+            static void set_view_components(view& v, const archetype_type& arch, const std::size_t index = 0) {
                 v.refs[index] = arch.template get_component<CurrentComponent>();
 
                 if constexpr(sizeof...(RestComponents)) {
@@ -40,7 +40,7 @@ namespace ccl::ecs {
             }
 
             template<typename T, typename CurrentComponent, typename ...RestComponents>
-            const component_i* get_generic_component(const size_t i = 0) const {
+            const component_i* get_generic_component(const std::size_t i = 0) const {
                 if constexpr(std::is_same_v<T, CurrentComponent>) {
                     return refs[i];
                 }
@@ -87,7 +87,7 @@ namespace ccl::ecs {
                 index = 0;
             }
 
-            constexpr size_t size() const {
+            constexpr std::size_t size() const {
                 return refs[0]->size();
             }
     };

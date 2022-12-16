@@ -17,7 +17,7 @@ namespace ccl::ecs {
     struct component_i {
         virtual ~component_i() = default;
 
-        virtual size_t size() const = 0;
+        virtual std::size_t size() const = 0;
 
         template<typename T, typed_allocator<T> Allocator>
         constexpr component<T, Allocator>& cast() {
@@ -60,7 +60,7 @@ namespace ccl::ecs {
             constexpr auto& get() { return items; }
             constexpr const auto& get() const { return items; }
 
-            virtual size_t size() const override {
+            virtual std::size_t size() const override {
                 return items.size();
             }
     };

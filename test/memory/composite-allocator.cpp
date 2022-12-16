@@ -9,8 +9,8 @@ struct spy_allocator {
     bool deallocated = false;
     bool does_own = false;
 
-    CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const int flags CCLUNUSED = 0) { allocated = true; return nullptr; }
-    CCLNODISCARD void* allocate(const size_t n_bytes CCLUNUSED, const size_t alignment CCLUNUSED, const int flags CCLUNUSED = 0) { allocated = true; return nullptr; }
+    CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const int flags CCLUNUSED = 0) { allocated = true; return nullptr; }
+    CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const std::size_t alignment CCLUNUSED, const int flags CCLUNUSED = 0) { allocated = true; return nullptr; }
     allocation_info get_allocation_info(const void* const ptr CCLUNUSED) const { return {}; }
     void deallocate(void * const ptr CCLUNUSED) { deallocated = true; }
     CCLNODISCARD bool owns(const void * const ptr CCLUNUSED) const { return does_own; }

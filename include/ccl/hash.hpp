@@ -12,7 +12,7 @@
 #include <ccl/api.hpp>
 
 namespace ccl {
-    using hash_t = size_t;
+    using hash_t = std::size_t;
 
     template<typename T>
     struct hash;
@@ -63,13 +63,13 @@ namespace ccl {
      * @see https://datatracker.ietf.org/doc/html/draft-eastlake-fnv-18
      */
     constexpr hash_t fnv1a_hash(
-        const size_t size,
+        const std::size_t size,
         const uint8_t * const data,
         const hash_t initial = fnv1a_basis
     ) noexcept {
         hash_t result = initial;
 
-        for(size_t i = 0; i < size; ++i) {
+        for(std::size_t i = 0; i < size; ++i) {
             result ^= data[i];
             result *= fnv1a_prime;
         }
@@ -162,7 +162,7 @@ namespace ccl {
             if constexpr(internally_hashable<T>) {
                 return value.hash();
             } else {
-                return hash<size_t>{}(static_cast<size_t>(value));
+                return hash<std::size_t>{}(static_cast<std::size_t>(value));
             }
         }
     };

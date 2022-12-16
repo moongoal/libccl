@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
         my_table.reserve(3);
 
-        for(size_t i = 0; i < 3; ++i) {
+        for(std::size_t i = 0; i < 3; ++i) {
             const auto add_int = [i] (auto& x) { x.emplace(i); };
             const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
 
@@ -29,10 +29,10 @@ int main(int argc, char **argv) {
         }
 
         auto view = my_table.view();
-        size_t n = 0;
+        std::size_t n = 0;
 
         view.each([&n] (const int& i, const float& f) {
-            check(n == static_cast<size_t>(i));
+            check(n == static_cast<std::size_t>(i));
             check(f == static_cast<float>(i) + 0.5);
 
             n += 1;
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 
         my_table.reserve(3);
 
-        for(size_t i = 0; i < 2; ++i) {
+        for(std::size_t i = 0; i < 2; ++i) {
             const auto add_int = [i] (auto& x) { x.emplace(i); };
             const auto add_float = [i] (auto& x) { x.emplace(static_cast<float>(i) + 0.5); };
 

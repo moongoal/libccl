@@ -99,11 +99,11 @@ int main(int argc, char **argv) {
     // bit is wrong
     suite.add_test("assign (more than one cluster)", [] () {
         using cluster_type = test_bitset::cluster_type;
-        static constexpr size_t cluster_size = sizeof(cluster_type) * 8 /* bits */;
+        static constexpr std::size_t cluster_size = sizeof(cluster_type) * 8 /* bits */;
 
         test_bitset x;
 
-        for(size_t i = 0; i < 2 * cluster_size; ++i) {
+        for(std::size_t i = 0; i < 2 * cluster_size; ++i) {
             x.push_back_set();
         }
 
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
         test_bitset x;
         test_bitset y;
 
-        for(size_t i = 0; i < test_bitset::bits_per_cluster; ++i) {
+        for(std::size_t i = 0; i < test_bitset::bits_per_cluster; ++i) {
             x.push_back_set();
         }
 

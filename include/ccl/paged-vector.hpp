@@ -163,7 +163,7 @@ namespace ccl {
                 return clone(page, CCL_PAGE_SIZE);
             }
 
-            constexpr pointer clone(const pointer page, const size_t page_size) const {
+            constexpr pointer clone(const pointer page, const std::size_t page_size) const {
                 CCL_THROW_IF(!page, std::invalid_argument{"Page must not be null."});
                 CCL_THROW_IF(!page_size, std::invalid_argument{"Page size must not be 0."});
 
@@ -186,7 +186,7 @@ namespace ccl {
             using const_pointer = typename pointer_traits::const_pointer;
             using reference = typename pointer_traits::reference;
             using const_reference = typename pointer_traits::const_reference;
-            using size_type = size_t;
+            using size_type = std::size_t;
             using allocator_type = Allocator;
             using cloner = page_cloner<value_type, pointer, allocator_type>;
             using iterator = paged_vector_iterator<paged_vector>;
@@ -536,7 +536,7 @@ namespace ccl {
                     const size_type new_page_count = max(1ULL, actual_new_capacity >> page_size_shift_width);
                     const size_type page_to_add_count = new_page_count - _pages.size();
 
-                    for(size_t i = 0; i < page_to_add_count; ++i) {
+                    for(std::size_t i = 0; i < page_to_add_count; ++i) {
                         const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size);
                         _pages.push_back(new_page);
                     }

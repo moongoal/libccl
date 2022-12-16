@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
         my_hashtable x;
 
-        for(size_t i = 0; i <= my_hashtable::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i <= my_hashtable::minimum_capacity; ++i) {
             x.insert(i, 1);
         }
 
@@ -37,11 +37,11 @@ int main(int argc, char **argv) {
 
         my_hashtable x;
 
-        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
             x.insert(i, i + 1);
         }
 
-        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
             check(x[i] == i + 1);
         }
     });
@@ -71,11 +71,11 @@ int main(int argc, char **argv) {
 
         my_hashtable x;
 
-        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
             x.insert(i, i + 1);
         }
 
-        for(size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i < my_hashtable::minimum_capacity; ++i) {
             check(x.at(i) == i + 1);
         }
     });

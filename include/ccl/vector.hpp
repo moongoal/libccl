@@ -137,7 +137,7 @@ namespace ccl {
         static constexpr value_init_tag_t value_init_tag{};
 
         public:
-            using size_type = size_t;
+            using size_type = std::size_t;
             using value_type = T;
             using pointer = T*;
             using reference = T&;

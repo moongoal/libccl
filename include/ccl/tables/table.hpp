@@ -97,7 +97,7 @@ namespace ccl {
     > class table : private column<ColumnTypes, Allocator>... {
         public:
             using allocator_type = Allocator;
-            using size_type = size_t;
+            using size_type = std::size_t;
 
             template<typename T>
             using column_type = column<T, allocator_type>;
@@ -239,7 +239,7 @@ namespace ccl {
              *
              * @return The number of items in a column.
              */
-            constexpr size_t size() const noexcept {
+            constexpr std::size_t size() const noexcept {
                 using first_type = first_type_t<ColumnTypes...>;
                 return get<first_type>().size();
             }
@@ -250,9 +250,9 @@ namespace ccl {
              * @param iter The iterator function.
              */
             constexpr void each(const view_iterator<ColumnTypes...> iter) const {
-                const size_t v_size = size();
+                const std::size_t v_size = size();
 
-                for(size_t i = 0; i < v_size; ++i) {
+                for(std::size_t i = 0; i < v_size; ++i) {
                     iter(get<ColumnTypes>()[i]...);
                 }
             }

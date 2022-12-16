@@ -46,7 +46,7 @@ namespace ccl {
              * @return The column having this data type.
              */
             template<typename T>
-            constexpr const T& get(const size_t index) const noexcept {
+            constexpr const T& get(const std::size_t index) const noexcept {
                 return get<T>()[index];
             }
 
@@ -64,7 +64,7 @@ namespace ccl {
              *
              * @return The number of items in a column.
              */
-            constexpr size_t size() const noexcept {
+            constexpr std::size_t size() const noexcept {
                 using first_type = first_type_t<Ts...>;
                 return get<first_type>().size();
             }
@@ -74,9 +74,9 @@ namespace ccl {
             constexpr void each(const view_iterator<Types...> iter) const {
                 using first_type = first_type_t<Types...>;
                 const auto& v = get<first_type>();
-                const size_t v_size = v.size();
+                const std::size_t v_size = v.size();
 
-                for(size_t i = 0; i < v_size; ++i) {
+                for(std::size_t i = 0; i < v_size; ++i) {
                     iter(get<Types>()[i]...);
                 }
             }

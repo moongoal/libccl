@@ -56,7 +56,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const size_t n_bytes, const int flags = 0) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const int flags = 0) {
                 void * const ptr1 = allocators.first()->allocate(n_bytes, flags);
 
                 if(!ptr1) {
@@ -75,7 +75,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const size_t n_bytes, const size_t alignment, const int flags = 0) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const int flags = 0) {
                 void * const ptr1 = allocators.first()->allocate(n_bytes, alignment, flags);
 
                 if(!ptr1) {
@@ -94,7 +94,7 @@ namespace ccl {
              * @return A pointer to the newly allocated memory.
              */
             template<typename T>
-            CCLNODISCARD T* allocate(const size_t n, const int flags = 0) {
+            CCLNODISCARD T* allocate(const std::size_t n, const int flags = 0) {
                 return reinterpret_cast<T*>(allocate(size_of<T>(n), alignof(T), flags));
             }
 

@@ -45,13 +45,13 @@ int main(int argc, char **argv) {
 
         my_set x;
 
-        for(size_t i = 0; i <= my_set::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i <= my_set::minimum_capacity; ++i) {
             x.insert(i);
         }
 
         check(x.capacity() > my_set::minimum_capacity);
 
-        for(size_t i = 0; i <= my_set::minimum_capacity; ++i) {
+        for(std::size_t i = 0; i <= my_set::minimum_capacity; ++i) {
             check(x.contains(i));
         }
     });

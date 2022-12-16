@@ -25,7 +25,7 @@ namespace ccl::ecs {
             using size_type = uint32_t;
             using entity_index_collection = hashtable<entity_type, size_type, hash<entity_type>, allocator_type>;
             using component_pointer = std::unique_ptr<component_i>;
-            using component_collection = hashtable<size_t, component_pointer, allocator_type>;
+            using component_collection = hashtable<std::size_t, component_pointer, allocator_type>;
 
         private:
             /**
@@ -72,7 +72,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr bool has_component() const {
-                const size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = typeid(T).hash_code();
 
                 return components.contains(component_hash);
             }
@@ -86,7 +86,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr const component_i* get_component() const {
-                const size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = typeid(T).hash_code();
                 const auto component_it = components.find(component_hash);
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
@@ -105,7 +105,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr const T& get_component(const entity_type e) const {
-                const size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = typeid(T).hash_code();
                 const auto component_it = components.find(component_hash);
                 const auto entity_it = entity_index_map.find(e);
 
@@ -124,7 +124,7 @@ namespace ccl::ecs {
              *
              * @return The computed archetype ID.
              */
-            static constexpr hash_t make_id(const std::span<const type_info*> component_types) {
+            static constexpr hash_t make_id(const std::span<const std::type_info*> component_types) {
                 hash_t id = 0;
 
                 for(const auto * const t : component_types) {
