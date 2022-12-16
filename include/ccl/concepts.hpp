@@ -6,6 +6,7 @@
 #ifndef CCL_CONCEPTS_HPP
 #define CCL_CONCEPTS_HPP
 
+#include <ccl/api.hpp>
 #include <type_traits>
 #include <concepts>
 

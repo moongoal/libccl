@@ -23,6 +23,10 @@
 #include <ccl/util.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/version.hpp>
+#include <ccl/dense-map.hpp>
+#include <ccl/handle.hpp>
+#include <ccl/packed-integer.hpp>
+#include <ccl/paged-vector.hpp>
 
 #include <ccl/memory/memory.hpp>
 #include <ccl/tables/tables.hpp>
