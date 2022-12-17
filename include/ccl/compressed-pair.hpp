@@ -7,6 +7,7 @@
 #define CCL_COMPRESSED_PAIR_HPP
 
 #include <type_traits>
+#include <utility>
 #include <ccl/api.hpp>
 
 namespace ccl {

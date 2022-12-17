@@ -100,5 +100,44 @@ int main(int argc, char **argv) {
         check(n == 3);
     });
 
+    suite.add_test("find", [] () {
+        test_map<S, S> map;
+
+        map.insert({ 1, 2.0 }, { 1, 2.0 });
+        map.insert({ 2, 3.0 }, { 2, 3.0 });
+        map.insert({ 3, 3.0 }, { 3, 4.0 });
+
+        const auto it = map.find({ 1, 2.0 });
+
+        check(*it->first() == S{ 1, 2.0 });
+        check(*it->second() == S{ 1, 2.0 });
+    });
+
+    suite.add_test("find (not found)", [] () {
+        test_map<S, S> map;
+
+        map.insert({ 1, 2.0 }, { 1, 2.0 });
+        map.insert({ 2, 3.0 }, { 2, 3.0 });
+        map.insert({ 3, 3.0 }, { 3, 4.0 });
+
+        const auto it = map.find({ 1, 9.0 });
+
+        check(it == map.end());
+    });
+
+    suite.add_test("emplace", [] () {
+        test_map<S, int> map;
+
+        map.emplace({ 1, 2.0 }, 5);
+        map.emplace({ 2, 3.0 }, 6);
+        map.emplace({ 3, 3.0 }, 7);
+
+        equals(*map.find({ 1, 2.0 })->second(), 5);
+        equals(*map.find({ 2, 3.0 })->second(), 6);
+        equals(*map.find({ 3, 3.0 })->second(), 7);
+
+        equals(map.size(), 3ULL);
+    });
+
     return suite.main(argc, argv);
 }

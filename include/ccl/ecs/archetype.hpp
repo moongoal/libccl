@@ -47,6 +47,8 @@ namespace ccl::ecs {
             component_collection components;
 
         public:
+            archetype(const hash_t id) : archetype_id{id} {}
+
             /**
              * @return The archetype ID.
              */
@@ -120,18 +122,29 @@ namespace ccl::ecs {
             /**
              * Compute an archetype ID.
              *
-             * @param component_types The sequence of component types, in any order.
+             * @tparam Components The component types.
+             * @param components The sequence of component types.
              *
              * @return The computed archetype ID.
              */
-            static constexpr hash_t make_id(const std::span<const std::type_info*> component_types) {
-                hash_t id = 0;
+            template<typename ...Components>
+            static constexpr hash_t make_id(const Components&& ...components) { // TODO: Add tests
+                return (typeid(components).hash_code() ^...);
+            }
 
-                for(const auto * const t : component_types) {
-                    id ^= t->hash_code();
-                }
-
-                return id;
+            /**
+             * Extend an archetype ID with new components.
+             *
+             * @tparam Components The component types.
+             *
+             * @param components The sequence of component types.
+             *
+             * @return The archetype ID of the current archetype's component extended with the
+             *  provided ones.
+             */
+            template<typename ...Components>
+            constexpr hash_t extend_id(const Components&& ...components) { // TODO: Add tests
+                return archetype_id ^ (typeid(components).hash_code() ^...);
             }
     };
 }

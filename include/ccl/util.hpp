@@ -259,9 +259,8 @@ namespace ccl {
         return sizeof(T) * n;
     }
 
-
     template<typename T>
-    T* nullv() noexcept {
+    T* null_v() noexcept {
         return reinterpret_cast<T*>(nullptr);
     }
 

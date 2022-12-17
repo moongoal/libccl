@@ -26,7 +26,6 @@ template<typename Map>
         using value_type = typename Map::value_type;
 
         using key_value_pair = compressed_pair<key_type*, value_type*>;
-        using const_key_value_pair = compressed_pair<const key_type*, const value_type*>;
 
         using map_type = Map;
         using size_type = typename Map::size_type;
@@ -44,6 +43,7 @@ template<typename Map>
             : map{other.map},
             index_iterator{*other.index_iterator.hashtable, other.index_iterator.index}
         {}
+
         constexpr dense_map_iterator(dense_map_iterator &&other) noexcept
             : map{std::move(other.map)},
             index_iterator{std::move(other.index_iterator)}
@@ -63,18 +63,20 @@ template<typename Map>
             return key_value_pair{ key_index_pair.first(), &map->data[index] };
         }
 
-        constexpr const_key_value_pair operator*() const noexcept {
+        constexpr key_value_pair operator*() const noexcept {
             const auto& key_index_pair = (*index_iterator);
-            const uint32_t index = key_index_pair.second();
+            const uint32_t index = *key_index_pair.second();
 
-            return key_value_pair{ key_index_pair.first(), map->data[index] };
+            return key_value_pair{ key_index_pair.first(), &map->data[index] };
         }
 
-        constexpr key_value_pair operator->() const noexcept {
+        constexpr key_value_pair* operator->() const noexcept {
             const auto& key_index_pair = (*index_iterator);
-            const uint32_t index = key_index_pair.second();
+            const uint32_t index = *key_index_pair.second();
 
-            return key_value_pair{ key_index_pair.first(), map->data[index] };
+            pair = key_value_pair{ key_index_pair.first(), &map->data[index] };
+
+            return &pair;
         }
 
         constexpr auto& operator --() const noexcept {
@@ -99,6 +101,7 @@ template<typename Map>
 
         map_type *map;
         mutable index_map_iterator index_iterator;
+        mutable key_value_pair pair;
     };
 
     template<typename Map>
@@ -147,6 +150,7 @@ template<typename Map>
         public:
             using key_type = K;
             using value_type = V;
+            using value_reference = V&;
             using const_key_reference = const K&;
             using const_value_reference = const V&;
             using allocator_type = Allocator;
@@ -242,6 +246,40 @@ template<typename Map>
 
             constexpr size_type size() const noexcept {
                 return static_cast<size_type>(data.size());
+            }
+
+            constexpr iterator find(const_key_reference key) {
+                auto index_it = index_map.find(key);
+
+                if(index_it != index_map.end()) {
+                    return dense_map_iterator{*this, index_it};
+                }
+
+                return end();
+            }
+
+            constexpr const_iterator find(const_key_reference key) const {
+                auto index_it = index_map.find(key);
+
+                if(index_it != index_map.end()) {
+                    return dense_map_iterator{*this, index_it};
+                }
+
+                return end();
+            }
+
+            template<typename ...Args>
+            constexpr value_reference emplace(const K& key, Args&& ...args) {
+                auto it = index_map.find(key);
+
+                CCL_THROW_IF(it != index_map.end(), std::invalid_argument{"Key already present."});
+
+                const size_type item_index = static_cast<size_type>(data.size());
+
+                auto& ref = data.emplace(std::forward<Args>(args)...);
+                index_map.insert(key, item_index);
+
+                return ref;
             }
     };
 }
