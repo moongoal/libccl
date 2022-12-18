@@ -26,7 +26,7 @@ namespace ccl::ecs {
             using size_type = uint32_t;
             using entity_index_collection = dense_map<entity_type, size_type, allocator_type>;
             using component_pointer = std::unique_ptr<component_i>;
-            using component_collection = hashtable<std::size_t, component_pointer, allocator_type>;
+            using component_collection = hashtable<std::size_t, component_pointer, hash<std::size_t>, allocator_type>;
 
         private:
             /**
