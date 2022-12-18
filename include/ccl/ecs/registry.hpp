@@ -54,8 +54,10 @@ namespace ccl::ecs {
 
                 CCL_ASSERT(new_arch);
 
-                // TODO
-                new_arch_it->migrate_entity<Components...>(entity, old_arch, std::forward<Components>(components)...);
+                new_arch->add_entity(entity);
+                new_arch->copy_entity_components_from(entity, *old_arch);
+                old_arch->remove_entity(entity);
+                (new_arch->set_entity_component(entity, components), ...);
             }
 
             archetype* get_entity_archetype(const entity_t entity) {
