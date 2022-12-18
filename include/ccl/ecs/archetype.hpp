@@ -15,6 +15,7 @@
 #include <ccl/dense-map.hpp>
 #include <ccl/ecs/entity.hpp>
 #include <ccl/ecs/component.hpp>
+#include <ccl/either.hpp>
 
 namespace ccl::ecs {
     template<basic_allocator Allocator>
@@ -125,7 +126,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
 
-                return &*component_it;
+                return *component_it;
             }
 
             /**
@@ -133,16 +134,16 @@ namespace ccl::ecs {
              *
              * @param component_hash The component type hash.
              *
-             * @return The optional component collection.
+             * @return The optional component collection, or nullptr.
              */
-            constexpr const std::optional<const component_i*> get_optional_component(const std::size_t component_hash) const {
+            constexpr component_i* get_generic_optional_component(const std::size_t component_hash) {
                 const auto component_it = components.find(component_hash);
 
-                if(component_it == components.end()) {
-                    return {};
+                if(component_it != components.end()) {
+                    return component_it->second()->get();
                 }
 
-                return &*component_it;
+                return nullptr;
             }
 
             /**
@@ -150,16 +151,54 @@ namespace ccl::ecs {
              *
              * @param component_hash The component type hash.
              *
-             * @return The optional component collection.
+             * @return The optional component collection, or nullptr.
              */
-            constexpr std::optional<component_i*> get_optional_component(const std::size_t component_hash) {
+            constexpr const component_i* get_generic_optional_component(const std::size_t component_hash) const {
                 const auto component_it = components.find(component_hash);
 
-                if(component_it == components.end()) {
-                    return {};
+                if(component_it != components.end()) {
+                    return component_it->second()->get();
                 }
 
-                return &*component_it;
+                return nullptr;
+            }
+
+            /**
+             * Get a component collection.
+             *
+             * @param component_hash The component type hash.
+             *
+             * @return The optional component collection or nullptr if not present.
+             */
+            template<typename T>
+            constexpr component<T, Allocator>* get_optional_component() {
+                const std::size_t component_hash = component<T, Allocator>::make_id();
+                auto * const component = get_generic_optional_component(component_hash);
+
+                if(component) {
+                    return &component->template cast<T, Allocator>();
+                }
+
+                return nullptr;
+            }
+
+            /**
+             * Get a component collection.
+             *
+             * @param component_hash The component type hash.
+             *
+             * @return The optional component collection or nullptr if not present.
+             */
+            template<typename T>
+            constexpr const component<T, Allocator>* get_optional_component() const {
+                const std::size_t component_hash = component<T, Allocator>::make_id();
+                auto * const component = get_generic_optional_component(component_hash);
+
+                if(component) {
+                    return &component->template cast<T, Allocator>();
+                }
+
+                return nullptr;
             }
 
             /**

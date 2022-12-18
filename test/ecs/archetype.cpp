@@ -46,6 +46,15 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("get_optional_component", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        check(arch.get_optional_component<int>());
+        check(arch.get_optional_component<double>());
+        check(arch.get_optional_component<entity_t>());
+        check(!arch.get_optional_component<float>());
+    });
+
     suite.add_test("extend_id", [] () {
         test_archetype arch = test_archetype::make<int, double>();
         const hash_t expected = test_archetype::make_id<int, double, float>();
@@ -59,6 +68,8 @@ int main(int argc, char **argv) {
         equals(arch.add_entity(entity_t{1}), 0U);
         equals(arch.add_entity(entity_t{2}), 1U);
     });
+
+
 
     return suite.main(argc, argv);
 }
