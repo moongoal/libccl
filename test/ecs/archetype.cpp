@@ -30,5 +30,21 @@ int main(int argc, char **argv) {
         check(!arch.has_component<float>());
     });
 
+    suite.add_test("get_component", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        check(arch.get_component<entity_t>());
+        check(arch.get_component<int>());
+        check(arch.get_component<double>());
+    });
+
+    suite.add_test("get_component (not present)", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        throws<std::out_of_range>([&arch] () {
+            arch.get_component<float>();
+        });
+    });
+
     return suite.main(argc, argv);
 }

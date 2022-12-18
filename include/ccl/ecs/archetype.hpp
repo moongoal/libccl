@@ -174,7 +174,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
 
-                return &*component_it;
+                return component_it->second()->get();
             }
 
             /**
@@ -186,7 +186,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr const component<T, Allocator>& get_component() const {
-                const std::size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = component<T, Allocator>::make_id();
 
                 return get_component(component_hash)->template cast<T, Allocator>();
             }
@@ -200,9 +200,9 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr component_i* get_component() {
-                const std::size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = component<T, Allocator>::make_id();
 
-                return get_component(component_hash)->template cast<T, Allocator>();
+                return get_component(component_hash);
             }
 
             /**
@@ -216,7 +216,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr const component<T, Allocator>& get_entity_component(const entity_type e) const {
-                const std::size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = component<T, Allocator>::make_id();
                 const auto component_it = components.find(component_hash);
                 const auto entity_it = entity_index_map.find(e);
 
