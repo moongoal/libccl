@@ -8,6 +8,7 @@
 
 #include <ccl/api.hpp>
 #include <ccl/packed-integer.hpp>
+#include <ccl/hash.hpp>
 
 namespace ccl {
     /**
@@ -103,6 +104,13 @@ namespace ccl {
      * A generic versioned handle.
      */
     using untyped_versioned_handle = versioned_handle<void>;
+
+    template<typename HandleType>
+    struct hash<versioned_handle<HandleType>> {
+        constexpr hash_t operator()(const versioned_handle<HandleType>& h) const {
+            return hash<typename versioned_handle<HandleType>::underlying_type>{}(h.raw());
+        }
+    };
 }
 
 #endif // CCL_HANDLE_HPP

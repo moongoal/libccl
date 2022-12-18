@@ -11,6 +11,7 @@
 #include <ccl/util.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/exceptions.hpp>
+#include <ccl/hash.hpp>
 
 namespace ccl {
     /**
@@ -118,6 +119,13 @@ namespace ccl {
     constexpr bool operator==(const T a, const packed_integer<T, LowPartSize> b) {
         return a == b.get();
     }
+
+    template<std::unsigned_integral T, std::size_t LowPartSize>
+    struct hash<packed_integer<T, LowPartSize>> {
+        constexpr hash_t operator()(const packed_integer<T, LowPartSize>& value) const {
+            return hash<typename packed_integer<T, LowPartSize>::value_type>{}(value.get());
+        }
+    };
 }
 
 #endif // CCL_PACKED_INTEGER_HPP

@@ -53,7 +53,7 @@ namespace ccl::ecs {
             /**
              * @return The archetype ID.
              */
-            constexpr hash_t get_id() const noexcept { return archetype_id; }
+            constexpr hash_t id() const noexcept { return archetype_id; }
 
             /**
              * Check whether an entity is present in this archetype.
