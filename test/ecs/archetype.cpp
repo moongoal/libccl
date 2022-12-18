@@ -46,5 +46,12 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("extend_id", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const hash_t expected = test_archetype::make_id<int, double, float>();
+
+        equals(arch.extend_id<float>(), expected);
+    });
+
     return suite.main(argc, argv);
 }

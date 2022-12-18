@@ -39,7 +39,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(!old_arch, std::out_of_range{"Invalid entity."});
 
-                const hash_t new_archetype_id = old_arch->extend_id(typeid(components).hash_code()...);
+                const hash_t new_archetype_id = old_arch->template extend_id<Components...>();
                 auto new_arch_it = archetype_map.find(new_archetype_id);
                 archetype * new_arch;
 

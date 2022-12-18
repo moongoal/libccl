@@ -250,7 +250,7 @@ namespace ccl::ecs {
              * @return The computed archetype ID.
              */
             template<typename ...Components>
-            static constexpr hash_t make_id() { // TODO: Add tests
+            static constexpr hash_t make_id() {
                 return (typeid(component<Components, Allocator>).hash_code() ^...);
             }
 
@@ -259,14 +259,12 @@ namespace ccl::ecs {
              *
              * @tparam Components The component types.
              *
-             * @param components The sequence of component types.
-             *
              * @return The archetype ID of the current archetype's component extended with the
              *  provided ones.
              */
             template<typename ...Components>
-            constexpr hash_t extend_id(const Components&& ...components) { // TODO: Add tests
-                return archetype_id ^ (typeid(components).hash_code() ^...);
+            constexpr hash_t extend_id() {
+                return archetype_id ^ (typeid(component<Components, Allocator>).hash_code() ^...);
             }
 
             /**
