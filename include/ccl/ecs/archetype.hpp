@@ -350,6 +350,8 @@ namespace ccl::ecs {
                     }
                 }
 
+                entity_index_map.insert(entity, entity_index);
+
                 return entity_index;
             }
 

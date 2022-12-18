@@ -69,12 +69,25 @@ int main(int argc, char **argv) {
         equals(arch.add_entity(entity_t{2}), 1U);
     });
 
-    suite.add_test("set_entity_component", [] () {
+    suite.add_test("set/get_entity_component", [] () {
         test_archetype arch = test_archetype::make<int, double>();
         const entity_t e{1};
+        const entity_t e2{2};
 
         arch.add_entity(e);
+        arch.add_entity(e2);
+
         arch.set_entity_component<int>(e, 5);
+        arch.set_entity_component<double>(e, 10);
+
+        arch.set_entity_component<int>(e2, 6);
+        arch.set_entity_component<double>(e2, 11);
+
+        equals(arch.get_entity_component<int>(e), 5);
+        equals(arch.get_entity_component<double>(e), 10.0);
+
+        equals(arch.get_entity_component<int>(e2), 6);
+        equals(arch.get_entity_component<double>(e2), 11.0);
     });
 
     return suite.main(argc, argv);
