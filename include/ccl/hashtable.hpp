@@ -231,9 +231,30 @@ namespace ccl {
             }
 
             void destroy() noexcept {
-                slot_map.destroy();
+                if constexpr(
+                    !std::is_trivially_destructible_v<K>
+                    || !std::is_trivially_destructible_v<V>
+                ) {
+                    const size_type end = slot_map.size_bits();
+
+                    for(size_type i = 0; i < end; i+= 1) {
+                        const bool is_set = slot_map[i];
+
+                        if(is_set) {
+                            if constexpr(!std::is_trivially_destructible_v<K>) {
+                                std::destroy_at(&keys[i]);
+                            }
+
+                            if constexpr(!std::is_trivially_destructible_v<V>) {
+                                std::destroy_at(&values[i]);
+                            }
+                        }
+                    }
+                }
+
                 alloc::get_allocator()->deallocate(keys);
                 alloc::get_allocator()->deallocate(values);
+                slot_map.destroy();
 
                 _capacity = 0;
                 keys = nullptr;

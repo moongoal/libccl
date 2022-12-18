@@ -7,6 +7,48 @@ using namespace ccl;
 template<typename K, typename V, typename H = hash<K>>
 using test_map = hashtable<K, V, H, counting_test_allocator>;
 
+constexpr uint32_t constructed_value = 0x1234;
+static int next_unique_value = 0;
+
+struct spy {
+    int unique_value;
+    uint32_t construction_magic;
+    std::function<void()> on_destroy;
+
+    spy() : unique_value{next_unique_value++}, construction_magic{constructed_value} {}
+    spy(const auto& on_destroy) : unique_value{next_unique_value++}, construction_magic{constructed_value}, on_destroy{on_destroy} {}
+    spy(const spy&) = default;
+
+    spy(spy&& other) : unique_value{other.unique_value}, construction_magic{constructed_value}, on_destroy{other.on_destroy} {
+        other.on_destroy = nullptr;
+    }
+
+    constexpr spy& operator=(const spy& other) {
+        on_destroy = other.on_destroy;
+
+        return *this;
+    }
+
+    ~spy() {
+        if(on_destroy) {
+            on_destroy();
+        }
+
+        construction_magic = 0;
+    }
+};
+
+constexpr bool operator ==(const spy& a, const spy& b) {
+    return a.unique_value == b.unique_value;
+}
+
+template<>
+struct hash<spy> {
+    constexpr hash_t operator()(const spy &s) const {
+        return hash<int>{}(s.unique_value);
+    }
+};
+
 int main(int argc, char **argv) {
     test_suite suite;
 
@@ -240,6 +282,21 @@ int main(int argc, char **argv) {
         check(x.contains(1));
         check(x.contains(2));
         check(!x.contains(3));
+    });
+
+    suite.add_test("dtor", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        {
+            test_map<spy, spy> x;
+
+            spy key { on_destroy };
+
+            x.emplace(key, on_destroy);
+        }
+
+        equals(destruction_counter, 3);
     });
 
     return suite.main(argc, argv);
