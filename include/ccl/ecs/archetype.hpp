@@ -276,7 +276,7 @@ namespace ccl::ecs {
                     if(dest_component.has_value()) {
                         const size_type index_from = source.entity_index_map[entity];
 
-                        dest_component.value()->copy_from(*source_component, index_from, index_to);
+                        dest_component.value()->move_from(*source_component, index_from, index_to);
                     }
                 }
             }

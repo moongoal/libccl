@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
         equals(c.get()[1].value, 0x123);
     });
 
-    suite.add_test("copy_from", [] () {
+    suite.add_test("move_from", [] () {
         test_component<int> c;
         test_component<int> d;
 
@@ -121,8 +121,8 @@ int main(int argc, char **argv) {
         d.push_back(0);
         d.push_back(0);
 
-        d.copy_from(c, 0, 1);
-        d.copy_from(c, 1, 0);
+        d.move_from(c, 0, 1);
+        d.move_from(c, 1, 0);
 
         equals(d.get()[0], 6);
         equals(d.get()[1], 5);
