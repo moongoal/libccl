@@ -177,7 +177,11 @@ namespace ccl::ecs {
             }
 
             constexpr std::size_t id() const {
-                return typeid(decltype(*this)).hash_code();
+                return make_id();
+            }
+
+            static constexpr std::size_t make_id() {
+                return typeid(component<T, Allocator>).hash_code();
             }
     };
 }

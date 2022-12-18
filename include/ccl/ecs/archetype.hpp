@@ -47,8 +47,41 @@ namespace ccl::ecs {
              */
             component_collection components;
 
+            /**
+             * Set the components of this archetype up.
+             *
+             * @tparam The component parameter types.
+             */
+            template<typename ...Components>
+            constexpr void setup_components() {
+                (components.emplace(
+                    component<Components, Allocator>::make_id(),
+                    std::make_unique<component<Components, Allocator>>()
+                ), ...);
+            }
+
+            constexpr archetype(hash_t id) : archetype_id{id} {}
+
         public:
-            archetype(const hash_t id) : archetype_id{id} {}
+            constexpr archetype(const archetype& other) = delete;
+            constexpr archetype(archetype&& other) = default;
+
+            /**
+             * Create a new archetype from its component type set.
+             *
+             * @tparam Components Component types part of the archetype.
+             *  A component of type `archetype::entity_type` is always
+             *  added automatically to every archetype to track entity IDs.
+             */
+            template<typename ...Components>
+            static archetype make() {
+                const hash_t id = make_id<Components...>();
+                archetype arch{id};
+
+                arch.setup_components<entity_type, Components...>();
+
+                return arch;
+            }
 
             /**
              * @return The archetype ID.
@@ -217,8 +250,8 @@ namespace ccl::ecs {
              * @return The computed archetype ID.
              */
             template<typename ...Components>
-            static constexpr hash_t make_id(const Components&& ...components) { // TODO: Add tests
-                return (typeid(components).hash_code() ^...);
+            static constexpr hash_t make_id() { // TODO: Add tests
+                return (typeid(component<Components, Allocator>).hash_code() ^...);
             }
 
             /**
