@@ -108,7 +108,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr bool has_component() const {
-                const std::size_t component_hash = typeid(T).hash_code();
+                const std::size_t component_hash = component<T, Allocator>::make_id();
 
                 return components.contains(component_hash);
             }

@@ -21,5 +21,14 @@ int main(int argc, char **argv) {
         differs(arch1.id(), arch3.id());
     });
 
+    suite.add_test("has_component", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        check(arch.has_component<int>());
+        check(arch.has_component<double>());
+        check(arch.has_component<entity_t>());
+        check(!arch.has_component<float>());
+    });
+
     return suite.main(argc, argv);
 }
