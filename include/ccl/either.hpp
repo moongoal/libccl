@@ -23,7 +23,7 @@ namespace ccl {
     };
 
     template<typename T1, typename T2, bool Predicate>
-    using either_or_v = typename either_or<T1, T2, Predicate>::type;
+    using either_or_t = typename either_or<T1, T2, Predicate>::type;
 }
 
 #endif // CCL_EITHER_HPP

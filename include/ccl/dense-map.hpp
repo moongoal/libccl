@@ -15,22 +15,31 @@
 #include <ccl/hash.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/compressed-pair.hpp>
+#include <ccl/either.hpp>
 
 namespace ccl {
-template<typename Map>
+template<typename Map, bool Const>
     struct dense_map_iterator {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
 
-        using key_type = typename Map::key_type;
-        using value_type = typename Map::value_type;
+        using key_type = either_or_t<
+            const typename Map::key_type,
+            typename Map::key_type,
+            Const
+        >;
 
+        using value_type = either_or_t<
+            const typename Map::value_type,
+            typename Map::value_type,
+            Const
+        >;
+
+        using map_type = either_or_t<const Map, Map, Const>;
         using key_value_pair = compressed_pair<key_type*, value_type*>;
-
-        using map_type = Map;
         using size_type = typename Map::size_type;
 
-        using index_map_iterator = hashtable_iterator<typename map_type::index_map_type>;
+        using index_map_iterator = hashtable_iterator<typename map_type::index_map_type, Const>;
 
         constexpr dense_map_iterator() = default;
 
@@ -104,39 +113,39 @@ template<typename Map>
         mutable key_value_pair pair;
     };
 
-    template<typename Map>
-    constexpr bool operator ==(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
+    template<typename Map, bool Const>
+    constexpr bool operator ==(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
         return a.map == b.map && a.index_iterator == b.index_iterator;
     }
 
-    template<typename Map>
-    constexpr bool operator !=(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
+    template<typename Map, bool Const>
+    constexpr bool operator !=(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
         return a.map != b.map || a.index_iterator != b.index_iterator;
     }
 
-    template<typename Map>
-    constexpr bool operator >(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
+    template<typename Map, bool Const>
+    constexpr bool operator >(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator > b.index_iterator;
     }
 
-    template<typename Map>
-    constexpr bool operator <(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
+    template<typename Map, bool Const>
+    constexpr bool operator <(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator < b.index_iterator;
     }
 
-    template<typename Map>
-    constexpr bool operator >=(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
+    template<typename Map, bool Const>
+    constexpr bool operator >=(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator >= b.index_iterator;
     }
 
-    template<typename Map>
-    constexpr bool operator <=(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
+    template<typename Map, bool Const>
+    constexpr bool operator <=(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator <= b.index_iterator;
@@ -144,8 +153,8 @@ template<typename Map>
 
     template<typename K, typename V, typed_allocator<K> Allocator = allocator, typed_hash_function<K> Hash = hash<K>>
     class dense_map : internal::with_optional_allocator<Allocator> {
-        friend struct dense_map_iterator<dense_map>;
-        friend struct dense_map_iterator<const dense_map>;
+        friend struct dense_map_iterator<dense_map, true>;
+        friend struct dense_map_iterator<dense_map, false>;
 
         public:
             using key_type = K;
@@ -161,8 +170,8 @@ template<typename Map>
             using index_map_type = hashtable<K, size_type, hash_function_type, allocator_type>;
             using value_iterator = typename data_vector_type::iterator;
             using const_value_iterator = typename data_vector_type::const_iterator;
-            using iterator = dense_map_iterator<dense_map>;
-            using const_iterator = dense_map_iterator<const dense_map>;
+            using iterator = dense_map_iterator<dense_map, false>;
+            using const_iterator = dense_map_iterator<dense_map, true>;
 
         private:
             using alloc = internal::with_optional_allocator<Allocator>;
@@ -248,13 +257,13 @@ template<typename Map>
             constexpr decltype(auto) cbegin_values() const { return data.cbegin(); }
             constexpr decltype(auto) cend_values() const { return data.cend(); }
 
-            constexpr decltype(auto) begin() { return dense_map_iterator{*this, index_map.begin()}; }
-            constexpr decltype(auto) begin() const { return dense_map_iterator{*this, index_map.begin()}; }
-            constexpr decltype(auto) end() { return dense_map_iterator{*this, index_map.end()}; }
-            constexpr decltype(auto) end() const { return dense_map_iterator{*this, index_map.end()}; }
+            constexpr decltype(auto) begin() { return iterator{*this, index_map.begin()}; }
+            constexpr decltype(auto) begin() const { return const_iterator{*this, index_map.begin()}; }
+            constexpr decltype(auto) end() { return iterator{*this, index_map.end()}; }
+            constexpr decltype(auto) end() const { return const_iterator{*this, index_map.end()}; }
 
-            constexpr decltype(auto) cbegin() const { return dense_map_iterator{*this, index_map.begin()}; }
-            constexpr decltype(auto) cend() const { return dense_map_iterator{*this, index_map.end()}; }
+            constexpr decltype(auto) cbegin() const { return const_iterator{*this, index_map.begin()}; }
+            constexpr decltype(auto) cend() const { return const_iterator{*this, index_map.end()}; }
 
             constexpr size_type size() const noexcept {
                 return static_cast<size_type>(data.size());
@@ -264,17 +273,17 @@ template<typename Map>
                 auto index_it = index_map.find(key);
 
                 if(index_it != index_map.end()) {
-                    return dense_map_iterator{*this, index_it};
+                    return iterator{*this, index_it};
                 }
 
                 return end();
             }
 
             constexpr const_iterator find(const_key_reference key) const {
-                auto index_it = index_map.find(key);
+                const auto index_it = index_map.find(key);
 
                 if(index_it != index_map.end()) {
-                    return dense_map_iterator{*this, index_it};
+                    return const_iterator{*this, index_it};
                 }
 
                 return end();

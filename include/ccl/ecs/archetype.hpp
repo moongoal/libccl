@@ -8,7 +8,6 @@
 
 #include <typeinfo>
 #include <memory>
-#include <optional>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hashtable.hpp>
@@ -254,17 +253,42 @@ namespace ccl::ecs {
              * @return A const reference to the entity's component.
              */
             template<typename T>
-            constexpr const component<T, Allocator>& get_entity_component(const entity_type e) const {
+            constexpr const T& get_entity_component(const entity_type e) const {
                 const std::size_t component_hash = component<T, Allocator>::make_id();
                 const auto component_it = components.find(component_hash);
                 const auto entity_it = entity_index_map.find(e);
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
-                CCL_THROW_IF(entity_it == entity_it.end(), std::out_of_range{"Entity not present in archetype."});
+                CCL_THROW_IF(entity_it == entity_index_map.end(), std::out_of_range{"Entity not present in archetype."});
 
-                const auto entity_component = component_it->operator[](*entity_it);
+                component_i * const entity_component = component_it->second()->get();
+                const auto entity_index = *entity_it->second();
 
-                return entity_component.template cast<T, Allocator>();
+                return entity_component->template cast<T, Allocator>().get()[entity_index];
+            }
+
+            /**
+             * Get an existing component for an existing entity.
+             *
+             * @tparam T The component type.
+             *
+             * @param e The entity.
+             *
+             * @return A const reference to the entity's component.
+             */
+            template<typename T>
+            constexpr T& get_entity_component(const entity_type e) {
+                const std::size_t component_hash = component<T, Allocator>::make_id();
+                const auto component_it = components.find(component_hash);
+                const auto entity_it = entity_index_map.find(e);
+
+                CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
+                CCL_THROW_IF(entity_it == entity_index_map.end(), std::out_of_range{"Entity not present in archetype."});
+
+                component_i * const entity_component = component_it->second()->get();
+                const auto entity_index = *entity_it->second();
+
+                return entity_component->template cast<T, Allocator>().get()[entity_index];
             }
 
             /**

@@ -69,7 +69,13 @@ int main(int argc, char **argv) {
         equals(arch.add_entity(entity_t{2}), 1U);
     });
 
+    suite.add_test("set_entity_component", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const entity_t e{1};
 
+        arch.add_entity(e);
+        arch.set_entity_component<int>(e, 5);
+    });
 
     return suite.main(argc, argv);
 }
