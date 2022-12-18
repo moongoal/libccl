@@ -133,6 +133,10 @@ namespace ccl::ecs {
             }
 
         public:
+            component() = default;
+            component(const component&) = delete;
+            component(component&&) = default;
+
             constexpr auto& get() { return items; }
             constexpr const auto& get() const { return items; }
 

@@ -53,5 +53,12 @@ int main(int argc, char **argv) {
         equals(arch.extend_id<float>(), expected);
     });
 
+    suite.add_test("add_entity", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        equals(arch.add_entity(entity_t{1}), 0U);
+        equals(arch.add_entity(entity_t{2}), 1U);
+    });
+
     return suite.main(argc, argv);
 }

@@ -275,13 +275,13 @@ namespace ccl::ecs {
              * @return The entity index within this archetype.
              */
             constexpr size_type add_entity(const entity_type entity) {
-                component<entity_t, Allocator> entity_component = get_component<entity_t>();
+                component<entity_t, Allocator>& entity_component = get_component<entity_t>()->template cast<entity_t, Allocator>();
                 const size_type entity_index = entity_component.size();
-                const auto entity_component_id = typeid(decltype(entity_component)).hash_code();
+                const auto entity_component_id = component<entity_t, Allocator>::make_id();
 
                 entity_component.push_back(entity);
 
-                for(auto& pair : components) {
+                for(const auto& pair : components) {
                     if(*pair.first() != entity_component_id) {
                         (*pair.second())->emplace_empty();
                     }
