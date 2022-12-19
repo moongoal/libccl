@@ -338,6 +338,18 @@ template<typename Map, bool Const>
 
                 return data[item_index];
             }
+
+            constexpr value_reference operator[](const_key_reference key) {
+                auto it = index_map.find(key);
+
+                if(it != index_map.end()) {
+                    const size_type item_index = *it->second();
+
+                    return data[item_index];
+                }
+
+                return emplace(key);
+            }
     };
 }
 

@@ -120,7 +120,7 @@ namespace ccl::ecs {
              *
              * @return The component collection.
              */
-            constexpr const component_i* get_component(const std::size_t component_hash) const {
+            constexpr const component_i* get_generic_component(const std::size_t component_hash) const {
                 const auto component_it = components.find(component_hash);
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
@@ -207,7 +207,7 @@ namespace ccl::ecs {
              *
              * @return The component collection.
              */
-            constexpr component_i* get_component(const std::size_t component_hash) {
+            constexpr component_i* get_generic_component(const std::size_t component_hash) {
                 const auto component_it = components.find(component_hash);
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
@@ -226,7 +226,7 @@ namespace ccl::ecs {
             constexpr const component<T, Allocator>& get_component() const {
                 const std::size_t component_hash = component<T, Allocator>::make_id();
 
-                return get_component(component_hash)->template cast<T, Allocator>();
+                return get_generic_component(component_hash)->template cast<T, Allocator>();
             }
 
             /**
@@ -237,10 +237,10 @@ namespace ccl::ecs {
              * @return The component.
              */
             template<typename T>
-            constexpr component_i* get_component() {
+            constexpr component<T, Allocator>& get_component() {
                 const std::size_t component_hash = component<T, Allocator>::make_id();
 
-                return get_component(component_hash);
+                return get_generic_component(component_hash)->template cast<T, Allocator>();
             }
 
             /**
@@ -338,7 +338,7 @@ namespace ccl::ecs {
              * @return The entity index within this archetype.
              */
             constexpr size_type add_entity(const entity_type entity) {
-                component<entity_t, Allocator>& entity_component = get_component<entity_t>()->template cast<entity_t, Allocator>();
+                component<entity_t, Allocator>& entity_component = get_component<entity_t>();
                 const size_type entity_index = entity_component.size();
                 const auto entity_component_id = component<entity_t, Allocator>::make_id();
 
@@ -384,7 +384,7 @@ namespace ccl::ecs {
              */
             constexpr void remove_entity(const entity_type entity) {
                 auto entity_index_it = entity_index_map.find(entity);
-                const size_type entity_index = *entity_index_it;
+                const size_type entity_index = *entity_index_it->second();
 
                 auto last_index_it = entity_index_map.end_values() - 1;
 
@@ -392,18 +392,18 @@ namespace ccl::ecs {
                     --last_index_it;
 
                     for(const auto& c : components) {
-                        component_i * const component = *c.second();
+                        component_i * const component = c.second()->get();
 
                         component->erase(entity_index);
                     }
                 } else { // Removing not last element
                     const size_type source_entity_index = *last_index_it;
-                    const entity_type source_entity = get_component<entity_type>().get()[source_entity_index];
+                    const entity_type source_entity = get_component<entity_type>()->get()[source_entity_index];
 
                     // Keep the array compact by swapping with last item
                     // and then removing it.
                     for(const auto& c : components) {
-                        component_i * const component = *c.second();
+                        component_i * const component = c.second()->get();
 
                         component->move(source_entity_index, entity_index);
                         component->erase(source_entity_index);

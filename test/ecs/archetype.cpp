@@ -30,12 +30,32 @@ int main(int argc, char **argv) {
         check(!arch.has_component<float>());
     });
 
+    suite.add_test("get_generic_component", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const auto entity_id = component<entity_t, counting_test_allocator>::make_id();
+        const auto int_id = component<int, counting_test_allocator>::make_id();
+        const auto double_id = component<double, counting_test_allocator>::make_id();
+
+        check(arch.get_generic_component(entity_id));
+        check(arch.get_generic_component(int_id));
+        check(arch.get_generic_component(double_id));
+    });
+
+    suite.add_test("get_generic_component (not present)", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const auto float_id = component<float, counting_test_allocator>::make_id();
+
+        throws<std::out_of_range>([&arch, float_id] () {
+            arch.get_generic_component(float_id);
+        });
+    });
+
     suite.add_test("get_component", [] () {
         test_archetype arch = test_archetype::make<int, double>();
 
-        check(arch.get_component<entity_t>());
-        check(arch.get_component<int>());
-        check(arch.get_component<double>());
+        arch.get_component<entity_t>();
+        arch.get_component<int>();
+        arch.get_component<double>();
     });
 
     suite.add_test("get_component (not present)", [] () {
@@ -148,6 +168,19 @@ int main(int argc, char **argv) {
             dest.get_entity_component<double>(e2);
         });
     });
+
+    // suite.add_test("remove_entity", [] () {
+    //     test_archetype arch = test_archetype::make<int, double>();
+    //     const entity_t e{1};
+    //     const entity_t e2{2};
+    //     const entity_t e3{3};
+
+    //     arch.add_entity(e);
+    //     arch.add_entity(e2);
+    //     arch.add_entity(e3);
+
+    //     arch.remove_entity(e2);
+    // });
 
     return suite.main(argc, argv);
 }
