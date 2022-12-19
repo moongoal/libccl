@@ -169,18 +169,22 @@ int main(int argc, char **argv) {
         });
     });
 
-    // suite.add_test("remove_entity", [] () {
-    //     test_archetype arch = test_archetype::make<int, double>();
-    //     const entity_t e{1};
-    //     const entity_t e2{2};
-    //     const entity_t e3{3};
+    suite.add_test("remove_entity", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const entity_t e{1};
+        const entity_t e2{2};
+        const entity_t e3{3};
 
-    //     arch.add_entity(e);
-    //     arch.add_entity(e2);
-    //     arch.add_entity(e3);
+        arch.add_entity(e);
+        arch.add_entity(e2);
+        arch.add_entity(e3);
 
-    //     arch.remove_entity(e2);
-    // });
+        arch.remove_entity(e2);
+        arch.remove_entity(e);
+        arch.remove_entity(e3);
+
+        equals(arch.get_component<entity_t>().size(), 0ULL);
+    });
 
     return suite.main(argc, argv);
 }

@@ -398,7 +398,7 @@ namespace ccl::ecs {
                     }
                 } else { // Removing not last element
                     const size_type source_entity_index = *last_index_it;
-                    const entity_type source_entity = get_component<entity_type>()->get()[source_entity_index];
+                    const entity_type source_entity = get_component<entity_type>().get()[source_entity_index];
 
                     // Keep the array compact by swapping with last item
                     // and then removing it.
