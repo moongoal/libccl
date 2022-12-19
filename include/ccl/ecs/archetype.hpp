@@ -362,17 +362,17 @@ namespace ccl::ecs {
              * @param source The source component.
              */
             constexpr void copy_entity_components_from(const entity_type entity, const archetype<Allocator>& source) {
-                const size_type index_to = entity_index_map[entity];
+                const size_type index_to = entity_index_map.at(entity);
 
                 for(const auto& c : source.components) {
                     const std::size_t source_component_id = *c.first();
-                    const component_i * const source_component = *c.second();
-                    std::optional<component_i*> dest_component = get_optional_component(source_component_id);
+                    const component_i * const source_component = c.second()->get();
+                    component_i* const dest_component = get_generic_optional_component(source_component_id);
 
-                    if(dest_component.has_value()) {
-                        const size_type index_from = source.entity_index_map[entity];
+                    if(dest_component) {
+                        const size_type index_from = source.entity_index_map.at(entity);
 
-                        dest_component.value()->move_from(*source_component, index_from, index_to);
+                        dest_component->move_from(*source_component, index_from, index_to);
                     }
                 }
             }

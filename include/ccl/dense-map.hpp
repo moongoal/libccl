@@ -290,7 +290,7 @@ template<typename Map, bool Const>
             }
 
             template<typename ...Args>
-            constexpr value_reference emplace(const K& key, Args&& ...args) {
+            constexpr value_reference emplace(const_key_reference key, Args&& ...args) {
                 auto it = index_map.find(key);
 
                 CCL_THROW_IF(it != index_map.end(), std::invalid_argument{"Key already present."});
@@ -301,6 +301,42 @@ template<typename Map, bool Const>
                 index_map.insert(key, item_index);
 
                 return ref;
+            }
+
+            /**
+             * Get the value for the given key. Throw an exception if the key
+             * is not present.
+             *
+             * @param key The key to get the value for.
+             *
+             * @return A reference to the value.
+             */
+            CCLNODISCARD constexpr value_reference at(const_key_reference key) {
+                auto it = index_map.find(key);
+
+                CCL_THROW_IF(it == index_map.end(), std::out_of_range{"Key not present."});
+
+                const size_type item_index = *it->second();
+
+                return data[item_index];
+            }
+
+            /**
+             * Get the value for the given key. Throw an exception if the key
+             * is not present.
+             *
+             * @param key The key to get the value for.
+             *
+             * @return A reference to the value.
+             */
+            CCLNODISCARD constexpr const_value_reference at(const_key_reference key) const {
+                auto it = index_map.find(key);
+
+                CCL_THROW_IF(it == index_map.end(), std::out_of_range{"Key not present."});
+
+                const size_type item_index = *it->second();
+
+                return data[item_index];
             }
     };
 }

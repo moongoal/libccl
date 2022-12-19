@@ -139,5 +139,31 @@ int main(int argc, char **argv) {
         equals(map.size(), 3ULL);
     });
 
+    suite.add_test("at", [] () {
+        test_map<S, int> map;
+
+        map.emplace({ 1, 2.0 }, 5);
+        map.emplace({ 2, 3.0 }, 6);
+        map.emplace({ 3, 3.0 }, 7);
+
+        equals(map.at({ 1, 2.0 }), 5);
+        equals(map.at({ 2, 3.0 }), 6);
+        equals(map.at({ 3, 3.0 }), 7);
+    });
+
+    suite.add_test("at (not present)", [] () {
+        test_map<S, int> map;
+
+        map.emplace({ 1, 2.0 }, 5);
+        map.emplace({ 2, 3.0 }, 6);
+        map.emplace({ 3, 3.0 }, 7);
+
+        throws<std::out_of_range>(
+            [&map] () {
+                const auto& x CCLUNUSED = map.at({ 1, 9.0 });
+            }
+        );
+    }, skip_if_exceptions_disabled);
+
     return suite.main(argc, argv);
 }

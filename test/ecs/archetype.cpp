@@ -90,5 +90,34 @@ int main(int argc, char **argv) {
         equals(arch.get_entity_component<double>(e2), 11.0);
     });
 
+    suite.add_test("copy_entity_components_from (widen)", [] () {
+        test_archetype source = test_archetype::make<int, double>();
+        test_archetype dest = test_archetype::make<int, double, float, char>();
+
+        const entity_t e{1};
+        const entity_t e2{2};
+
+        source.add_entity(e);
+        source.add_entity(e2);
+
+        source.set_entity_component<int>(e, 5);
+        source.set_entity_component<double>(e, 10);
+
+        source.set_entity_component<int>(e2, 6);
+        source.set_entity_component<double>(e2, 11);
+
+        dest.add_entity(e);
+        dest.add_entity(e2);
+
+        dest.copy_entity_components_from(e, source);
+        dest.copy_entity_components_from(e2, source);
+
+        equals(dest.get_entity_component<int>(e), 5);
+        equals(dest.get_entity_component<double>(e), 10.0);
+
+        equals(dest.get_entity_component<int>(e2), 6);
+        equals(dest.get_entity_component<double>(e2), 11.0);
+    });
+
     return suite.main(argc, argv);
 }
