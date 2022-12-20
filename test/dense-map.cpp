@@ -177,5 +177,55 @@ int main(int argc, char **argv) {
         );
     }, skip_if_exceptions_disabled);
 
+    suite.add_test("move-assignment operator", [] () {
+        test_map<S, int> map1;
+        test_map<S, int> map2;
+
+        map1.emplace({ 1, 2.0 }, 5);
+        map1.emplace({ 2, 3.0 }, 6);
+        map1.emplace({ 3, 3.0 }, 7);
+
+        map2.emplace({ 1, 2.0 }, 8);
+        map2.emplace({ 2, 3.0 }, 9);
+        map2.emplace({ 3, 3.0 }, 10);
+        map2.emplace({ 3, 4.0 }, 10);
+
+        map1 = std::move(map2);
+
+        equals(map1.at({ 1, 2.0 }), 8);
+        equals(map1.at({ 2, 3.0 }), 9);
+        equals(map1.at({ 3, 3.0 }), 10);
+        equals(map1.at({ 3, 4.0 }), 10);
+        equals(map1.size(), 4ULL);
+    });
+
+    suite.add_test("copy-assignment operator", [] () {
+        test_map<S, int> map1;
+        test_map<S, int> map2;
+
+        map1.emplace({ 1, 2.0 }, 5);
+        map1.emplace({ 2, 3.0 }, 6);
+        map1.emplace({ 3, 3.0 }, 7);
+
+        map2.emplace({ 1, 2.0 }, 8);
+        map2.emplace({ 2, 3.0 }, 9);
+        map2.emplace({ 3, 3.0 }, 10);
+        map2.emplace({ 3, 4.0 }, 10);
+
+        map1 = map2;
+
+        equals(map1.at({ 1, 2.0 }), 8);
+        equals(map1.at({ 2, 3.0 }), 9);
+        equals(map1.at({ 3, 3.0 }), 10);
+        equals(map1.at({ 3, 4.0 }), 10);
+        equals(map1.size(), 4ULL);
+
+        equals(map2.at({ 1, 2.0 }), 8);
+        equals(map2.at({ 2, 3.0 }), 9);
+        equals(map2.at({ 3, 3.0 }), 10);
+        equals(map2.at({ 3, 4.0 }), 10);
+        equals(map2.size(), 4ULL);
+    });
+
     return suite.main(argc, argv);
 }

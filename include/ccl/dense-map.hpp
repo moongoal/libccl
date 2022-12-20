@@ -359,6 +359,24 @@ template<typename Map, bool Const>
 
                 return emplace(key);
             }
+
+            constexpr dense_map& operator=(dense_map&& other) {
+                alloc::operator=(std::move(other));
+
+                data = std::move(other.data);
+                index_map = std::move(other.index_map);
+
+                return *this;
+            }
+
+            constexpr dense_map& operator=(const dense_map& other) {
+                alloc::operator=(other);
+
+                data = other.data;
+                index_map = other.index_map;
+
+                return *this;
+            }
     };
 }
 
