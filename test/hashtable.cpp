@@ -299,5 +299,47 @@ int main(int argc, char **argv) {
         equals(destruction_counter, 3);
     });
 
+    suite.add_test("move-assignment operator", [] () {
+        using my_hashtable = test_map<int, float>;
+
+        my_hashtable x, y;
+
+        x.emplace(1, 2);
+        x.emplace(2, 3);
+
+        y.emplace(1, 1);
+        y.emplace(2, 3);
+        y.emplace(3, 4);
+
+        x = std::move(y);
+
+        equals(x.at(1), 1);
+        equals(x.at(2), 3);
+        equals(x.at(3), 4);
+    });
+
+    suite.add_test("copy-assignment operator", [] () {
+        using my_hashtable = test_map<int, float>;
+
+        my_hashtable x, y;
+
+        x.emplace(1, 2);
+        x.emplace(2, 3);
+
+        y.emplace(1, 1);
+        y.emplace(2, 3);
+        y.emplace(3, 4);
+
+        x = y;
+
+        equals(x.at(1), 1);
+        equals(x.at(2), 3);
+        equals(x.at(3), 4);
+
+        equals(y.at(1), 1);
+        equals(y.at(2), 3);
+        equals(y.at(3), 4);
+    });
+
     return suite.main(argc, argv);
 }

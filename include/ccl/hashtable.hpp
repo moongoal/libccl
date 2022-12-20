@@ -262,8 +262,11 @@ namespace ccl {
                     }
                 }
 
-                alloc::get_allocator()->deallocate(keys);
-                alloc::get_allocator()->deallocate(values);
+                if(keys) {
+                    alloc::get_allocator()->deallocate(keys);
+                    alloc::get_allocator()->deallocate(values);
+                }
+
                 slot_map.destroy();
 
                 _capacity = 0;
@@ -276,19 +279,39 @@ namespace ccl {
             }
 
             constexpr hashtable& operator =(const hashtable &other) {
+                destroy();
                 alloc::operator =(other);
-                slot_map = other.slot_map;
-                keys = other.keys;
-                values = other.values;
+                reserve(other._capacity);
+
+                if constexpr(
+                    std::is_trivially_copyable_v<K>
+                    && std::is_trivially_copyable_v<V>
+                ) { // Both trivially copiable
+                    ::memcpy(keys, other.keys, sizeof(K) * _capacity);
+                    ::memcpy(values, other.values, sizeof(V) * _capacity);
+
+                    slot_map = other.slot_map;
+                } else {
+                    for(const auto& pair : other) {
+                        insert(*pair.first(), *pair.second());
+                    }
+                }
 
                 return *this;
             }
 
             constexpr hashtable& operator =(hashtable &&other) {
+                destroy();
+
                 alloc::operator =(std::move(other));
                 slot_map = std::move(other.slot_map);
                 keys = std::move(other.keys);
                 values = std::move(other.values);
+                _capacity = other._capacity;
+
+                other.keys = nullptr;
+                other.values = nullptr;
+                other._capacity = 0;
 
                 return *this;
             }
