@@ -34,5 +34,18 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("add_components", []() {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<int, float>(e, 5, 2.0f);
+
+        const typename test_registry::archetype * const arch = registry.get_entity_archetype(e);
+
+        equals(arch->get_entity_component<int>(e), 5);
+        equals(arch->get_entity_component<float>(e), 2.0f);
+    });
+
     return suite.main(argc, argv);
 }

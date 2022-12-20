@@ -29,6 +29,8 @@ namespace ccl::ecs {
             using component_pointer = std::unique_ptr<component_i>;
             using component_collection = hashtable<std::size_t, component_pointer, hash<std::size_t>, allocator_type>;
 
+            static constexpr hash_t invalid_id = ~static_cast<hash_t>(0);
+
         private:
             /**
              * The ID of the archetype, computed by aggregating
@@ -61,11 +63,23 @@ namespace ccl::ecs {
                 ), ...);
             }
 
-            constexpr archetype(hash_t id) : archetype_id{id} {}
-
         public:
+            constexpr archetype(hash_t id) : archetype_id{id} {}
+            constexpr archetype() : archetype_id{invalid_id} {}
             constexpr archetype(const archetype& other) = delete;
             constexpr archetype(archetype&& other) = default;
+
+            constexpr archetype& operator=(const archetype&) = delete;
+
+            constexpr archetype& operator=(archetype&& other) {
+                archetype_id = other.archetype_id;
+                entity_index_map = std::move(other.entity_index_map);
+                components = std::move(other.components);
+
+                other.archetype_id = invalid_id;
+
+                return *this;
+            }
 
             /**
              * Create a new archetype from its component type set.

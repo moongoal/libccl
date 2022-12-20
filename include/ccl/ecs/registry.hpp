@@ -33,7 +33,7 @@ namespace ccl::ecs {
 
         private:
             entity_id_t next_entity_id = 0;
-            dense_map<hash_t, archetype> archetype_map;
+            dense_map<hash_t, archetype, allocator_type> archetype_map;
 
         public:
             /**
@@ -68,10 +68,10 @@ namespace ccl::ecs {
                 if(new_arch_it == archetype_map.end()) {
                     new_arch = &archetype_map.emplace(
                         entity,
-                        archetype::template make_id<Components...>(components...)
+                        archetype::template make_id<Components...>()
                     );
                 } else {
-                    new_arch = &*new_arch_it;
+                    new_arch = new_arch_it->second();
                 }
 
                 CCL_ASSERT(new_arch);
