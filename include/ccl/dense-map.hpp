@@ -194,6 +194,13 @@ template<typename Map, bool Const>
                 return wrap_index(hash(x), capacity);
             }
 
+            void reset_indices_after_removal(const size_type removed_index) {
+                for(auto pair : index_map) {
+                    size_type &current_index = *pair.second();
+                    current_index -= current_index > removed_index;
+                }
+            }
+
         public:
             constexpr dense_map(allocator_type * const allocator = nullptr) : alloc{allocator} {}
 
@@ -231,6 +238,7 @@ template<typename Map, bool Const>
 
                     data.erase(data.begin() + index);
                     index_map.erase(key);
+                    reset_indices_after_removal(index);
                 }
             }
 
@@ -242,6 +250,7 @@ template<typename Map, bool Const>
 
                     data.erase(data.begin() + index);
                     index_map.erase(key);
+                    reset_indices_after_removal(index);
                 }
             }
 

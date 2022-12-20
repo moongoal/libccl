@@ -57,6 +57,18 @@ int main(int argc, char **argv) {
         check(map.size() == 2);
     });
 
+    suite.add_test("access after remove", [] () {
+        test_map<int, S> map;
+
+        map.insert(1, { 1, 2.0 });
+        map.insert(2, { 2, 3.0 });
+        map.insert(3, { 3, 3.0 });
+
+        map.remove(2);
+
+        equals(map.at(3), S{ 3, 3.0 });
+    });
+
     suite.add_test("contains", [] () {
         test_map<int, S> map;
 

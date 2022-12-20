@@ -8,6 +8,7 @@
 
 #include <typeinfo>
 #include <memory>
+#include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hashtable.hpp>
@@ -384,7 +385,7 @@ namespace ccl::ecs {
              */
             constexpr void remove_entity(const entity_type entity) {
                 auto entity_index_it = entity_index_map.find(entity);
-                const size_type entity_index = *entity_index_it->second();
+                size_type &entity_index = *entity_index_it->second();
 
                 auto last_index_it = entity_index_map.end_values() - 1;
 
@@ -397,7 +398,7 @@ namespace ccl::ecs {
                         component->erase(entity_index);
                     }
                 } else { // Removing not last element
-                    const size_type source_entity_index = *last_index_it;
+                    size_type& source_entity_index = *last_index_it;
                     const entity_type source_entity = get_component<entity_type>().get()[source_entity_index];
 
                     // Keep the array compact by swapping with last item
@@ -409,7 +410,7 @@ namespace ccl::ecs {
                         component->erase(source_entity_index);
                     }
 
-                    entity_index_map[source_entity] = entity_index;
+                    source_entity_index = entity_index;
                 }
 
                 entity_index_map.remove(entity_index_it);
