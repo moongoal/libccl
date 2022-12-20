@@ -26,6 +26,12 @@ namespace ccl::ecs {
             dense_map<hash_t, archetype> archetype_map;
 
         public:
+            /**
+             * Add a new entity to this registry. The returned entity is guaranteed
+             * To be new, unique and of the 0th generation.
+             *
+             * @return The newly created entity.
+             */
             entity_t add_entity() {
                 return entity_t::make(0, next_entity_id++);
             }
