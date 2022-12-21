@@ -70,7 +70,7 @@ namespace ccl::ecs {
                     if(old_arch) {
                         new_arch = &archetype_map.emplace(
                             entity,
-                            old_arch // TODO: make_from_template
+                            archetype::make_from_template(*old_arch)
                         );
                     } else {
                         new_arch = &archetype_map.emplace(

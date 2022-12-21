@@ -435,6 +435,26 @@ namespace ccl::ecs {
 
                 entity_index_map.remove(entity_index_it);
             }
+
+            /**
+             * Create an empty archetype with the same components as `tmpl`.
+             *
+             * @param tmpl The template archetype.
+             *
+             * @return The new empty archetype.
+             */
+            static constexpr archetype make_from_template(const archetype& tmpl) {
+                archetype arch{tmpl.id()};
+
+                for(const auto& pair : tmpl.components) {
+                    arch.components.emplace(
+                        *pair.first(),
+                        pair.second()->get()->clone_empty()
+                    );
+                }
+
+                return arch;
+            }
     };
 }
 

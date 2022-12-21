@@ -79,6 +79,14 @@ namespace ccl::ecs {
          */
         virtual void move(const std::size_t index_from, const std::size_t index_to) = 0;
 
+        /**
+         * Create an empty clone of this component. The new component
+         * is heap-allocated via `new`.
+         *
+         * @return The pointer to the newly created clone.
+         */
+        virtual component_i* clone_empty() = 0;
+
         template<typename T, typed_allocator<T> Allocator>
         constexpr component<T, Allocator>& cast() {
             return *
@@ -186,6 +194,10 @@ namespace ccl::ecs {
 
             static constexpr std::size_t make_id() {
                 return typeid(component<T, Allocator>).hash_code();
+            }
+
+            virtual component_i* clone_empty() override {
+                return new component;
             }
     };
 }
