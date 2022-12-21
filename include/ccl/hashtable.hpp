@@ -219,7 +219,10 @@ namespace ccl {
                 slot_map{std::move(other.slot_map)},
                 keys{std::move(other.keys)},
                 values{std::move(other.values)}
-            {}
+            {
+                other.keys = nullptr;
+                other.values = nullptr;
+            }
 
             template<typename InputRange>
             requires std::ranges::input_range<InputRange>
