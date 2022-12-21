@@ -10,6 +10,7 @@
 #include <limits>
 #include <ccl/api.hpp>
 #include <ccl/type-traits.hpp>
+#include <ccl/debug.hpp>
 #include <ccl/paged-vector.hpp>
 #include <ccl/memory/allocator.hpp>
 
@@ -58,6 +59,13 @@ namespace ccl::ecs {
              * @param index The index of the value to remove.
              */
             virtual void erase(const std::size_t index) = 0;
+
+            /**
+             * Resize the component collection.
+             *
+             * @param new_size The new size of the collection.
+             */
+            virtual void resize(const std::size_t new_size) = 0;
 
             /**
              * Move an item from another collection.
@@ -125,6 +133,10 @@ namespace ccl::ecs {
 
             virtual void emplace_empty() override {
                 items.emplace();
+            }
+
+            virtual void resize(const std::size_t new_size) override {
+                items.resize(new_size);
             }
 
             virtual void erase(const std::size_t index) override {
@@ -215,27 +227,31 @@ namespace ccl::ecs {
 
             template<typename T>
             void set(const std::size_t index, const T& value) {
-                if constexpr(std::is_pointer_v<T>) {
-                    return set(index, reinterpret_cast<const void*>(value));
+                if constexpr(std::is_pointer_v<T> || std::is_null_pointer_v<T>) {
+                    return set(index, static_cast<const void*>(value));
                 } else {
                     typed_ref<T>().set(index, value);
                 }
             }
 
             void set(const std::size_t index, const void * const value) {
+                CCL_THROW_IF(!value, std::invalid_argument{"Value cannot be null."});
+
                 ptr.get()->set(index, value);
             }
 
             template<typename T>
             void push_back(const T& value) {
-                if constexpr(std::is_pointer_v<T>) {
-                    return push_back(reinterpret_cast<const void*>(value));
+                if constexpr(std::is_pointer_v<T> || std::is_null_pointer_v<T>) {
+                    return push_back(static_cast<const void*>(value));
                 } else {
                     typed_ref<T>().push_back(value);
                 }
             }
 
             void push_back(const void * const value) {
+                CCL_THROW_IF(!value, std::invalid_argument{"Value cannot be null."});
+
                 ptr.get()->push_back(value);
             }
 
@@ -250,6 +266,15 @@ namespace ccl::ecs {
 
             void emplace_empty() {
                 ptr.get()->emplace_empty();
+            }
+
+            template<typename T>
+            void resize(const std::size_t new_size) {
+                typed_ref<T>().resize(new_size);
+            }
+
+            void resize(const std::size_t new_size) {
+                ptr.get()->resize(new_size);
             }
 
             void erase(const std::size_t index) {

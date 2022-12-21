@@ -243,5 +243,29 @@ int main(int argc, char **argv) {
         check(arch2.has_entity(e3));
     });
 
+    suite.add_test("add_components", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        const entity_t e{1};
+        const entity_t e2{2};
+        const entity_t e3{3};
+
+        arch.add_entity(e);
+        arch.add_entity(e2);
+        arch.add_entity(e3);
+
+        arch.add_components<float, char>();
+        arch.get_entity_component<char>(e3);
+    });
+
+    suite.add_test("add_component (empty)", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const entity_t e3{3};
+
+        arch.add_components<float, char>();
+        arch.add_entity(e3);
+        arch.get_entity_component<char>(e3);
+    });
+
     return suite.main(argc, argv);
 }

@@ -38,6 +38,16 @@ int main(int argc, char **argv) {
         equals(c.get<int>(1), n);
     });
 
+    suite.add_test("set (null pointer)", [] () {
+        test_component c = test_component::make<int>();
+
+        c.emplace_empty();
+
+        throws<std::invalid_argument>([&c] () {
+            c.set(0, nullptr);
+        });
+    });
+
     suite.add_test("push_back", [] () {
         test_component c = test_component::make<int>();
 
@@ -48,6 +58,14 @@ int main(int argc, char **argv) {
 
         equals(c.get<int>(0), 1);
         equals(c.get<int>(1), n);
+    });
+
+    suite.add_test("push_back (null pointer)", [] () {
+        test_component c = test_component::make<int>();
+
+        throws<std::invalid_argument>([&c] () {
+            c.push_back(nullptr);
+        });
     });
 
     suite.add_test("push_back_from", [] () {
@@ -149,7 +167,18 @@ int main(int argc, char **argv) {
         equals(c.get<int>(2), 3);
     });
 
-    // TODO: Add exceptions support and test for new functions
+    suite.add_test("resize", [] () {
+        test_component c = test_component::make<int>();
+
+        c.resize(0);
+        equals(c.size(), 0ULL);
+
+        c.resize(1);
+        equals(c.size(), 1ULL);
+
+        c.template resize<int>(2);
+        equals(c.size(), 2ULL);
+    });
 
     return suite.main(argc, argv);
 }

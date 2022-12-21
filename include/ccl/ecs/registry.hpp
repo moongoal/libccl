@@ -57,7 +57,7 @@ namespace ccl::ecs {
                 const entity_t entity,
                 const Components&& ...components
             ) {
-                archetype * const old_arch = get_entity_archetype(entity);
+                archetype * old_arch = get_entity_archetype(entity);
                 archetype * new_arch;
 
                 hash_t new_archetype_id = old_arch
@@ -69,12 +69,12 @@ namespace ccl::ecs {
                 if(new_arch_it == archetype_map.end()) {
                     if(old_arch) {
                         new_arch = &archetype_map.emplace(
-                            entity,
+                            new_archetype_id,
                             archetype::make_from_template(*old_arch)
                         );
                     } else {
                         new_arch = &archetype_map.emplace(
-                            entity,
+                            new_archetype_id,
                             archetype::template make<Components...>()
                         );
                     }
@@ -84,6 +84,12 @@ namespace ccl::ecs {
 
                 CCL_ASSERT(new_arch);
 
+                if(old_arch) {
+                    // Adding a new archetype may trigger the vector
+                    // reallocation and invalidate the pointer.
+                    old_arch = get_entity_archetype(entity);
+                }
+
                 new_arch->add_entity(entity);
 
                 if(old_arch) {
@@ -91,6 +97,7 @@ namespace ccl::ecs {
                     old_arch->remove_entity(entity);
                 }
 
+                new_arch->template add_components<Components...>();
                 (new_arch->set_entity_component(entity, components), ...);
             }
 

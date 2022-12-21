@@ -441,6 +441,22 @@ namespace ccl::ecs {
 
                 return arch;
             }
+
+            template<typename ...Ts>
+            constexpr void add_components() {
+                const auto first = components.begin();
+
+                // This is always viable as there is at least
+                // an entity_t component
+                const std::size_t size = first->second()->size();
+
+                (components.emplace(
+                    component_type::template make_id<Ts>(),
+                    component_type::template make<Ts>()
+                ).template resize<Ts>(size), ...);
+
+                archetype_id = extend_id<Ts...>();
+            }
     };
 }
 
