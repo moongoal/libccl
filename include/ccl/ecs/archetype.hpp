@@ -67,7 +67,13 @@ namespace ccl::ecs {
             constexpr archetype(hash_t id) : archetype_id{id} {}
             constexpr archetype() : archetype_id{invalid_id} {}
             constexpr archetype(const archetype& other) = delete;
-            constexpr archetype(archetype&& other) = default;
+
+            constexpr archetype(archetype&& other)
+                : archetype_id{other.archetype_id},
+                entity_index_map{std::move(other.entity_index_map)},
+                components{std::move(other.components)} {
+                    other.archetype_id = invalid_id;
+            }
 
             constexpr archetype& operator=(const archetype&) = delete;
 
