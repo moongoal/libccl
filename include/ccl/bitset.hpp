@@ -69,22 +69,26 @@ namespace ccl {
 
             explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}
-            constexpr bitset(bitset &&other) : clusters{std::move(other.clusters)}, _size_bits{std::move(other._size_bits)} {}
+            constexpr bitset(bitset &&other) : clusters{std::move(other.clusters)}, _size_bits{std::move(other._size_bits)} {
+                other._size_bits = 0;
+            }
 
             ~bitset() {
                 destroy();
             }
 
-            bitset& operator =(const bitset &other) {
+            constexpr bitset& operator =(const bitset &other) {
                 clusters = other.clusters;
                 _size_bits = other._size_bits;
 
                 return *this;
             }
 
-            bitset& operator =(bitset &&other) {
+            constexpr bitset& operator =(bitset &&other) {
                 clusters = std::move(other.clusters);
                 _size_bits = std::move(other._size_bits);
+
+                other._size_bits = 0;
 
                 return *this;
             }
@@ -92,7 +96,7 @@ namespace ccl {
             /**
              * Clear this bitset, removing all bits.
              */
-            void clear() {
+            constexpr void clear() {
                 clusters.clear();
                 _size_bits = 0;
             }
@@ -100,7 +104,7 @@ namespace ccl {
             /**
              * Release any resources.
              */
-            void destroy() noexcept {
+            constexpr void destroy() noexcept {
                 clusters.destroy();
                 _size_bits = 0;
             }

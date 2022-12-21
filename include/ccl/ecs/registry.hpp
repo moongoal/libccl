@@ -58,17 +58,18 @@ namespace ccl::ecs {
                 const Components&& ...components
             ) {
                 archetype * const old_arch = get_entity_archetype(entity);
-
-                CCL_THROW_IF(!old_arch, std::out_of_range{"Invalid entity."});
-
-                const hash_t new_archetype_id = old_arch->template extend_id<Components...>();
-                auto new_arch_it = archetype_map.find(new_archetype_id);
                 archetype * new_arch;
+
+                hash_t new_archetype_id = old_arch
+                    ? old_arch->template extend_id<Components...>()
+                    : archetype::template make_id<Components...>();
+
+                auto new_arch_it = archetype_map.find(new_archetype_id);
 
                 if(new_arch_it == archetype_map.end()) {
                     new_arch = &archetype_map.emplace(
                         entity,
-                        archetype::template make_id<Components...>()
+                        archetype::template make<Components...>()
                     );
                 } else {
                     new_arch = new_arch_it->second();
@@ -77,8 +78,12 @@ namespace ccl::ecs {
                 CCL_ASSERT(new_arch);
 
                 new_arch->add_entity(entity);
-                new_arch->copy_entity_components_from(entity, *old_arch);
-                old_arch->remove_entity(entity);
+
+                if(old_arch) {
+                    new_arch->copy_entity_components_from(entity, *old_arch);
+                    old_arch->remove_entity(entity);
+                }
+
                 (new_arch->set_entity_component(entity, components), ...);
             }
 
