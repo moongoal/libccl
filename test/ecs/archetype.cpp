@@ -6,6 +6,7 @@ using namespace ccl;
 using namespace ccl::ecs;
 
 using test_archetype = archetype<counting_test_allocator>;
+using test_component = component<counting_test_allocator>;
 
 int main(int argc, char **argv) {
     test_suite suite;
@@ -30,23 +31,23 @@ int main(int argc, char **argv) {
         check(!arch.has_component<float>());
     });
 
-    suite.add_test("get_generic_component", [] () {
+    suite.add_test("get_component_by_id", [] () {
         test_archetype arch = test_archetype::make<int, double>();
-        const auto entity_id = component<entity_t, counting_test_allocator>::make_id();
-        const auto int_id = component<int, counting_test_allocator>::make_id();
-        const auto double_id = component<double, counting_test_allocator>::make_id();
+        const auto entity_id = test_component::template make_id<entity_t>();
+        const auto int_id = test_component::template make_id<int>();
+        const auto double_id = test_component::template make_id<double>();
 
-        check(arch.get_generic_component(entity_id));
-        check(arch.get_generic_component(int_id));
-        check(arch.get_generic_component(double_id));
+        arch.get_component_by_id(entity_id);
+        arch.get_component_by_id(int_id);
+        arch.get_component_by_id(double_id);
     });
 
-    suite.add_test("get_generic_component (not present)", [] () {
+    suite.add_test("get_component_by_id (not present)", [] () {
         test_archetype arch = test_archetype::make<int, double>();
-        const auto float_id = component<float, counting_test_allocator>::make_id();
+        const auto float_id = test_component::make_id<float>();
 
         throws<std::out_of_range>([&arch, float_id] () {
-            arch.get_generic_component(float_id);
+            arch.get_component_by_id(float_id);
         });
     });
 

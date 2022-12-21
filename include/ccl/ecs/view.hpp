@@ -23,12 +23,13 @@ namespace ccl::ecs {
     class view {
         public:
             using archetype_type = archetype<Allocator>;
+            using component_type = component<Allocator>;
 
             static constexpr std::size_t component_count = sizeof...(Components);
 
         private:
             std::size_t index = 0; // Ref iteration index
-            std::array<component_i*, component_count> refs;
+            std::array<component_type, component_count> refs;
 
             template<typename CurrentComponent, typename ...RestComponents>
             static void set_view_components(view& v, const archetype_type& arch, const std::size_t index = 0) {
@@ -40,14 +41,14 @@ namespace ccl::ecs {
             }
 
             template<typename T, typename CurrentComponent, typename ...RestComponents>
-            const component_i* get_generic_component(const std::size_t i = 0) const {
+            const component_type* get_component_by_id(const std::size_t i = 0) const {
                 if constexpr(std::is_same_v<T, CurrentComponent>) {
                     return refs[i];
                 }
 
                 static_assert(sizeof...(RestComponents) > 0, "Component not found.");
 
-                return get_generic_component<T, RestComponents...>(i + 1);
+                return get_component_by_id<T, RestComponents...>(i + 1);
             }
 
         public:
@@ -67,10 +68,10 @@ namespace ccl::ecs {
              * @return A reference to the requested component for the current item.
              */
             template<typename T>
-            constexpr const typename component<T, Allocator>::value_type& get() const {
-                const component_i * const g = get_generic_component<T, Components...>();
+            constexpr const T& get() const {
+                const component_type * const g = get_component_by_id<T, Components...>();
 
-                return g->template cast<T, Allocator>()[index];
+                return g->template get<T>(index);
             }
 
             /**
