@@ -186,5 +186,61 @@ int main(int argc, char **argv) {
         equals(arch.get_component<entity_t>().size(), 0ULL);
     });
 
+    suite.add_test("move assignment operator (empty)", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        test_archetype arch2 = test_archetype::make<int, double>();
+
+        const entity_t e{1};
+        const entity_t e2{2};
+        const entity_t e3{3};
+
+        arch.add_entity(e);
+        arch.add_entity(e2);
+        arch.add_entity(e3);
+
+        arch2 = std::move(arch);
+
+        check(arch2.has_entity(e));
+        check(arch2.has_entity(e2));
+        check(arch2.has_entity(e3));
+    });
+
+    suite.add_test("move assignment operator (initialized)", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        test_archetype arch2 = test_archetype::make<int, double>();
+
+        const entity_t e{1};
+        const entity_t e2{2};
+        const entity_t e3{3};
+
+        arch.add_entity(e);
+        arch.add_entity(e2);
+        arch2.add_entity(e3);
+
+        arch2 = std::move(arch);
+
+        check(arch2.has_entity(e));
+        check(arch2.has_entity(e2));
+        check(!arch2.has_entity(e3));
+    });
+
+    suite.add_test("move ctor", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+
+        const entity_t e{1};
+        const entity_t e2{2};
+        const entity_t e3{3};
+
+        arch.add_entity(e);
+        arch.add_entity(e2);
+        arch.add_entity(e3);
+
+        test_archetype arch2{std::move(arch)};
+
+        check(arch2.has_entity(e));
+        check(arch2.has_entity(e2));
+        check(arch2.has_entity(e3));
+    });
+
     return suite.main(argc, argv);
 }
