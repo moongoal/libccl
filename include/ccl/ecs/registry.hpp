@@ -67,10 +67,17 @@ namespace ccl::ecs {
                 auto new_arch_it = archetype_map.find(new_archetype_id);
 
                 if(new_arch_it == archetype_map.end()) {
-                    new_arch = &archetype_map.emplace(
-                        entity,
-                        archetype::template make<Components...>()
-                    );
+                    if(old_arch) {
+                        new_arch = &archetype_map.emplace(
+                            entity,
+                            old_arch // TODO: make_from_template
+                        );
+                    } else {
+                        new_arch = &archetype_map.emplace(
+                            entity,
+                            archetype::template make<Components...>()
+                        );
+                    }
                 } else {
                     new_arch = new_arch_it->second();
                 }
