@@ -325,6 +325,8 @@ namespace ccl::ecs {
 
             /**
              * Extend an archetype ID with new components.
+             * This function can also be used to subtract components from the ID, by
+             * providing existing components as `Components`.
              *
              * @tparam Components The component types.
              *

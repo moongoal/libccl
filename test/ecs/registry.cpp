@@ -66,5 +66,34 @@ int main(int argc, char **argv) {
         differs(old_arch, arch);
     });
 
+    suite.add_test("remove_components", [] () {
+        test_registry registry;
+
+        const entity_t e1 = registry.add_entity();
+        const entity_t e2 = registry.add_entity();
+
+        registry.add_components<int, float, double>(e1, 5, 2.0f, 5.0);
+        registry.add_components<int, float, double>(e2, 5, 2.0f, 5.0);
+
+        registry.remove_components<int, float>(e2);
+
+        const auto * const a1 = registry.get_entity_archetype(e1);
+        const auto * const a2 = registry.get_entity_archetype(e2);
+
+        differs(a1, a2);
+    });
+
+    suite.add_test("remove_components (non-existing components)", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<int, float, double>(e, 5, 2.0f, 5.0);
+
+        throws<std::out_of_range>([&registry, e] () {
+            registry.remove_components<int, char>(e);
+        });
+    });
+
     return suite.main(argc, argv);
 }

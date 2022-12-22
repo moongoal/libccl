@@ -11,4 +11,11 @@
 #cmakedefine CCL_FEATURE_EXCEPTIONS
 #cmakedefine CCL_FEATURE_TYPECHECK_CASTS
 
+// Check whether the ECS registry checks
+// for existing components before adding/removing
+// new ones. Disabling this check may yield unexpected
+// results if adding already existing components or
+// removing non-existent ones.
+#define CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+
 #endif // CCL_FEATURES_HPP

@@ -55,12 +55,12 @@ namespace ccl::ecs {
             template<typename ...Components>
             void add_components(
                 const entity_t entity,
-                const Components&& ...components
+                Components&& ...components
             ) {
                 archetype * old_arch = get_entity_archetype(entity);
                 archetype * new_arch;
 
-                hash_t new_archetype_id = old_arch
+                const hash_t new_archetype_id = old_arch
                     ? old_arch->template extend_id<Components...>()
                     : archetype::template make_id<Components...>();
 
@@ -111,6 +111,47 @@ namespace ccl::ecs {
                 }
 
                 return nullptr;
+            }
+
+            template<typename ...Components>
+            void remove_components(const entity_t entity) {
+                archetype * old_arch = get_entity_archetype(entity);
+                archetype * new_arch = nullptr;
+
+                #ifdef CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+                CCL_THROW_IF(
+                    old_arch && ((!old_arch->template has_component<Components>()) || ...),
+                    std::out_of_range{"One or more components missing from entity's archetype."}
+                );
+                #endif // CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+
+                const hash_t new_archetype_id = old_arch->template extend_id<Components...>();
+
+                auto new_arch_it = archetype_map.find(new_archetype_id);
+
+                if(new_arch_it == archetype_map.end()) {
+                    if(old_arch) {
+                        new_arch = &archetype_map.emplace(
+                            new_archetype_id,
+                            archetype::make_from_template(*old_arch)
+                        );
+                    }
+                } else {
+                    new_arch = new_arch_it->second();
+                }
+
+                if(new_arch) {
+                    new_arch->add_entity(entity);
+
+                    if(old_arch) {
+                        // Removing an archetype may trigger an item
+                        // relocation and invalidate the pointer.
+                        old_arch = get_entity_archetype(entity);
+                        new_arch->copy_entity_components_from(entity, *old_arch);
+                        old_arch->remove_entity(entity);
+                    }
+                }
+
             }
     };
 }
