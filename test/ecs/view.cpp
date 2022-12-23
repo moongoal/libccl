@@ -1,7 +1,6 @@
 #include <ccl/test/test.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 #include <ccl/ecs/registry.hpp>
-#include <ccl/ecs/view.hpp>
 
 using namespace ccl;
 using namespace ccl::ecs;

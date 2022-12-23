@@ -60,12 +60,27 @@ namespace ccl::ecs {
             }
 
         public:
+            /**
+             * Add a new archetype to this view.
+             *
+             * @param arch The archetype to add.
+             */
             constexpr void add_archetype(const archetype& arch) {
                 CCL_THROW_IF(archetype_count == max_archetype_count, std::out_of_range{"Too many archetypes in view."});
+
+                #ifdef CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+                CCL_ASSERT(arch.template has_component<Components>() && ...);
+                #endif // CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
 
                 archetypes[archetype_count++] = &arch;
             }
 
+            /**
+             * Compute the size of this view as number of entities to
+             * iterate.
+             *
+             * @return The number of entities that will be iterate by this view.
+             */
             constexpr std::size_t size() const {
                 std::size_t total_size = 0;
 
@@ -76,6 +91,18 @@ namespace ccl::ecs {
                 return total_size;
             }
 
+            /**
+             * Iterate this view. The given iterator function will have
+             * the same types of the view in the same order and will
+             * accept constant references (or values) to items of the
+             * specified types in the same order as arguments.
+             *
+             * @example
+             *  const auto my_view = registry.view<int, float>();
+             *  view.iterate([] (const int, const float) { ... });
+             *
+             * @param iterator The iterator function.
+             */
             constexpr void iterate(const archetype_iterator iterator) const {
                 if constexpr(component_count > 0) {
                     component_array components;
