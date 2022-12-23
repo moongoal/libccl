@@ -45,7 +45,7 @@ namespace ccl::ecs {
             ) {
                 out_components[component_index] = &archetype.template get_component<Component>();
 
-                if constexpr(sizeof...(Rest)) {
+                if constexpr(sizeof...(Rest) > 0) {
                     set_archetype_components<Rest...>(archetype, out_components, component_index + 1);
                 }
             }
@@ -77,7 +77,7 @@ namespace ccl::ecs {
             }
 
             constexpr void iterate(const archetype_iterator iterator) const {
-                if constexpr(component_count) {
+                if constexpr(component_count > 0) {
                     component_array components;
 
                     for(std::size_t i = 0; i < archetype_count; ++i) {
