@@ -6,6 +6,7 @@
 #ifndef CCL_ECS_REGISTRY_HPP
 #define CCL_ECS_REGISTRY_HPP
 
+#include <array>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>
@@ -40,6 +41,14 @@ namespace ccl::ecs {
              * Add a new entity to this registry. The returned entity is guaranteed
              * To be new, unique and of the 0th generation. Will throw an `std::out_of_range`
              * exception if the maximum allowed number of entities is reached.
+             *
+             * Calling this function creates an entity with 0 components. This entity will
+             * never be iterated unless components are assigned to it. To make this iterable
+             * without assigning any components, explicitly call `add_components()` with no
+             * component types.
+             *
+             * @example
+             *  registry.add_components<>(registry.add_entity());
              *
              * @return The newly created entity.
              */
@@ -152,6 +161,22 @@ namespace ccl::ecs {
                     }
                 }
 
+            }
+
+            template<typename ...Components>
+            constexpr const ccl::ecs::view<allocator_type, Components...> view() {
+                const auto archetype_map_end = archetype_map.end_values();
+                ccl::ecs::view<allocator_type, Components...> view_object;
+
+                for(auto it = archetype_map.begin_values(); it != archetype_map_end; ++it) {
+                    const bool has_all_components = (it->template has_component<Components>() && ...);
+
+                    if(has_all_components) {
+                        view_object.add_archetype(*it);
+                    }
+                }
+
+                return view_object;
             }
     };
 }

@@ -16,4 +16,6 @@
 // Handle value with in bits
 #define CCL_HANDLE_VALUE_WIDTH 24
 
+#define CCL_ECS_VIEW_MAX_ARCHETYPE_COUNT 32
+
 #endif // CCL_DEFINITIONS_HPP

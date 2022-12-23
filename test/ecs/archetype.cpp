@@ -267,5 +267,16 @@ int main(int argc, char **argv) {
         arch.get_entity_component<char>(e3);
     });
 
+    suite.add_test("size", [] () {
+        test_archetype arch = test_archetype::make<int, double>();
+        const entity_t e3{3};
+
+        equals(arch.size(), 0ULL);
+
+        arch.add_entity(e3);
+
+        equals(arch.size(), 1ULL);
+    });
+
     return suite.main(argc, argv);
 }

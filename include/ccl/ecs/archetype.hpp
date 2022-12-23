@@ -323,6 +323,11 @@ namespace ccl::ecs {
                 return (component_type::template make_id<Components>() ^...);
             }
 
+            template<>
+            static constexpr hash_t make_id() {
+                return 0;
+            }
+
             /**
              * Extend an archetype ID with new components.
              * This function can also be used to subtract components from the ID, by
@@ -336,6 +341,11 @@ namespace ccl::ecs {
             template<typename ...Components>
             constexpr hash_t extend_id() {
                 return archetype_id ^ (component_type::template make_id<Components>() ^...);
+            }
+
+            template<>
+            constexpr hash_t extend_id() {
+                return archetype_id;
             }
 
             /**
@@ -458,6 +468,10 @@ namespace ccl::ecs {
                 ).template resize<Ts>(size), ...);
 
                 archetype_id = extend_id<Ts...>();
+            }
+
+            constexpr std::size_t size() const {
+                return get_component<entity_t>().size();
             }
     };
 }

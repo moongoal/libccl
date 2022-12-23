@@ -7,7 +7,9 @@
 #define CCL_ECS_VIEW_HPP
 
 #include <array>
+#include <functional>
 #include <ccl/api.hpp>
+#include <ccl/debug.hpp>
 #include <ccl/ecs/component.hpp>
 #include <ccl/ecs/archetype.hpp>
 
@@ -22,74 +24,77 @@ namespace ccl::ecs {
     template<typename Allocator, typename ...Components>
     class view {
         public:
-            using archetype_type = archetype<Allocator>;
-            using component_type = component<Allocator>;
+            using archetype = ccl::ecs::archetype<Allocator>;
+            using component = ccl::ecs::component<Allocator>;
+            using archetype_iterator = std::function<void(const Components& ...components)>;
 
+            static constexpr std::size_t max_archetype_count = CCL_ECS_VIEW_MAX_ARCHETYPE_COUNT;
             static constexpr std::size_t component_count = sizeof...(Components);
 
+            using component_array = std::array<const component*, component_count>;
+
         private:
-            std::size_t index = 0; // Ref iteration index
-            std::array<component_type, component_count> refs;
+            std::size_t archetype_count = 0;
+            std::array<const archetype*, max_archetype_count> archetypes;
 
-            template<typename CurrentComponent, typename ...RestComponents>
-            static void set_view_components(view& v, const archetype_type& arch, const std::size_t index = 0) {
-                v.refs[index] = arch.template get_component<CurrentComponent>();
+            template<typename Component, typename ...Rest>
+            static constexpr void set_archetype_components(
+                const archetype& archetype,
+                component_array& out_components,
+                const uint32_t component_index = 0
+            ) {
+                out_components[component_index] = &archetype.template get_component<Component>();
 
-                if constexpr(sizeof...(RestComponents)) {
-                    set_view_components<RestComponents...>(v, arch, index + 1);
+                if constexpr(sizeof...(Rest)) {
+                    set_archetype_components<Rest...>(archetype, out_components, component_index + 1);
                 }
             }
 
-            template<typename T, typename CurrentComponent, typename ...RestComponents>
-            const component_type* get_component_by_id(const std::size_t i = 0) const {
-                if constexpr(std::is_same_v<T, CurrentComponent>) {
-                    return refs[i];
+            template<typename TargetComponent, typename CurrentComponent, typename ...Rest>
+            static constexpr auto get_component(component_array& components, const uint32_t component_index = 0) {
+                if constexpr(std::is_same_v<TargetComponent, CurrentComponent>) {
+                    return components[component_index];
+                } else {
+                    return get_component<TargetComponent, Rest...>(components, component_index + 1);
                 }
-
-                static_assert(sizeof...(RestComponents) > 0, "Component not found.");
-
-                return get_component_by_id<T, RestComponents...>(i + 1);
             }
 
         public:
-            static view create(const archetype_type& arch) {
-                view v;
+            constexpr void add_archetype(const archetype& arch) {
+                CCL_THROW_IF(archetype_count == max_archetype_count, std::out_of_range{"Too many archetypes in view."});
 
-                set_view_components<Components...>(v, arch);
-
-                return v;
-            }
-
-            /**
-             * Access the current element from a given component.
-             *
-             * @tparam T The component type to access.
-             *
-             * @return A reference to the requested component for the current item.
-             */
-            template<typename T>
-            constexpr const T& get() const {
-                const component_type * const g = get_component_by_id<T, Components...>();
-
-                return g->template get<T>(index);
-            }
-
-            /**
-             * Advance to the next entity in the view.
-             */
-            constexpr void next() {
-                index += 1;
-            }
-
-            /**
-             * Reset the view.
-             */
-            constexpr void reset() {
-                index = 0;
+                archetypes[archetype_count++] = &arch;
             }
 
             constexpr std::size_t size() const {
-                return refs[0]->size();
+                std::size_t total_size = 0;
+
+                for(archetype * const a : archetypes) {
+                    total_size += a->size();
+                }
+
+                return total_size;
+            }
+
+            constexpr void iterate(const archetype_iterator iterator) const {
+                if constexpr(component_count) {
+                    component_array components;
+
+                    for(std::size_t i = 0; i < archetype_count; ++i) {
+                        const archetype& current_archetype = *archetypes[i];
+
+                        set_archetype_components<Components...>(current_archetype, components);
+                        const uint32_t entity_count = components[0]->size();
+
+                        for(uint32_t j = 0; j < entity_count; ++j) {
+                            iterator(
+                                get_component<Components, Components...>(components)
+                                    ->template get<Components>(j)
+                                ...
+                            );
+                        }
+                    }
+                }
             }
     };
 }
