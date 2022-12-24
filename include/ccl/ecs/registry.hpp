@@ -15,6 +15,7 @@
 #include <ccl/ecs/view.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/dense-map.hpp>
+#include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl::ecs {
     namespace internal {
@@ -23,8 +24,10 @@ namespace ccl::ecs {
     }
 
     template<basic_allocator Allocator>
-    class registry {
+    class registry : ccl::internal::with_optional_allocator<Allocator> {
         friend class internal::registry_editor<Allocator>;
+
+        using alloc = ccl::internal::with_optional_allocator<Allocator>;
 
         public:
             using allocator_type = Allocator;
@@ -33,10 +36,24 @@ namespace ccl::ecs {
             static constexpr entity_id_t max_entity_id = entity_t::underlying_type::low_part_max;
 
         private:
-            entity_id_t next_entity_id = 0;
+            entity_id_t next_entity_id;
             dense_map<hash_t, archetype, allocator_type> archetype_map;
 
         public:
+            explicit constexpr registry(allocator_type * const allocator = nullptr)
+                : alloc{allocator},
+                next_entity_id{0},
+                archetype_map{allocator}
+            {}
+
+            constexpr registry(const registry& other) = delete;
+
+            constexpr registry(registry&& other)
+                : alloc{std::move(other)},
+                next_entity_id{other.next_entity_id},
+                archetype_map{std::move(other.archetype_map)}
+            {}
+
             /**
              * Add a new entity to this registry. The returned entity is guaranteed
              * To be new, unique and of the 0th generation. Will throw an `std::out_of_range`
