@@ -30,5 +30,6 @@
 
 #include <ccl/memory/memory.hpp>
 #include <ccl/tables/tables.hpp>
+#include <ccl/ecs/registry.hpp>
 
 #endif // CCL_HPP
