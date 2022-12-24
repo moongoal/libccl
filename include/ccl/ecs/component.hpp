@@ -17,172 +17,188 @@
 namespace ccl::ecs {
     template<basic_allocator Allocator>
     class component {
-        struct iface {
-            virtual ~iface() = default;
+        public:
+            using allocator_type = Allocator;
 
-            /**
-             * @return The number of values in this component collection.
-             */
-            virtual std::size_t size() const = 0;
+        private:
+            struct iface {
+                virtual ~iface() = default;
 
-            /**
-             * Set an existing component's value.
-             *
-             * @param index The index of the value to assign.
-             * @param value The value to assign.
-             */
-            virtual void set(const std::size_t index, const void * const value) = 0;
+                /**
+                * @return The number of values in this component collection.
+                */
+                virtual std::size_t size() const = 0;
 
-            /**
-             * Push a new value at the end of the collection.
-             *
-             * @param value The value to push back.
-             */
-            virtual void push_back(const void * const value) = 0;
+                /**
+                * Set an existing component's value.
+                *
+                * @param index The index of the value to assign.
+                * @param value The value to assign.
+                */
+                virtual void set(const std::size_t index, const void * const value) = 0;
 
-            /**
-             * Push a new value from the given component to the end of this collection.
-             *
-             * @param index The index of the value in `other` to push back.
-             * @param other The other component collection to get the value from.
-             */
-            virtual void push_back_from(const std::size_t index, iface& other) = 0;
+                /**
+                * Push a new value at the end of the collection.
+                *
+                * @param value The value to push back.
+                */
+                virtual void push_back(const void * const value) = 0;
 
-            /**
-             * Emplace an empty value at the end of this collection.
-             */
-            virtual void emplace_empty() = 0;
+                /**
+                * Push a new value from the given component to the end of this collection.
+                *
+                * @param index The index of the value in `other` to push back.
+                * @param other The other component collection to get the value from.
+                */
+                virtual void push_back_from(const std::size_t index, iface& other) = 0;
 
-            /**
-             * Erase a value from this collection.
-             *
-             * @param index The index of the value to remove.
-             */
-            virtual void erase(const std::size_t index) = 0;
+                /**
+                * Emplace an empty value at the end of this collection.
+                */
+                virtual void emplace_empty() = 0;
 
-            /**
-             * Resize the component collection.
-             *
-             * @param new_size The new size of the collection.
-             */
-            virtual void resize(const std::size_t new_size) = 0;
+                /**
+                * Erase a value from this collection.
+                *
+                * @param index The index of the value to remove.
+                */
+                virtual void erase(const std::size_t index) = 0;
 
-            /**
-             * Move an item from another collection.
-             *
-             * @param other The collection to move the item from.
-             * @param index_from The index in `other` of the item to move.
-             * @param index_to The index to the existing item in this collection to move the value to.
-             */
-            virtual void move_from(
-                const iface& other,
-                const std::size_t index_from,
-                const std::size_t index_to
-            ) = 0;
+                /**
+                * Resize the component collection.
+                *
+                * @param new_size The new size of the collection.
+                */
+                virtual void resize(const std::size_t new_size) = 0;
 
-            /**
-             * Move an item within this collection.
-             *
-             * @param index_from The index of the item to move.
-             * @param index_to The index of the destination item.
-             */
-            virtual void move(const std::size_t index_from, const std::size_t index_to) = 0;
+                /**
+                * Move an item from another collection.
+                *
+                * @param other The collection to move the item from.
+                * @param index_from The index in `other` of the item to move.
+                * @param index_to The index to the existing item in this collection to move the value to.
+                */
+                virtual void move_from(
+                    const iface& other,
+                    const std::size_t index_from,
+                    const std::size_t index_to
+                ) = 0;
 
-            /**
-             * Create an empty clone of this component. The new component
-             * is heap-allocated via `new`.
-             *
-             * @return The pointer to the newly created clone.
-             */
-            virtual iface* clone_empty() const = 0;
-        };
+                /**
+                * Move an item within this collection.
+                *
+                * @param index_from The index of the item to move.
+                * @param index_to The index of the destination item.
+                */
+                virtual void move(const std::size_t index_from, const std::size_t index_to) = 0;
 
-        template<typename T>
-        struct typed_component final : public iface {
-            using item_collection = paged_vector<T, T*, Allocator>;
+                /**
+                * Create an empty clone of this component. The new component
+                * is heap-allocated via `new`.
+                *
+                * @return The pointer to the newly created clone.
+                */
+                virtual iface* clone_empty(allocator_type * const allocator) const = 0;
+            };
 
-            item_collection items;
+            template<typename T>
+            struct typed_component final : public iface {
+                using item_collection = paged_vector<T, T*, Allocator>;
 
-            virtual ~typed_component() = default;
+                item_collection items;
 
-            virtual std::size_t size() const override {
-                return items.size();
-            }
+                constexpr typed_component(allocator_type * const allocator = nullptr)
+                    : items{allocator}
+                {}
 
-            void set(const std::size_t index, const T& value) {
-                items[index] = value;
-            }
+                constexpr typed_component(const typed_component& other)
+                    : items{other.items}
+                {}
 
-            virtual void set(const std::size_t index, const void * const value) override {
-                items[index] = *reinterpret_cast<const T*>(value);
-            }
+                constexpr typed_component(typed_component&& other)
+                    : items{std::move(other.items)}
+                {}
 
-            void push_back(const T& value) {
-                items.push_back(value);
-            }
+                virtual ~typed_component() = default;
 
-            virtual void push_back(const void * const value) override {
-                items.push_back(*reinterpret_cast<const T*>(value));
-            }
+                virtual std::size_t size() const override {
+                    return items.size();
+                }
 
-            virtual void push_back_from(const std::size_t index, iface& other) override {
-                items.push_back(
-                    typed_component::typed_ref(other).items[index]
-                );
-            }
+                void set(const std::size_t index, const T& value) {
+                    items[index] = value;
+                }
 
-            virtual void emplace_empty() override {
-                items.emplace();
-            }
+                virtual void set(const std::size_t index, const void * const value) override {
+                    items[index] = *reinterpret_cast<const T*>(value);
+                }
 
-            virtual void resize(const std::size_t new_size) override {
-                items.resize(new_size);
-            }
+                void push_back(const T& value) {
+                    items.push_back(value);
+                }
 
-            virtual void erase(const std::size_t index) override {
-                items.erase(items.begin() + index);
-            }
+                virtual void push_back(const void * const value) override {
+                    items.push_back(*reinterpret_cast<const T*>(value));
+                }
 
-            virtual void move(const std::size_t index_from, const std::size_t index_to) override {
-                items[index_to] = items[index_from];
-            }
+                virtual void push_back_from(const std::size_t index, iface& other) override {
+                    items.push_back(
+                        typed_component::typed_ref(other).items[index]
+                    );
+                }
 
-            virtual iface* clone_empty() const override {
-                return new typed_component;
-            }
+                virtual void emplace_empty() override {
+                    items.emplace();
+                }
 
-            virtual void move_from(
-                const iface& other,
-                const std::size_t index_from,
-                const std::size_t index_to
-            ) override {
-                items[index_to] = typed_ref(other).items[index_from];
-            }
+                virtual void resize(const std::size_t new_size) override {
+                    items.resize(new_size);
+                }
 
-            static constexpr auto& typed_ref(iface& other) {
-                return
+                virtual void erase(const std::size_t index) override {
+                    items.erase(items.begin() + index);
+                }
 
-                    #ifdef CCL_FEATURE_TYPECHECK_CASTS
-                        dynamic_cast
-                    #else // CCL_FEATURE_TYPECHECK_CASTS
-                        reinterpret_cast
-                    #endif // CCL_FEATURE_TYPECHECK_CASTS
+                virtual void move(const std::size_t index_from, const std::size_t index_to) override {
+                    items[index_to] = items[index_from];
+                }
 
-                    <typed_component<std::remove_cvref_t<T>>&>(other);
-            }
+                virtual iface* clone_empty(allocator_type * const allocator) const override {
+                    return new typed_component{allocator};
+                }
 
-            static constexpr const auto& typed_ref(const iface& other) {
-                return
+                virtual void move_from(
+                    const iface& other,
+                    const std::size_t index_from,
+                    const std::size_t index_to
+                ) override {
+                    items[index_to] = typed_ref(other).items[index_from];
+                }
 
-                    #ifdef CCL_FEATURE_TYPECHECK_CASTS
-                        dynamic_cast
-                    #else // CCL_FEATURE_TYPECHECK_CASTS
-                        reinterpret_cast
-                    #endif // CCL_FEATURE_TYPECHECK_CASTS
+                static constexpr auto& typed_ref(iface& other) {
+                    return
 
-                    <const typed_component<std::remove_cvref_t<T>>&>(other);
-            }
-        };
+                        #ifdef CCL_FEATURE_TYPECHECK_CASTS
+                            dynamic_cast
+                        #else // CCL_FEATURE_TYPECHECK_CASTS
+                            reinterpret_cast
+                        #endif // CCL_FEATURE_TYPECHECK_CASTS
+
+                        <typed_component<std::remove_cvref_t<T>>&>(other);
+                }
+
+                static constexpr const auto& typed_ref(const iface& other) {
+                    return
+
+                        #ifdef CCL_FEATURE_TYPECHECK_CASTS
+                            dynamic_cast
+                        #else // CCL_FEATURE_TYPECHECK_CASTS
+                            reinterpret_cast
+                        #endif // CCL_FEATURE_TYPECHECK_CASTS
+
+                        <const typed_component<std::remove_cvref_t<T>>&>(other);
+                }
+            };
 
         public:
             using id_type = std::size_t;
@@ -214,10 +230,10 @@ namespace ccl::ecs {
             constexpr component(component&& other) : _id{other._id}, ptr{std::move(other.ptr)} {}
 
             template<typename T>
-            static component make() {
+            static component make(allocator_type * const allocator = nullptr) {
                 return component {
                     make_id<T>(),
-                    new typed_component<std::remove_cvref_t<T>>
+                    new typed_component<std::remove_cvref_t<T>>{allocator}
                 };
             }
 
@@ -285,8 +301,8 @@ namespace ccl::ecs {
                 ptr.get()->move(index_from, index_to);
             }
 
-            component clone_empty() const {
-                return component{_id, ptr.get()->clone_empty()};
+            component clone_empty(allocator_type * const allocator = nullptr) const {
+                return component{_id, ptr.get()->clone_empty(allocator)};
             }
 
             void move_from(
