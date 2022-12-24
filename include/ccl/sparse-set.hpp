@@ -28,6 +28,7 @@ namespace ccl {
             using size_type = uint32_t;
 
         private:
+            using alloc = internal::with_optional_allocator<Allocator>;
             using data_vector_type = vector<T, allocator_type>;
             using index_map_type = hashtable<T, size_type, hash_function_type, allocator_type>;
 
@@ -52,17 +53,17 @@ namespace ccl {
         public:
             constexpr sparse_set(
                 allocator_type * const allocator = nullptr
-            ) : internal::with_optional_allocator<Allocator>(allocator)
+            ) : alloc{allocator}
             {}
 
             constexpr sparse_set(const sparse_set &other)
-                : internal::with_optional_allocator<Allocator>(other.get_allocator()),
+                : alloc{other.get_allocator()},
                 data{other.data},
                 index_map{other.index_map}
             {}
 
             constexpr sparse_set(sparse_set &&other)
-                : internal::with_optional_allocator<Allocator>(other.get_allocator()),
+                : alloc{other.get_allocator()},
                 data{std::move(other.data)},
                 index_map{std::move(other.index_map)}
             {}
