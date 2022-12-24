@@ -13,7 +13,6 @@
 #include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hash.hpp>
-#include <ccl/internal/optional-allocator.hpp>
 #include <ccl/compressed-pair.hpp>
 #include <ccl/either.hpp>
 
@@ -152,7 +151,7 @@ template<typename Map, bool Const>
     }
 
     template<typename K, typename V, typed_allocator<K> Allocator = allocator, typed_hash_function<K> Hash = hash<K>>
-    class dense_map : internal::with_optional_allocator<Allocator> {
+    class dense_map {
         friend struct dense_map_iterator<dense_map, true>;
         friend struct dense_map_iterator<dense_map, false>;
 
@@ -174,8 +173,6 @@ template<typename Map, bool Const>
             using const_iterator = dense_map_iterator<dense_map, true>;
 
         private:
-            using alloc = internal::with_optional_allocator<Allocator>;
-
             data_vector_type data;
             index_map_type index_map;
 
@@ -202,17 +199,18 @@ template<typename Map, bool Const>
             }
 
         public:
-            constexpr dense_map(allocator_type * const allocator = nullptr) : alloc{allocator} {}
+            constexpr dense_map(allocator_type * const allocator = nullptr)
+                : data{allocator},
+                index_map{allocator}
+            {}
 
             constexpr dense_map(const dense_map &other)
-                : alloc{other.get_allocator()},
-                data{other.data},
+                : data{other.data},
                 index_map{other.index_map}
             {}
 
             constexpr dense_map(dense_map &&other)
-                : alloc{other.get_allocator()},
-                data{std::move(other.data)},
+                : data{std::move(other.data)},
                 index_map{std::move(other.index_map)}
             {}
 
@@ -361,8 +359,6 @@ template<typename Map, bool Const>
             }
 
             constexpr dense_map& operator=(dense_map&& other) {
-                alloc::operator=(std::move(other));
-
                 data = std::move(other.data);
                 index_map = std::move(other.index_map);
 
@@ -370,8 +366,6 @@ template<typename Map, bool Const>
             }
 
             constexpr dense_map& operator=(const dense_map& other) {
-                alloc::operator=(other);
-
                 data = other.data;
                 index_map = other.index_map;
 
