@@ -16,10 +16,11 @@
 #include <ccl/ecs/entity.hpp>
 #include <ccl/ecs/component.hpp>
 #include <ccl/either.hpp>
+#include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl::ecs {
     template<basic_allocator Allocator>
-    class archetype {
+    class archetype : internal::with_optional_allocator<Allocator> {
         public:
             using entity_type = entity_t;
             using entity_id = entity_id_t;
@@ -32,6 +33,8 @@ namespace ccl::ecs {
             static constexpr hash_t invalid_id = ~static_cast<hash_t>(0);
 
         private:
+            using alloc = internal::with_optional_allocator<Allocator>;
+
             /**
              * The ID of the archetype, computed by aggregating
              * its component IDs.
@@ -59,17 +62,25 @@ namespace ccl::ecs {
             constexpr void setup_components() {
                 (components.emplace(
                     component_type::template make_id<Components>(),
-                    component_type::template make<Components>()
+                    component_type::template make<Components>(alloc::get_allocator())
                 ), ...);
             }
 
         public:
-            constexpr archetype(const hash_t id) : archetype_id{id} {}
-            constexpr archetype() : archetype_id{invalid_id} {}
+            constexpr archetype(
+                const hash_t id = invalid_id,
+                allocator_type * const allocator = nullptr
+            ) : alloc{allocator},
+                archetype_id{id},
+                entity_index_map{allocator},
+                components{allocator}
+            {}
+
             constexpr archetype(const archetype& other) = delete;
 
             constexpr archetype(archetype&& other)
-                : archetype_id{other.archetype_id},
+                : alloc{std::move(other)},
+                archetype_id{other.archetype_id},
                 entity_index_map{std::move(other.entity_index_map)},
                 components{std::move(other.components)} {
                     other.archetype_id = invalid_id;
@@ -78,6 +89,8 @@ namespace ccl::ecs {
             constexpr archetype& operator=(const archetype&) = delete;
 
             constexpr archetype& operator=(archetype&& other) {
+                alloc::operator =(std::move(other));
+
                 archetype_id = other.archetype_id;
                 entity_index_map = std::move(other.entity_index_map);
                 components = std::move(other.components);
@@ -95,9 +108,9 @@ namespace ccl::ecs {
              *  added automatically to every archetype to track entity IDs.
              */
             template<typename ...Components>
-            static archetype make() {
+            static archetype make(allocator_type * const allocator = nullptr) {
                 const hash_t id = make_id<Components...>();
-                archetype arch{id};
+                archetype arch{id, allocator};
 
                 arch.setup_components<entity_type, Components...>();
 
@@ -441,13 +454,16 @@ namespace ccl::ecs {
              *
              * @return The new empty archetype.
              */
-            static constexpr archetype make_from_template(const archetype& tmpl) {
+            static constexpr archetype make_from_template(
+                const archetype& tmpl,
+                allocator_type * const allocator = nullptr
+            ) {
                 archetype arch{tmpl.id()};
 
                 for(const auto& pair : tmpl.components) {
                     arch.components.emplace(
                         *pair.first(),
-                        pair.second()->clone_empty()
+                        pair.second()->clone_empty(allocator)
                     );
                 }
 
@@ -464,7 +480,7 @@ namespace ccl::ecs {
 
                 (components.emplace(
                     component_type::template make_id<Ts>(),
-                    component_type::template make<Ts>()
+                    component_type::template make<Ts>(alloc::get_allocator())
                 ).template resize<Ts>(size), ...);
 
                 archetype_id = extend_id<Ts...>();
