@@ -17,8 +17,16 @@ Unstable: 🔴
 |Debug Utilities|🔴
 |Compressed Pair|🔴
 |Bitset|🔴
-|Allocator|🔴
+|Allocators|🔴
 |Tables|🔴
+|ECS|🔴
+|Dense Map|🔴
+|Handle|🔴
+|Packed Integer|🔴
+|Paged Vector|🔴
+|Set|🔴
+|Sparse Set|🔴
+|Tagged pointer|🔴
 
 ## Dependencies
 

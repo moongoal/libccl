@@ -1,7 +1,7 @@
 /**
  * @file
  *
- * Optional memory residency.
+ * Conditional memory residency.
  */
 #ifndef CCL_MAYBE_HPP
 #define CCL_MAYBE_HPP
