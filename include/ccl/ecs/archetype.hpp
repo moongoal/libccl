@@ -27,8 +27,8 @@ namespace ccl::ecs {
             using allocator_type = Allocator;
             using size_type = uint32_t;
             using entity_index_collection = dense_map<entity_type, size_type, allocator_type>;
-            using component_type = component<allocator_type>;
-            using component_collection = hashtable<std::size_t, component_type, hash<std::size_t>, allocator_type>;
+            using component = ccl::ecs::component<allocator_type>;
+            using component_collection = hashtable<std::size_t, component, hash<std::size_t>, allocator_type>;
 
             static constexpr hash_t invalid_id = ~static_cast<hash_t>(0);
 
@@ -61,8 +61,8 @@ namespace ccl::ecs {
             template<typename ...Components>
             constexpr void setup_components() {
                 (components.emplace(
-                    component_type::template make_id<Components>(),
-                    component_type::template make<Components>(alloc::get_allocator())
+                    component::template make_id<Components>(),
+                    component::template make<Components>(alloc::get_allocator())
                 ), ...);
             }
 
@@ -142,7 +142,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr bool has_component() const {
-                const std::size_t component_id = component_type::template make_id<T>();
+                const std::size_t component_id = component::template make_id<T>();
 
                 return components.contains(component_id);
             }
@@ -154,7 +154,7 @@ namespace ccl::ecs {
              *
              * @return The component collection.
              */
-            constexpr const component_type& get_component_by_id(const std::size_t component_id) const {
+            constexpr const component& get_component_by_id(const std::size_t component_id) const {
                 const auto component_it = components.find(component_id);
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
@@ -169,7 +169,7 @@ namespace ccl::ecs {
              *
              * @return The component collection.
              */
-            constexpr component_type& get_component_by_id(const std::size_t component_id) {
+            constexpr component& get_component_by_id(const std::size_t component_id) {
                 const auto component_it = components.find(component_id);
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
@@ -184,7 +184,7 @@ namespace ccl::ecs {
              *
              * @return The optional component collection, or nullptr.
              */
-            constexpr component_type* get_optional_component_by_id(const std::size_t component_id) {
+            constexpr component* get_optional_component_by_id(const std::size_t component_id) {
                 const auto component_it = components.find(component_id);
 
                 if(component_it != components.end()) {
@@ -201,7 +201,7 @@ namespace ccl::ecs {
              *
              * @return The optional component collection, or nullptr.
              */
-            constexpr const component_type* get_optional_component_by_id(const std::size_t component_id) const {
+            constexpr const component* get_optional_component_by_id(const std::size_t component_id) const {
                 const auto component_it = components.find(component_id);
 
                 if(component_it != components.end()) {
@@ -219,8 +219,8 @@ namespace ccl::ecs {
              * @return The optional component collection or nullptr if not present.
              */
             template<typename T>
-            constexpr component_type* get_optional_component() {
-                const std::size_t component_id = component_type::template make_id<T>();
+            constexpr component* get_optional_component() {
+                const std::size_t component_id = component::template make_id<T>();
 
                 return get_optional_component_by_id(component_id);
             }
@@ -233,8 +233,8 @@ namespace ccl::ecs {
              * @return The optional component collection or nullptr if not present.
              */
             template<typename T>
-            constexpr const component_type* get_optional_component() const {
-                const std::size_t component_id = component_type::template make_id<T>();
+            constexpr const component* get_optional_component() const {
+                const std::size_t component_id = component::template make_id<T>();
                 auto * const component = get_optional_component_by_id(component_id);
 
                 return get_optional_component_by_id(component_id);
@@ -248,8 +248,8 @@ namespace ccl::ecs {
              * @return The component.
              */
             template<typename T>
-            constexpr const component_type& get_component() const {
-                const std::size_t component_id = component_type::template make_id<T>();
+            constexpr const component& get_component() const {
+                const std::size_t component_id = component::template make_id<T>();
 
                 return get_component_by_id(component_id);
             }
@@ -262,8 +262,8 @@ namespace ccl::ecs {
              * @return The component.
              */
             template<typename T>
-            constexpr component_type& get_component() {
-                const std::size_t component_id = component_type::template make_id<T>();
+            constexpr component& get_component() {
+                const std::size_t component_id = component::template make_id<T>();
 
                 return get_component_by_id(component_id);
             }
@@ -279,7 +279,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr const T& get_entity_component(const entity_type e) const {
-                const component_type& component = get_component<T>();
+                const component& component = get_component<T>();
                 const auto entity_it = entity_index_map.find(e);
 
                 CCL_THROW_IF(entity_it == entity_index_map.end(), std::out_of_range{"Entity not present in archetype."});
@@ -300,7 +300,7 @@ namespace ccl::ecs {
              */
             template<typename T>
             constexpr T& get_entity_component(const entity_type e) {
-                component_type& component = get_component<T>();
+                component& component = get_component<T>();
                 const auto entity_it = entity_index_map.find(e);
 
                 CCL_THROW_IF(entity_it == entity_index_map.end(), std::out_of_range{"Entity not present in archetype."});
@@ -333,7 +333,7 @@ namespace ccl::ecs {
              */
             template<typename ...Components>
             static constexpr hash_t make_id() {
-                return (component_type::template make_id<Components>() ^...);
+                return (component::template make_id<Components>() ^...);
             }
 
             template<>
@@ -353,7 +353,7 @@ namespace ccl::ecs {
              */
             template<typename ...Components>
             constexpr hash_t extend_id() {
-                return archetype_id ^ (component_type::template make_id<Components>() ^...);
+                return archetype_id ^ (component::template make_id<Components>() ^...);
             }
 
             template<>
@@ -369,7 +369,7 @@ namespace ccl::ecs {
              * @return The entity index within this archetype.
              */
             constexpr size_type add_entity(const entity_type entity) {
-                component_type& entity_component = get_component<entity_t>();
+                component& entity_component = get_component<entity_t>();
                 const size_type entity_index = entity_component.size();
                 const auto entity_component_id = entity_component.id();
 
@@ -397,8 +397,8 @@ namespace ccl::ecs {
 
                 for(const auto& c : source.components) {
                     const std::size_t source_component_id = *c.first();
-                    const component_type * const source_component = c.second();
-                    component_type * const dest_component = get_optional_component_by_id(source_component_id);
+                    const component * const source_component = c.second();
+                    component * const dest_component = get_optional_component_by_id(source_component_id);
 
                     if(dest_component) {
                         const size_type index_from = source.entity_index_map.at(entity);
@@ -423,7 +423,7 @@ namespace ccl::ecs {
                     --last_index_it;
 
                     for(const auto& c : components) {
-                        component_type * const component = c.second();
+                        component * const component = c.second();
 
                         component->erase(entity_index);
                     }
@@ -435,7 +435,7 @@ namespace ccl::ecs {
                     // Keep the array compact by swapping with last item
                     // and then removing it.
                     for(const auto& c : components) {
-                        component_type * const component = c.second();
+                        component * const component = c.second();
 
                         component->move(source_entity_index, entity_index);
                         component->erase(source_entity_index);
@@ -479,8 +479,8 @@ namespace ccl::ecs {
                 const std::size_t size = first->second()->size();
 
                 (components.emplace(
-                    component_type::template make_id<Ts>(),
-                    component_type::template make<Ts>(alloc::get_allocator())
+                    component::template make_id<Ts>(),
+                    component::template make<Ts>(alloc::get_allocator())
                 ).template resize<Ts>(size), ...);
 
                 archetype_id = extend_id<Ts...>();

@@ -20,6 +20,9 @@ namespace ccl::ecs {
         public:
             using allocator_type = Allocator;
 
+            template<typename T>
+            using item_collection = paged_vector<T, T*, allocator_type>;
+
         private:
             struct iface {
                 virtual ~iface() = default;
@@ -103,7 +106,7 @@ namespace ccl::ecs {
 
             template<typename T>
             struct typed_component final : public iface {
-                using item_collection = paged_vector<T, T*, Allocator>;
+                using item_collection = component::item_collection<T>;
 
                 item_collection items;
 
@@ -339,6 +342,18 @@ namespace ccl::ecs {
             template<typename T>
             constexpr const T& get(const std::size_t index) const {
                 return typed_ref<T>().items[index];
+            }
+
+            /**
+             * Get the component vector.
+             *
+             * @tparam T The component value type.
+             *
+             * @return The a reference to the component vector.
+             */
+            template<typename T>
+            constexpr const item_collection<T>& get() const {
+                return typed_ref<T>().items;
             }
 
             /**

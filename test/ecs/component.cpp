@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
         equals(d.size(), 1ULL);
     });
 
-    suite.add_test("get", [] () {
+    suite.add_test("get (item)", [] () {
         test_component c = test_component::make<int>();
 
         c.push_back(1);
@@ -165,6 +165,20 @@ int main(int argc, char **argv) {
         equals(c.get<int>(0), 1);
         equals(c.get<int>(1), 2);
         equals(c.get<int>(2), 3);
+    });
+
+    suite.add_test("get", [] () {
+        test_component c = test_component::make<int>();
+
+        c.push_back(1);
+        c.push_back(2);
+        c.push_back(3);
+
+        const auto &items = c.get<int>();
+
+        equals(items[0], 1);
+        equals(items[1], 2);
+        equals(items[2], 3);
     });
 
     suite.add_test("resize", [] () {

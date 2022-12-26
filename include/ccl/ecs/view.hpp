@@ -10,6 +10,7 @@
 #include <functional>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
+#include <ccl/type-traits.hpp>
 #include <ccl/ecs/component.hpp>
 #include <ccl/ecs/archetype.hpp>
 
@@ -27,6 +28,7 @@ namespace ccl::ecs {
             using archetype = ccl::ecs::archetype<Allocator>;
             using component = ccl::ecs::component<Allocator>;
             using archetype_iterator = std::function<void(const Components& ...components)>;
+            using archetype_paged_iterator = std::function<void(const typename component::template item_collection<Components>& ...components)>;
 
             static constexpr std::size_t max_archetype_count = CCL_ECS_VIEW_MAX_ARCHETYPE_COUNT;
             static constexpr std::size_t component_count = sizeof...(Components);
@@ -120,6 +122,35 @@ namespace ccl::ecs {
                                 ...
                             );
                         }
+                    }
+                }
+            }
+
+            /**
+             * Iterate this view. The given iterator function will have
+             * accept references to the underlying archetype components'
+             * data and will be called once per matching archetype.
+             *
+             * @example
+             *  const auto my_view = registry.view<int, float>();
+             *  view.iterate_archetypes([] (const auto& int_vec, const auto& float_vec) { ... });
+             *
+             * @param iterator The iterator function.
+             */
+            constexpr void iterate_archetypes(const archetype_paged_iterator iterator) const {
+                if constexpr(component_count > 0) {
+                    component_array components;
+
+                    for(std::size_t i = 0; i < archetype_count; ++i) {
+                        const archetype& current_archetype = *archetypes[i];
+
+                        set_archetype_components<Components...>(current_archetype, components);
+
+                        iterator(
+                            get_component<Components, Components...>(components)
+                                ->template get<Components>()
+                            ...
+                        );
                     }
                 }
             }

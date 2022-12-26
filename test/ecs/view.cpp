@@ -53,5 +53,45 @@ int main(int argc, char **argv) {
         equals(visited, 3);
     });
 
+    suite.add_test("iterate_archetypes", [] () {
+        test_registry registry;
+
+        const auto e1 = registry.add_entity();
+        const auto e2 = registry.add_entity();
+        const auto e3 = registry.add_entity();
+
+        registry.add_components<int, double, float>(e1, 5, 10.0, 15.0f);
+        registry.add_components<int, float>(e2, 6, 16.0f);
+        registry.add_components<>(e3);
+
+        const auto view = registry.view<entity_t, float>();
+        int visited = 0;
+        float float_total_value = 0;
+
+        view.iterate_archetypes(
+            [&visited, &float_total_value] (
+                const auto& entities,
+                const auto& f
+            ) {
+            visited += entities.size();
+
+            for(unsigned i = 0; i < f.size(); ++i) {
+                float_total_value += f[i];
+            }
+        });
+
+        equals(visited, 2);
+        equals(float_total_value, 31.0f);
+
+        const auto view2 = registry.view<entity_t>();
+        visited = 0;
+
+        view2.iterate_archetypes([&visited] (const auto& entities) {
+            visited += entities.size();
+        });
+
+        equals(visited, 3);
+    });
+
     return suite.main(argc, argv);
 }
