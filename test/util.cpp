@@ -121,5 +121,17 @@ int main(int argc, char ** argv) {
         check(size_of<int>() == sizeof(int));
     });
 
+    suite.add_test("is_address_aligned", [] () {
+        uint32_t n;
+
+        equals(is_address_aligned(&n), true);
+        equals(
+            is_address_aligned(
+                reinterpret_cast<uint32_t*>(1)
+            ),
+            false
+        );
+    });
+
     return suite.main(argc, argv);
 }

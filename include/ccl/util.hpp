@@ -260,9 +260,7 @@ namespace ccl {
     }
 
     template<typename T>
-    T* null_v() noexcept {
-        return reinterpret_cast<T*>(nullptr);
-    }
+    static constexpr T* null_v = nullptr;
 
     /**
      * Resolves to a typed null pointer value container.
@@ -283,6 +281,21 @@ namespace ccl {
      */
     template<typename T>
     static constexpr T* null = null_t<T>::value;
+
+    /**
+     * Test whether a given pointer is aligned.
+     *
+     * @tparam T The value type.
+     * @tparam Alignment The alignment of the value.
+     *
+     * @param ptr The pointer to check for alignment.
+     *
+     * @return True if the pointer is aligned on the given boundary, false if not.
+     */
+    template<typename T, std::size_t Alignment = alignof(T)>
+    constexpr bool is_address_aligned(const T * const ptr) noexcept {
+        return ptr == align_address(ptr, Alignment);
+    }
 }
 
 #endif // CCL_UTIL_HPP
