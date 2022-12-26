@@ -15,6 +15,7 @@
 #include <ccl/hash.hpp>
 #include <ccl/compressed-pair.hpp>
 #include <ccl/either.hpp>
+#include <ccl/pair.hpp>
 
 namespace ccl {
 template<typename Map, bool Const>
@@ -35,7 +36,7 @@ template<typename Map, bool Const>
         >;
 
         using map_type = either_or_t<const Map, Map, Const>;
-        using key_value_pair = compressed_pair<key_type*, value_type*>;
+        using key_value_pair = pair<key_type*, value_type*>;
         using size_type = typename Map::size_type;
 
         using index_map_iterator = hashtable_iterator<typename map_type::index_map_type, Const>;
@@ -66,23 +67,23 @@ template<typename Map, bool Const>
 
         constexpr key_value_pair operator*() noexcept {
             const auto& key_index_pair = (*index_iterator);
-            const uint32_t index = *key_index_pair.second();
+            const uint32_t index = *key_index_pair.second;
 
-            return key_value_pair{ key_index_pair.first(), &map->data[index] };
+            return key_value_pair{ key_index_pair.first, &map->data[index] };
         }
 
         constexpr key_value_pair operator*() const noexcept {
             const auto& key_index_pair = (*index_iterator);
-            const uint32_t index = *key_index_pair.second();
+            const uint32_t index = *key_index_pair.second;
 
-            return key_value_pair{ key_index_pair.first(), &map->data[index] };
+            return key_value_pair{ key_index_pair.first, &map->data[index] };
         }
 
         constexpr key_value_pair* operator->() const noexcept {
             const auto& key_index_pair = (*index_iterator);
-            const uint32_t index = *key_index_pair.second();
+            const uint32_t index = *key_index_pair.second;
 
-            pair = key_value_pair{ key_index_pair.first(), &map->data[index] };
+            pair = key_value_pair{ key_index_pair.first, &map->data[index] };
 
             return &pair;
         }
@@ -193,7 +194,7 @@ template<typename Map, bool Const>
 
             void reset_indices_after_removal(const size_type removed_index) {
                 for(auto pair : index_map) {
-                    size_type &current_index = *pair.second();
+                    size_type &current_index = *pair.second;
                     current_index -= current_index > removed_index;
                 }
             }
@@ -223,7 +224,7 @@ template<typename Map, bool Const>
                     data.push_back(value);
                     index_map.insert(key, item_index);
                 } else {
-                    data[*it->second()] = value;
+                    data[*it->second] = value;
                 }
             }
 
@@ -231,8 +232,8 @@ template<typename Map, bool Const>
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
                 if(where != end()) {
-                    const auto& key = *where->first();
-                    const size_type index = static_cast<size_type>(*where->second());
+                    const auto& key = *where->first;
+                    const size_type index = static_cast<size_type>(*where->second);
 
                     data.erase(data.begin() + index);
                     index_map.erase(key);
@@ -244,7 +245,7 @@ template<typename Map, bool Const>
                 const auto it = index_map.find(key);
 
                 if(it != index_map.end()) {
-                    const size_type index = static_cast<size_type>(*it->second());
+                    const size_type index = static_cast<size_type>(*it->second);
 
                     data.erase(data.begin() + index);
                     index_map.erase(key);
@@ -323,7 +324,7 @@ template<typename Map, bool Const>
 
                 CCL_THROW_IF(it == index_map.end(), std::out_of_range{"Key not present."});
 
-                const size_type item_index = *it->second();
+                const size_type item_index = *it->second;
 
                 return data[item_index];
             }
@@ -341,7 +342,7 @@ template<typename Map, bool Const>
 
                 CCL_THROW_IF(it == index_map.end(), std::out_of_range{"Key not present."});
 
-                const size_type item_index = *it->second();
+                const size_type item_index = *it->second;
 
                 return data[item_index];
             }
@@ -350,7 +351,7 @@ template<typename Map, bool Const>
                 auto it = index_map.find(key);
 
                 if(it != index_map.end()) {
-                    const size_type item_index = *it->second();
+                    const size_type item_index = *it->second;
 
                     return data[item_index];
                 }

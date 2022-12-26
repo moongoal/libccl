@@ -380,7 +380,7 @@ namespace ccl {
     };
 
     template<typename X, typename Y>
-    constexpr compressed_pair<X, Y> make_pair(X&& x, Y&& y) {
+    constexpr compressed_pair<X, Y> make_compressed_pair(X&& x, Y&& y) {
         return compressed_pair<X, Y>{std::forward<X>(x), std::forward<Y>(y)};
     }
 }

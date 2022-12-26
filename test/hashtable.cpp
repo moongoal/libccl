@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 
         x.insert(0, 1);
 
-        equals(*x.begin()->second(), 1);
+        equals(*x.begin()->second, 1);
     });
 
     suite.add_test("at (not present)", []() {
@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
     suite.add_test("ctor (range)", [] () {
         using my_hashtable = test_map<int, float>;
 
-        vector<compressed_pair<int, float>> v {
+        vector<pair<int, float>> v {
             make_pair(1, 2.f),
             make_pair(2, 3.f),
             make_pair(3, 3.f)
@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
     suite.add_test("ctor (range w/allocator)", [] () {
         using my_hashtable = test_map<int, float>;
 
-        vector<compressed_pair<int, float>> v {
+        vector<pair<int, float>> v {
             make_pair(1, 2.f),
             make_pair(2, 3.f),
             make_pair(3, 3.f)
@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
     suite.add_test("begin", [] () {
         using my_hashtable = test_map<int, float>;
 
-        vector<compressed_pair<int, float>> v {
+        vector<pair<int, float>> v {
             make_pair(1, 2.f)
         };
 
@@ -214,15 +214,15 @@ int main(int argc, char **argv) {
 
         const auto it = x.begin();
 
-        check(*it->first() == 1);
-        check(*it->second() == 2);
+        check(*it->first == 1);
+        check(*it->second == 2);
         check(++it == x.end());
     });
 
     suite.add_test("last", [] () {
         using my_hashtable = test_map<int, float>;
 
-        vector<compressed_pair<int, float>> v {
+        vector<pair<int, float>> v {
             make_pair(1, 2.f)
         };
 
@@ -230,15 +230,15 @@ int main(int argc, char **argv) {
 
         const auto it = --x.end();
 
-        check(*it->first() == 1);
-        check(*it->second() == 2);
+        check(*it->first == 1);
+        check(*it->second == 2);
         check(it == x.begin());
     });
 
     suite.add_test("clear", [] () {
         using my_hashtable = test_map<int, float>;
 
-        vector<compressed_pair<int, float>> v {
+        vector<pair<int, float>> v {
             make_pair(1, 2.f),
             make_pair(2, 3.f),
             make_pair(3, 3.f)
@@ -267,8 +267,8 @@ int main(int argc, char **argv) {
         x.emplace(1, 1);
         x.emplace(2, 3);
 
-        check(*x.find(1)->second() == 1);
-        check(*x.find(2)->second() == 3);
+        check(*x.find(1)->second == 1);
+        check(*x.find(2)->second == 3);
     });
 
     suite.add_test("contains", []() {

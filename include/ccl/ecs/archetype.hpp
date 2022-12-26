@@ -159,7 +159,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
 
-                return *component_it->second();
+                return *component_it->second;
             }
 
             /**
@@ -174,7 +174,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(component_it == components.end(), std::out_of_range{"Component not present in archetype."});
 
-                return *component_it->second();
+                return *component_it->second;
             }
 
             /**
@@ -188,7 +188,7 @@ namespace ccl::ecs {
                 const auto component_it = components.find(component_id);
 
                 if(component_it != components.end()) {
-                    return component_it->second();
+                    return component_it->second;
                 }
 
                 return nullptr;
@@ -205,7 +205,7 @@ namespace ccl::ecs {
                 const auto component_it = components.find(component_id);
 
                 if(component_it != components.end()) {
-                    return component_it->second();
+                    return component_it->second;
                 }
 
                 return nullptr;
@@ -284,7 +284,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(entity_it == entity_index_map.end(), std::out_of_range{"Entity not present in archetype."});
 
-                const auto entity_index = *entity_it->second();
+                const auto entity_index = *entity_it->second;
 
                 return component.template get<T>(entity_index);
             }
@@ -305,7 +305,7 @@ namespace ccl::ecs {
 
                 CCL_THROW_IF(entity_it == entity_index_map.end(), std::out_of_range{"Entity not present in archetype."});
 
-                const auto entity_index = *entity_it->second();
+                const auto entity_index = *entity_it->second;
 
                 return component.template get<T>(entity_index);
             }
@@ -376,8 +376,8 @@ namespace ccl::ecs {
                 entity_component.push_back(entity);
 
                 for(const auto& pair : components) {
-                    if(*pair.first() != entity_component_id) {
-                        pair.second()->emplace_empty();
+                    if(*pair.first != entity_component_id) {
+                        pair.second->emplace_empty();
                     }
                 }
 
@@ -396,8 +396,8 @@ namespace ccl::ecs {
                 const size_type index_to = entity_index_map.at(entity);
 
                 for(const auto& c : source.components) {
-                    const std::size_t source_component_id = *c.first();
-                    const component * const source_component = c.second();
+                    const std::size_t source_component_id = *c.first;
+                    const component * const source_component = c.second;
                     component * const dest_component = get_optional_component_by_id(source_component_id);
 
                     if(dest_component) {
@@ -415,7 +415,7 @@ namespace ccl::ecs {
              */
             constexpr void remove_entity(const entity_type entity) {
                 auto entity_index_it = entity_index_map.find(entity);
-                size_type &entity_index = *entity_index_it->second();
+                size_type &entity_index = *entity_index_it->second;
 
                 auto last_index_it = entity_index_map.end_values() - 1;
 
@@ -423,7 +423,7 @@ namespace ccl::ecs {
                     --last_index_it;
 
                     for(const auto& c : components) {
-                        component * const component = c.second();
+                        component * const component = c.second;
 
                         component->erase(entity_index);
                     }
@@ -435,7 +435,7 @@ namespace ccl::ecs {
                     // Keep the array compact by swapping with last item
                     // and then removing it.
                     for(const auto& c : components) {
-                        component * const component = c.second();
+                        component * const component = c.second;
 
                         component->move(source_entity_index, entity_index);
                         component->erase(source_entity_index);
@@ -462,8 +462,8 @@ namespace ccl::ecs {
 
                 for(const auto& pair : tmpl.components) {
                     arch.components.emplace(
-                        *pair.first(),
-                        pair.second()->clone_empty(allocator)
+                        *pair.first,
+                        pair.second->clone_empty(allocator)
                     );
                 }
 
@@ -476,7 +476,7 @@ namespace ccl::ecs {
 
                 // This is always viable as there is at least
                 // an entity_t component
-                const std::size_t size = first->second()->size();
+                const std::size_t size = first->second->size();
 
                 (components.emplace(
                     component::template make_id<Ts>(),

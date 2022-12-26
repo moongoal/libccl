@@ -18,6 +18,7 @@
 #include <ccl/bitset.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/either.hpp>
+#include <ccl/pair.hpp>
 
 namespace ccl {
     template<typename Hashtable, bool Const>
@@ -37,8 +38,8 @@ namespace ccl {
             Const
         >;
 
-        using key_value_pair = compressed_pair<key_type*, value_type*>;
-        using const_key_value_pair = compressed_pair<const key_type*, const value_type*>;
+        using key_value_pair = pair<key_type*, value_type*>;
+        using const_key_value_pair = pair<const key_type*, const value_type*>;
 
         using hashtable_type = either_or_t<const Hashtable, Hashtable, Const>;
         using size_type = typename Hashtable::size_type;
@@ -234,7 +235,7 @@ namespace ccl {
                     input.begin(),
                     input.end(),
                     [this] (const auto &pair) {
-                        insert(pair.first(), pair.second());
+                        insert(pair.first, pair.second);
                     }
                 );
             }
@@ -296,7 +297,7 @@ namespace ccl {
                     slot_map = other.slot_map;
                 } else {
                     for(const auto& pair : other) {
-                        insert(*pair.first(), *pair.second());
+                        insert(*pair.first, *pair.second);
                     }
                 }
 
@@ -341,14 +342,14 @@ namespace ccl {
                     new_slot_map.zero();
 
                     for(auto it = begin(); it < finish && keep_iterating; ++it) {
-                        const size_type new_index = compute_key_index(*it->first(), new_capacity);
+                        const size_type new_index = compute_key_index(*it->first, new_capacity);
                         const size_type last_chunk_index = wrap_index(new_index + CCL_HASHTABLE_CHUNK_SIZE, new_capacity);
                         bool item_added = false;
 
                         for(size_type i = new_index; i != last_chunk_index; i = wrap_index(++i, new_capacity)) {
                             if(!new_slot_map[i]) {
-                                std::construct_at(&new_keys[i], std::move(*it->first()));
-                                std::construct_at(&new_values[i], std::move(*it->second()));
+                                std::construct_at(&new_keys[i], std::move(*it->first));
+                                std::construct_at(&new_values[i], std::move(*it->second));
 
                                 std::destroy_at(&keys[it.index]);
                                 std::destroy_at(&values[it.index]);

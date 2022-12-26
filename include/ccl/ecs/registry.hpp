@@ -105,7 +105,7 @@ namespace ccl::ecs {
                         );
                     }
                 } else {
-                    new_arch = new_arch_it->second();
+                    new_arch = new_arch_it->second;
                 }
 
                 CCL_ASSERT(new_arch);
@@ -163,7 +163,7 @@ namespace ccl::ecs {
                         );
                     }
                 } else {
-                    new_arch = new_arch_it->second();
+                    new_arch = new_arch_it->second;
                 }
 
                 if(new_arch) {
