@@ -6,7 +6,6 @@ project(
 )
 
 include(CMakePackageConfigHelpers)
-include(cmake/features.cmake)
 
 if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
     message(STATUS "Conan paths file found.")
@@ -43,12 +42,6 @@ target_include_directories(
 if(CCL_ENABLE_TESTS)
     include(cmake/test.cmake)
 endif()
-
-configure_file(
-    include/ccl/features.hpp.in
-    include/ccl/features.hpp
-    NEWLINE_STYLE UNIX
-)
 
 configure_file(
     include/ccl/version.hpp.in

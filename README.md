@@ -102,3 +102,15 @@ Define any of these before including any CCL headers to override the default beh
 way to override these is by leveraging your compiler flags (i.e. `g++ -DCCL_HANDLE_VALUE_WIDTH=16 ...`). Default values are meant to be reasonable for most situations. Some values or combinations
 may not make sense and cause undefined behaviour. Be sure to check the source code first.
 
+Certain features can be enabled or disabled as needed. The following pre-processor definitions configure optional features:
+
+|Symbol|Meaning
+|-|-
+|CCL_FEATURE_ASSERTIONS|Enable assertions
+|CCL_FEATURE_EXCEPTIONS|Enable exceptions
+|CCL_FEATURE_TYPECHECK_CASTS|Enable use of `dynamic_cast` where appropriate
+|CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS|Control whether the ECS registry checks for existing components before adding/removing new ones. Disabling this feature may yield unexpected results if adding already existing components or removing non-existent ones.
+
+Default values are availble in [features.hpp](include/ccl/features.hpp).
+
+To override the presence of any feature, define `CCL_OVERRIDE_FEATURE_<FEATURE_NAME>`. This will disable the definition any pre-processor symbols related to the given feature.

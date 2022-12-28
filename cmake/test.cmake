@@ -20,21 +20,6 @@ function(add_ccl_test test_name test_file_path)
         ${test_name}
         PRIVATE
             -Wall -Wextra -pedantic -Werror
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_MEMORY}>:-fsanitize=memory>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize=address>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fno-omit-frame-pointer>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize-recover=address>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_UNDEFINED_BEHAVIOR}>:-fsanitize=undefined>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_STACK}>:-fsanitize=safe-stack>
-    )
-
-    target_link_options(
-        ${test_name}
-        PRIVATE
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_MEMORY}>:-fsanitize=memory>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_ADDRESS}>:-fsanitize=address>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_UNDEFINED_BEHAVIOR}>:-fsanitize=undefined>
-            $<$<BOOL:${CCL_FEATURE_SANITIZE_STACK}>:-fsanitize=safe-stack>
     )
 endfunction(add_ccl_test)
 
