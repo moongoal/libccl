@@ -80,3 +80,25 @@ This project is configured for clangd. Run as follows:
 ```
 clangd --header-insertion=never --compile-commands-dir=build --enable-config
 ```
+
+### Configuration
+
+Several pre-processor definitions configure behaviour:
+
+|Symbol|Meaning
+|-|-
+|CCL_HANDLE_VALUE_WIDTH|Handle value width, in bits
+|CCL_ECS_VIEW_MAX_ARCHETYPE_COUNT|Maximum number of archetypes iterable from a view
+|CCL_HASHTABLE_MINIMUM_CAPACITY|Minimum capacity of a hashtable
+|CCL_HASHTABLE_CHUNK_SIZE|Max number of consecutive hashtable slots to look for when inserting, before rehashing into a larger table
+|CCL_SET_MINIMUM_CAPACITY|Minimum capacity of a set
+|CCL_SET_KEY_CHUNK_SIZE|Max number of consecutive set slots to look for when inserting, before rehashing into a larger set
+|CCL_ALLOCATOR_DEFAULT_ALIGNMENT|Default allocator minimum alignment constraint
+|CCL_PAGE_SIZE|Page size for paged data structures, as number of elements
+
+Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
+
+Define any of these before including any CCL headers to override the default behaviour. The best
+way to override these is by leveraging your compiler flags (i.e. `g++ -DCCL_HANDLE_VALUE_WIDTH=16 ...`). Default values are meant to be reasonable for most situations. Some values or combinations
+may not make sense and cause undefined behaviour. Be sure to check the source code first.
+
