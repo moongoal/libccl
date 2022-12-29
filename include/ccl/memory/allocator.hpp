@@ -16,7 +16,7 @@
 namespace ccl {
     class allocator;
 
-    allocator* CCLAPI get_default_allocator();
+    allocator* get_default_allocator();
 
     enum allocation_flag_bits {
         #define CCL_VALUE(name, bitno) CCL_ALLOCATION_ ## name ## _BIT = 1 << bitno
@@ -67,7 +67,7 @@ namespace ccl {
         std::size_t alignment;
     };
 
-    class CCLAPI allocator {
+    class allocator {
         public:
             /**
              * Allocate with default alignment constraint.
@@ -186,11 +186,11 @@ namespace ccl {
     #ifdef CCL_ALLOCATOR_IMPL
         static allocator *s_allocator = nullptr;
 
-        void CCLAPI set_default_allocator(allocator &allocator) {
+        void set_default_allocator(allocator &allocator) {
             s_allocator = &allocator;
         }
 
-        allocator * CCLAPI get_default_allocator() {
+        allocator * get_default_allocator() {
             return s_allocator;
         }
     #endif // CCL_ALLOCATOR_IMPL
@@ -200,12 +200,12 @@ namespace ccl {
      *
      * @param allocator The new memory allocator.
      */
-    void CCLAPI set_default_allocator(allocator &allocator);
+    void set_default_allocator(allocator &allocator);
 
     /**
      * Get the default memory allocator.
      */
-    allocator * CCLAPI get_default_allocator();
+    allocator * get_default_allocator();
 
     /**
      * Get a default allocator for a given type.
