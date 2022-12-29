@@ -12,6 +12,7 @@
 
 #define CCLNODISCARD [[nodiscard]]
 #define CCLUNUSED [[maybe_unused]]
+#define CCLINLINE __attribute__((always_inline))
 
 #ifdef _MSC_VER
     #define CCLZEROSIZE [[msvc::no_unique_address]]
