@@ -58,15 +58,16 @@ namespace ccl {
     class atomic {
         public:
             using value_type = T;
-            using pointer = T*;
-            using const_pointer = const T*;
+            using reference = T&;
 
         private:
             value_type value;
 
         public:
+            static constexpr bool is_always_lock_free = __atomic_always_lock_free(sizeof(T), 0);
+
             constexpr atomic() noexcept(std::is_nothrow_default_constructible_v<T>) = default;
-            constexpr atomic(T value) noexcept : value{value} {}
+            constexpr atomic(value_type value) noexcept : value{value} {}
             constexpr atomic(const atomic& other) = delete;
 
             constexpr bool CCLINLINE is_lock_free() noexcept {
@@ -74,10 +75,10 @@ namespace ccl {
             }
 
             T CCLINLINE load(const memory_order order = memory_order_seq_cst) noexcept {
-                return __atomic_load(std::addressof(value), order);
+                return __atomic_load_n(std::addressof(value), order);
             }
 
-            void CCLINLINE store(T value, const memory_order order = memory_order_seq_cst) noexcept {
+            void CCLINLINE store(value_type value, const memory_order order = memory_order_seq_cst) noexcept {
                 __atomic_store(
                     std::addressof(this->value),
                     std::addressof(value),
@@ -85,17 +86,17 @@ namespace ccl {
                 );
             }
 
-            T CCLINLINE exchange(T desired, const memory_order order = memory_order_seq_cst) noexcept {
-                return __atomic_exchange(
+            value_type CCLINLINE exchange(value_type desired, const memory_order order = memory_order_seq_cst) noexcept {
+                return __atomic_exchange_n(
                     std::addressof(value),
-                    std::addressof(desired),
+                    desired,
                     order
                 );
             }
 
             bool CCLINLINE compare_exchange_weak(
-                T& expected,
-                T desired,
+                reference expected,
+                value_type desired,
                 const memory_order success,
                 const memory_order failure
             ) noexcept {
@@ -110,16 +111,16 @@ namespace ccl {
             }
 
             bool CCLINLINE compare_exchange_weak(
-                T& expected,
-                T desired,
+                reference expected,
+                value_type desired,
                 const memory_order order = memory_order_seq_cst
             ) noexcept {
                 return compare_exchange_weak(expected, desired, order, order);
             }
 
             bool CCLINLINE compare_exchange_strong(
-                T& expected,
-                T desired,
+                reference expected,
+                value_type desired,
                 const memory_order success,
                 const memory_order failure
             ) noexcept {
@@ -134,13 +135,148 @@ namespace ccl {
             }
 
             bool CCLINLINE compare_exchange_strong(
-                T& expected,
-                T desired,
+                reference expected,
+                value_type desired,
                 const memory_order order = memory_order_seq_cst
             ) noexcept {
-                return compare_exchange_weak(expected, desired, order, order);
+                return compare_exchange_strong(expected, desired, order, order);
+            }
+
+            value_type add_fetch(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_add_fetch(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type sub_fetch(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_sub_fetch(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type and_fetch(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_and_fetch(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type xor_fetch(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_xor_fetch(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type or_fetch(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_or_fetch(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type nand_fetch(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_nand_fetch(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type fetch_add(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_fetch_add(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type fetch_sub(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_fetch_sub(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type fetch_and(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_fetch_and(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type fetch_xor(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_fetch_xor(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type fetch_or(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_fetch_or(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
+            }
+
+            value_type fetch_nand(
+                const value_type value,
+                const memory_order order = memory_order_seq_cst
+            ) noexcept {
+                return __atomic_fetch_nand(
+                    std::addressof(this->value),
+                    value,
+                    order
+                );
             }
     };
+
+    // TODO: Add atomic_flag
+    // TODO: Add memory fences
 }
 
 #endif // CCL_ATOMIC_HPP
