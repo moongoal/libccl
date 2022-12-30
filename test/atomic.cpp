@@ -150,5 +150,13 @@ int main(int argc, char **argv) {
         equals(n.load(), 0x0000ffffu);
     });
 
+    suite.add_test("atomic_thread_fence", [] () {
+        atomic_thread_fence();
+    });
+
+    suite.add_test("atomic_signal_fence", [] () {
+        atomic_signal_fence();
+    });
+
     return suite.main(argc, argv);
 }

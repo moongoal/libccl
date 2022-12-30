@@ -303,7 +303,13 @@ namespace ccl {
             }
     };
 
-    // TODO: Add memory fences
+    inline void CCLINLINE atomic_thread_fence(const memory_order order = memory_order_seq_cst) noexcept {
+        __atomic_thread_fence(order);
+    }
+
+    inline void CCLINLINE atomic_signal_fence(const memory_order order = memory_order_seq_cst) noexcept {
+        __atomic_signal_fence(order);
+    }
 }
 
 #endif // CCL_ATOMIC_HPP
