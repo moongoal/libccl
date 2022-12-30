@@ -276,7 +276,7 @@ namespace ccl {
     };
 
     class atomic_flag {
-        uint8_t value;
+        uint8_t value = 0;
 
         public:
             static constexpr bool is_always_lock_free = __atomic_always_lock_free(sizeof(uint8_t), 0);
@@ -303,7 +303,6 @@ namespace ccl {
             }
     };
 
-    // TODO: Add atomic_flag
     // TODO: Add memory fences
 }
 
