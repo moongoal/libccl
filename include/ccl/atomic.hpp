@@ -275,6 +275,34 @@ namespace ccl {
             }
     };
 
+    class atomic_flag {
+        uint8_t value;
+
+        public:
+            static constexpr bool is_always_lock_free = __atomic_always_lock_free(sizeof(uint8_t), 0);
+
+            constexpr atomic_flag() noexcept = default;
+
+            constexpr bool CCLINLINE is_lock_free() noexcept {
+                return __atomic_is_lock_free(sizeof(uint8_t), std::addressof(value));
+            }
+
+            bool CCLINLINE test_and_set(const memory_order order = memory_order_seq_cst) noexcept {
+                return __atomic_test_and_set(
+                    &value,
+                    order
+                );
+            }
+
+            void CCLINLINE clear(const memory_order order = memory_order_seq_cst) noexcept {
+                __atomic_clear(&value, order);
+            }
+
+            bool CCLINLINE test(const memory_order order = memory_order_seq_cst) noexcept {
+                return __atomic_load_n(&value, order);
+            }
+    };
+
     // TODO: Add atomic_flag
     // TODO: Add memory fences
 }
