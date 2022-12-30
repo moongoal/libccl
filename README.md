@@ -2,8 +2,8 @@
 
 ## API stability
 
-Stable: 🟢
-Almost stable: 🟡
+API and implementation stable: 🟢
+API stable: 🟡
 Unstable: 🔴
 
 |Interface|Status
@@ -13,7 +13,7 @@ Unstable: 🔴
 |Test Driver|🟡
 |Maybe|🔴
 |Hashtable|🔴
-|Hash|🟡
+|Hash|🔴
 |Debug Utilities|🔴
 |Compressed Pair|🔴
 |Bitset|🔴
@@ -27,18 +27,13 @@ Unstable: 🔴
 |Set|🔴
 |Sparse Set|🔴
 |Tagged pointer|🔴
+|Pair|🔴
 |Atomic|🔴
 
-## Dependencies
-
-### Build dependencies
-
-* Cmake `>= 3.24.2`
-* LLVM `>= 15.0.0`
-* Ninja `>= 1.11.0`
-* Conan `>= 1.55.0`
-
 ## Building
+
+While this is a header-only library, the build process is required to create the *version.hpp* header
+file.
 
 This library is built with cmake `>= 3.24.2`. Lower versions may work but are not supported. The following are example build commands for informational purposes only. The specific commands for your system may differ.
 
@@ -55,6 +50,13 @@ To build the project:
 ```
 cmake --build build
 ```
+
+### Build dependencies
+
+* Cmake `>= 3.24.2`
+* LLVM `>= 15.0.0`
+* Ninja `>= 1.11.0`
+* Conan `>= 1.55.0`
 
 ## Packaging
 
