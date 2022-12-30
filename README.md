@@ -27,6 +27,7 @@ Unstable: 🔴
 |Set|🔴
 |Sparse Set|🔴
 |Tagged pointer|🔴
+|Atomic|🔴
 
 ## Dependencies
 
