@@ -1,4 +1,4 @@
-# Ccl C++ base library
+# CCL C++ base library
 
 ## API stability
 
