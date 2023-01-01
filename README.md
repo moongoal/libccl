@@ -63,7 +63,7 @@ cmake --build build
 This library can be packaged with Conan, by running:
 
 ```
-    conan create -pr:b <YOUR_PROFILE> .
+conan create -pr:b <YOUR_PROFILE> .
 ```
 
 ## Testing
