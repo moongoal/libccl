@@ -228,6 +228,35 @@ namespace ccl::ecs {
 
                 return false;
             }
+
+            /**
+             * Remove an entity, if present.
+             *
+             * @param entity The entity to remove.
+             */
+            void remove_entity(const entity_t entity) {
+                archetype * const arch = get_entity_archetype(entity);
+
+                if(arch) {
+                    arch->remove_entity(entity);
+                }
+            }
+
+            /**
+             * Remove an entity. If the entity is not present within this
+             * registry, calling this function will cause undefined behaviour.
+             *
+             * This is faster than `remove_entity()` as this always assumes
+             * the entity is present, thus avoiding one condition.
+             *
+             * @param entity The entity to remove.
+             */
+            void unsafe_remove_entity(const entity_t entity) {
+                #ifdef CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY
+                CCL_ASSERT(has_entity(entity));
+                #endif // CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY
+                get_entity_archetype(entity)->remove_entity(entity);
+            }
     };
 }
 #endif // CCL_ECS_REGISTRY_HPP

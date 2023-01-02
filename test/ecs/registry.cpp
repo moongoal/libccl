@@ -120,5 +120,27 @@ int main(int argc, char **argv) {
         equals(registry.has_entity(entity_t::make(1, 0)), false);
     });
 
+    suite.add_test("remove_entity", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<>(e);
+        registry.remove_entity(e);
+
+        equals(registry.has_entity(e), false);
+    });
+
+    suite.add_test("unsafe_remove_entity", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<>(e);
+        registry.unsafe_remove_entity(e);
+
+        equals(registry.has_entity(e), false);
+    });
+
     return suite.main(argc, argv);
 }
