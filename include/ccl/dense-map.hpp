@@ -372,6 +372,14 @@ template<typename Map, bool Const>
 
                 return *this;
             }
+
+            /**
+             * Remove all items from the map.
+             */
+            void clear() {
+                data.clear();
+                index_map.clear();
+            }
     };
 }
 

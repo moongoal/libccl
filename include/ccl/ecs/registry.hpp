@@ -10,6 +10,7 @@
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>
+#include <ccl/util.hpp>
 #include <ccl/ecs/archetype.hpp>
 #include <ccl/ecs/entity.hpp>
 #include <ccl/ecs/view.hpp>
@@ -36,12 +37,14 @@ namespace ccl::ecs {
             static constexpr entity_id_t max_entity_id = entity_t::underlying_type::low_part_max;
 
         private:
+            entity_id_t current_generation;
             entity_id_t next_entity_id;
             dense_map<hash_t, archetype, allocator_type> archetype_map;
 
         public:
             explicit constexpr registry(allocator_type * const allocator = nullptr)
                 : alloc{allocator},
+                current_generation{0},
                 next_entity_id{0},
                 archetype_map{allocator}
             {}
@@ -50,6 +53,7 @@ namespace ccl::ecs {
 
             constexpr registry(registry&& other)
                 : alloc{std::move(other)},
+                current_generation{other.current_generation},
                 next_entity_id{other.next_entity_id},
                 archetype_map{std::move(other.archetype_map)}
             {}
@@ -75,7 +79,7 @@ namespace ccl::ecs {
                     std::out_of_range{"Maximum number of entities reached."}
                 );
 
-                return entity_t::make(0, next_entity_id++);
+                return entity_t::make(current_generation, next_entity_id++);
             }
 
             template<typename ...Components>
@@ -194,6 +198,16 @@ namespace ccl::ecs {
                 }
 
                 return view_object;
+            }
+
+            /**
+             * Remove all entities and advance to the next generation.
+             */
+            void clear() {
+                archetype_map.clear();
+
+                current_generation = choose(current_generation + 1, 0U, current_generation < max_entity_id);
+                next_entity_id = 0;
             }
     };
 }

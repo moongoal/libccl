@@ -95,5 +95,19 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("clear", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<int, float, double>(e, 5, 2.0f, 5.0);
+        registry.clear();
+
+        const entity_t e1 = registry.add_entity();
+
+        equals(e.value(), e1.value());
+        equals(e.generation() + 1, e1.generation());
+    });
+
     return suite.main(argc, argv);
 }
