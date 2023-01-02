@@ -309,6 +309,42 @@ namespace ccl::ecs {
 
                 return false;
             }
+
+            /**
+             * Get the component value of an entity.
+             *
+             * @tparam Component The component type.
+             *
+             * @param entity The entity.
+             *
+             * @return The component value for this entity.
+             */
+            template<typename Component>
+            CCLNODISCARD constexpr Component& get_entity_component(const entity_t entity) {
+                archetype * const arch = get_entity_archetype(entity);
+
+                CCL_THROW_IF(!arch, std::out_of_range{"Entity not present in registry."});
+
+                return arch->template get_entity_component<Component>(entity);
+            }
+
+            /**
+             * Get the component value of an entity.
+             *
+             * @tparam Component The component type.
+             *
+             * @param entity The entity.
+             *
+             * @return The component value for this entity.
+             */
+            template<typename Component>
+            CCLNODISCARD constexpr const Component& get_entity_component(const entity_t entity) const {
+                const archetype * const arch = get_entity_archetype(entity);
+
+                CCL_THROW_IF(!arch, std::out_of_range{"Entity not present in registry."});
+
+                return arch->template get_entity_component<Component>(entity);
+            }
     };
 }
 #endif // CCL_ECS_REGISTRY_HPP

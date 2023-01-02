@@ -170,5 +170,26 @@ int main(int argc, char **argv) {
         equals(registry.template has_any_components<entity_t, int, float>(e), true);
     });
 
+    suite.add_test("get_entity_component", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<int>(e, 5);
+
+        equals(registry.get_entity_component<entity_t>(e), e);
+        equals(registry.get_entity_component<int>(e), 5);
+    });
+
+    suite.add_test("get_entity_component (missing entity)", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        throws<std::out_of_range>([&registry, e] () {
+            const volatile auto& x CCLUNUSED = registry.get_entity_component<int>(e);
+        });
+    });
+
     return suite.main(argc, argv);
 }

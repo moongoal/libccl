@@ -10,13 +10,13 @@
 #include <ccl/api.hpp>
 
 #ifdef CCL_FEATURE_ASSERTIONS
-    #define CCL_ASSERT(cond) do { if(!(cond)) { ::abort(); } } while(false)
+    #define CCL_ASSERT(cond) do { if(!(cond)) [[unlikely]] { ::abort(); } } while(false)
 #else // CCL_FEATURE_ASSERTIONS
     #define CCL_ASSERT(cond) ((void)0)
 #endif // CCL_FEATURE_ASSERTIONS
 
 #ifdef CCL_FEATURE_EXCEPTIONS
-    #define CCL_THROW_IF(cond, exc) do { if((cond)) { throw (exc); } } while(false)
+    #define CCL_THROW_IF(cond, exc) do { if((cond)) [[unlikely]] { throw (exc); } } while(false)
     #define CCL_THROW(exc) do { throw (exc); } while(false)
 #else // CCL_FEATURE_EXCEPTIONS
     #define CCL_THROW_IF(cond, exc) ((void)0)
