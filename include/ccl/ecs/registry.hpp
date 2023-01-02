@@ -289,6 +289,26 @@ namespace ccl::ecs {
 
                 return false;
             }
+
+            /**
+             * Tell whether a given entity has any of the given components.
+             *
+             * @tparam Components The components to test.
+             *
+             * @param entity The entity to test.
+             *
+             * @return True if the given entity has any of the given components, false if not.
+             */
+            template<typename ...Components>
+            CCLNODISCARD bool has_any_components(const entity_t entity) const {
+                const archetype * const arch = get_entity_archetype(entity);
+
+                if(arch) {
+                    return (arch->template has_component<Components>() || ...);
+                }
+
+                return false;
+            }
     };
 }
 #endif // CCL_ECS_REGISTRY_HPP

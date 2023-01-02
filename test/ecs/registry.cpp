@@ -156,5 +156,19 @@ int main(int argc, char **argv) {
         equals(registry.template has_components<entity_t, int, float>(e), false);
     });
 
+    suite.add_test("has_any_components", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+        const entity_t e2 = registry.add_entity();
+
+        registry.add_components<int>(e, 5);
+
+        equals(registry.template has_any_components<int>(e), true);
+        equals(registry.template has_any_components<int>(e2), false);
+        equals(registry.template has_any_components<entity_t, int>(e), true);
+        equals(registry.template has_any_components<entity_t, int, float>(e), true);
+    });
+
     return suite.main(argc, argv);
 }
