@@ -95,5 +95,52 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("clear", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<int, float, double>(e, 5, 2.0f, 5.0);
+        registry.clear();
+
+        const entity_t e1 = registry.add_entity();
+
+        equals(e.value(), e1.value());
+        equals(e.generation() + 1, e1.generation());
+    });
+
+    suite.add_test("has_entity", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<>(e);
+
+        equals(registry.has_entity(e), true);
+        equals(registry.has_entity(entity_t::make(1, 0)), false);
+    });
+
+    suite.add_test("remove_entity", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<>(e);
+        registry.remove_entity(e);
+
+        equals(registry.has_entity(e), false);
+    });
+
+    suite.add_test("unsafe_remove_entity", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<>(e);
+        registry.unsafe_remove_entity(e);
+
+        equals(registry.has_entity(e), false);
+    });
+
     return suite.main(argc, argv);
 }

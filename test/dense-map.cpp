@@ -227,5 +227,16 @@ int main(int argc, char **argv) {
         equals(map2.size(), 4ULL);
     });
 
+    suite.add_test("clear", [] () {
+        test_map<S, int> map;
+
+        map.emplace({ 1, 2.0 }, 5);
+        map.emplace({ 2, 3.0 }, 6);
+        map.emplace({ 3, 3.0 }, 7);
+
+        map.clear();
+        equals(map.size(), 0U);
+    });
+
     return suite.main(argc, argv);
 }

@@ -21,6 +21,13 @@ namespace ccl::ecs {
      * An entity ID is the raw, unversioned handle value.
      */
     using entity_id_t = typename entity_t::value_type;
+
+    /**
+     * A null entity value. This is a placeholder value
+     * to initialise unused entities but is not treated specially
+     * by the ECS registry.
+     */
+    static constexpr entity_t null_entity = entity_t{~static_cast<handle_t>(0U)};
 }
 
 #endif // CCL_ECS_ENTITY_HPP

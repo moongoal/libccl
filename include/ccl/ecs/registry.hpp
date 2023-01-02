@@ -10,6 +10,7 @@
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>
+#include <ccl/util.hpp>
 #include <ccl/ecs/archetype.hpp>
 #include <ccl/ecs/entity.hpp>
 #include <ccl/ecs/view.hpp>
@@ -36,12 +37,14 @@ namespace ccl::ecs {
             static constexpr entity_id_t max_entity_id = entity_t::underlying_type::low_part_max;
 
         private:
+            entity_id_t current_generation;
             entity_id_t next_entity_id;
             dense_map<hash_t, archetype, allocator_type> archetype_map;
 
         public:
             explicit constexpr registry(allocator_type * const allocator = nullptr)
                 : alloc{allocator},
+                current_generation{0},
                 next_entity_id{0},
                 archetype_map{allocator}
             {}
@@ -50,6 +53,7 @@ namespace ccl::ecs {
 
             constexpr registry(registry&& other)
                 : alloc{std::move(other)},
+                current_generation{other.current_generation},
                 next_entity_id{other.next_entity_id},
                 archetype_map{std::move(other.archetype_map)}
             {}
@@ -75,7 +79,7 @@ namespace ccl::ecs {
                     std::out_of_range{"Maximum number of entities reached."}
                 );
 
-                return entity_t::make(0, next_entity_id++);
+                return entity_t::make(current_generation, next_entity_id++);
             }
 
             template<typename ...Components>
@@ -194,6 +198,64 @@ namespace ccl::ecs {
                 }
 
                 return view_object;
+            }
+
+            /**
+             * Remove all entities and advance to the next generation.
+             */
+            void clear() {
+                archetype_map.clear();
+
+                current_generation = choose(current_generation + 1, 0U, current_generation < max_entity_id);
+                next_entity_id = 0;
+            }
+
+            /**
+             * Check whether an entity is present in this registry.
+             *
+             * @param entity The entity to check for presence.
+             *
+             * @return True if the entity is present in this registry, false if not.
+             */
+            constexpr bool has_entity(const entity_t entity) const {
+                const auto archetype_end = archetype_map.end_values();
+
+                for(auto it = archetype_map.begin_values(); it != archetype_end; ++it) {
+                    if(it->has_entity(entity)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /**
+             * Remove an entity, if present.
+             *
+             * @param entity The entity to remove.
+             */
+            void remove_entity(const entity_t entity) {
+                archetype * const arch = get_entity_archetype(entity);
+
+                if(arch) {
+                    arch->remove_entity(entity);
+                }
+            }
+
+            /**
+             * Remove an entity. If the entity is not present within this
+             * registry, calling this function will cause undefined behaviour.
+             *
+             * This is faster than `remove_entity()` as this always assumes
+             * the entity is present, thus avoiding one condition.
+             *
+             * @param entity The entity to remove.
+             */
+            void unsafe_remove_entity(const entity_t entity) {
+                #ifdef CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY
+                CCL_ASSERT(has_entity(entity));
+                #endif // CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY
+                get_entity_archetype(entity)->remove_entity(entity);
             }
     };
 }

@@ -3,7 +3,9 @@
 ## API stability
 
 API and implementation stable: 🟢
+
 API stable: 🟡
+
 Unstable: 🔴
 
 |Interface|Status
@@ -113,6 +115,7 @@ Certain features can be enabled or disabled as needed. The following pre-process
 |CCL_FEATURE_EXCEPTIONS|Enable exceptions
 |CCL_FEATURE_TYPECHECK_CASTS|Enable use of `dynamic_cast` where appropriate
 |CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS|Control whether the ECS registry checks for existing components before adding/removing new ones. Disabling this feature may yield unexpected results if adding already existing components or removing non-existent ones.
+|CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY|Assert the presence of the entity when calling `unsafe_remove_entity()`.
 
 Default values are availble in [features.hpp](include/ccl/features.hpp).
 
