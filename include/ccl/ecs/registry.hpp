@@ -143,6 +143,18 @@ namespace ccl::ecs {
                 return nullptr;
             }
 
+            const archetype* get_entity_archetype(const entity_t entity) const {
+                const auto archetype_end = archetype_map.end_values();
+
+                for(auto it = archetype_map.begin_values(); it != archetype_end; ++it) {
+                    if(it->has_entity(entity)) {
+                        return &(*it);
+                    }
+                }
+
+                return nullptr;
+            }
+
             template<typename ...Components>
             void remove_components(const entity_t entity) {
                 archetype * old_arch = get_entity_archetype(entity);
@@ -256,6 +268,26 @@ namespace ccl::ecs {
                 CCL_ASSERT(has_entity(entity));
                 #endif // CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY
                 get_entity_archetype(entity)->remove_entity(entity);
+            }
+
+            /**
+             * Tell whether a given entity has all the given components.
+             *
+             * @tparam Components The components to test.
+             *
+             * @param entity The entity to test.
+             *
+             * @return True if the given entity has all the given components, false if not.
+             */
+            template<typename ...Components>
+            CCLNODISCARD bool has_components(const entity_t entity) const {
+                const archetype * const arch = get_entity_archetype(entity);
+
+                if(arch) {
+                    return (arch->template has_component<Components>() && ...);
+                }
+
+                return false;
             }
     };
 }
