@@ -209,6 +209,25 @@ namespace ccl::ecs {
                 current_generation = choose(current_generation + 1, 0U, current_generation < max_entity_id);
                 next_entity_id = 0;
             }
+
+            /**
+             * Check whether an entity is present in this registry.
+             *
+             * @param entity The entity to check for presence.
+             *
+             * @return True if the entity is present in this registry, false if not.
+             */
+            constexpr bool has_entity(const entity_t entity) const {
+                const auto archetype_end = archetype_map.end_values();
+
+                for(auto it = archetype_map.begin_values(); it != archetype_end; ++it) {
+                    if(it->has_entity(entity)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
     };
 }
 #endif // CCL_ECS_REGISTRY_HPP

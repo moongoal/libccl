@@ -109,5 +109,16 @@ int main(int argc, char **argv) {
         equals(e.generation() + 1, e1.generation());
     });
 
+    suite.add_test("has_entity", [] () {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<>(e);
+
+        equals(registry.has_entity(e), true);
+        equals(registry.has_entity(entity_t::make(1, 0)), false);
+    });
+
     return suite.main(argc, argv);
 }
