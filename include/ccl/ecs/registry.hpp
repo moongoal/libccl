@@ -90,6 +90,13 @@ namespace ccl::ecs {
                 archetype * old_arch = get_entity_archetype(entity);
                 archetype * new_arch;
 
+                #ifdef CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+                CCL_THROW_IF(
+                    old_arch && ((old_arch->template has_component<Components>()) || ...),
+                    std::invalid_argument{"Attempting to add one or more already existing components."}
+                );
+                #endif // CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+
                 const hash_t new_archetype_id = old_arch
                     ? old_arch->template extend_id<Components...>()
                     : archetype::template make_id<Components...>();

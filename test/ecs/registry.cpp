@@ -12,6 +12,14 @@ using test_registry_editor = ccl::ecs::internal::registry_editor<test_registry::
 int main(int argc, char **argv) {
     test_suite suite;
 
+    const auto skip_if_exceptions_or_component_checks_disabled = [] () -> bool {
+        #ifdef CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+            return skip_if_exceptions_disabled();
+        #else // CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+            return false;
+        #endif //CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS
+    };
+
     suite.add_test("add_entity", []() {
         test_registry registry;
 
@@ -46,6 +54,18 @@ int main(int argc, char **argv) {
         equals(arch->get_entity_component<int>(e), 5);
         equals(arch->get_entity_component<float>(e), 2.0f);
     });
+
+    suite.add_test("add_components (add twice)", []() {
+        test_registry registry;
+
+        const entity_t e = registry.add_entity();
+
+        registry.add_components<int, float>(e, 5, 2.0f);
+
+        throws<std::invalid_argument>([&registry, e] () {
+            registry.add_components<float>(e, 3.0f);
+        });
+    }, skip_if_exceptions_or_component_checks_disabled);
 
     suite.add_test("get_entity_archetype", []() {
         test_registry registry;
@@ -93,7 +113,7 @@ int main(int argc, char **argv) {
         throws<std::out_of_range>([&registry, e] () {
             registry.remove_components<int, char>(e);
         });
-    });
+    }, skip_if_exceptions_or_component_checks_disabled);
 
     suite.add_test("clear", [] () {
         test_registry registry;
@@ -189,7 +209,7 @@ int main(int argc, char **argv) {
         throws<std::out_of_range>([&registry, e] () {
             const volatile auto& x CCLUNUSED = registry.get_entity_component<int>(e);
         });
-    });
+    }, skip_if_exceptions_disabled);
 
     return suite.main(argc, argv);
 }
