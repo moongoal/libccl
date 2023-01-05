@@ -19,15 +19,16 @@
 #include <ccl/concepts.hpp>
 #include <ccl/util.hpp>
 #include <ccl/internal/optional-allocator.hpp>
+#include <ccl/either.hpp>
 
 namespace ccl {
-    template<typename Vector>
+    template<typename T>
     struct vector_iterator {
         using iterator_category = std::contiguous_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = typename Vector::value_type;
-        using pointer = typename Vector::pointer;
-        using reference = typename Vector::reference;
+        using value_type = T;
+        using pointer = T*;
+        using reference = T&;
 
         constexpr vector_iterator(const pointer ptr = nullptr) noexcept : ptr{ptr} {}
         constexpr vector_iterator(const vector_iterator &other) noexcept : ptr{other.ptr} {}
@@ -88,42 +89,42 @@ namespace ccl {
         pointer ptr;
     };
 
-    template<typename Vector>
-    constexpr bool operator ==(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+    template<typename T>
+    constexpr bool operator ==(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
         return a.ptr == b.ptr;
     }
 
-    template<typename Vector>
-    constexpr bool operator !=(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+    template<typename T>
+    constexpr bool operator !=(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
         return a.ptr != b.ptr;
     }
 
-    template<typename Vector>
-    constexpr bool operator >(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+    template<typename T>
+    constexpr bool operator >(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
         return a.ptr > b.ptr;
     }
 
-    template<typename Vector>
-    constexpr bool operator <(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+    template<typename T>
+    constexpr bool operator <(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
         return a.ptr < b.ptr;
     }
 
-    template<typename Vector>
-    constexpr bool operator >=(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+    template<typename T>
+    constexpr bool operator >=(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
         return a.ptr >= b.ptr;
     }
 
-    template<typename Vector>
-    constexpr bool operator <=(const vector_iterator<Vector> &a, const vector_iterator<Vector> &b) noexcept {
+    template<typename T>
+    constexpr bool operator <=(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
         return a.ptr <= b.ptr;
     }
 
-    template<typename Vector>
-    static constexpr vector_iterator<Vector> operator +(
-        const typename vector_iterator<Vector>::difference_type n,
-        const vector_iterator<Vector> it
+    template<typename T>
+    static constexpr vector_iterator<T> operator +(
+        const typename vector_iterator<T>::difference_type n,
+        const vector_iterator<T> it
     ) noexcept {
-        return vector_iterator<Vector>{it.get_data() + n};
+        return vector_iterator<T>{it.get_data() + n};
     }
 
     template<
@@ -143,8 +144,8 @@ namespace ccl {
             using reference = T&;
             using const_reference = const T&;
             using allocator_type = Allocator;
-            using iterator = vector_iterator<vector>;
-            using const_iterator = vector_iterator<const vector>;
+            using iterator = vector_iterator<T>;
+            using const_iterator = vector_iterator<const T>;
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
