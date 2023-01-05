@@ -145,6 +145,8 @@ namespace ccl {
             using allocator_type = Allocator;
             using iterator = vector_iterator<vector>;
             using const_iterator = vector_iterator<const vector>;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         private:
             size_type _size = 0;
@@ -432,6 +434,15 @@ namespace ccl {
 
             constexpr const_iterator cbegin() const noexcept { return _data; }
             constexpr const_iterator cend() const noexcept { return _data + _size; }
+
+            constexpr reverse_iterator rbegin() noexcept { return reverse_iterator{_data + _size}; }
+            constexpr reverse_iterator rend() noexcept { return reverse_iterator{_data}; }
+
+            constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{_data + _size}; }
+            constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{_data}; }
+
+            constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{_data + _size}; }
+            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
     };
 }
 

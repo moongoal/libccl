@@ -568,5 +568,23 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("reverse iterator", [] () {
+        test_vector<int> v { 1, 2, 3 };
+
+        auto it = v.rbegin();
+        const auto end = v.rend();
+
+        equals(*it, 3);
+
+        ++it;
+        equals(*it, 2);
+
+        ++it;
+        equals(*it, 1);
+
+        ++it;
+        check(it == end);
+    });
+
     return suite.main(argc, argv);
 }
