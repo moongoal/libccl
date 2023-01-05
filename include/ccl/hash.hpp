@@ -162,7 +162,9 @@ namespace ccl {
             if constexpr(internally_hashable<T>) {
                 return value.hash();
             } else {
-                return hash<std::size_t>{}(static_cast<std::size_t>(value));
+                using U = std::underlying_type_t<T>;
+
+                return hash<U>{}(static_cast<U>(value));
             }
         }
     };
