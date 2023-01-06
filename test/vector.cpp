@@ -586,5 +586,14 @@ int main(int argc, char **argv) {
         check(it == end);
     });
 
+    suite.add_test("iterator -> const_iterator", [] () {
+        using myvec = test_vector<int>;
+
+        myvec v { 1, 2, 3 };
+
+        myvec::iterator it = v.begin();
+        volatile myvec::const_iterator it2 CCLUNUSED = it;
+    });
+
     return suite.main(argc, argv);
 }

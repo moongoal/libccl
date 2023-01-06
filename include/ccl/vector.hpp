@@ -31,7 +31,9 @@ namespace ccl {
         using reference = T&;
 
         constexpr vector_iterator(const pointer ptr = nullptr) noexcept : ptr{ptr} {}
-        constexpr vector_iterator(const vector_iterator &other) noexcept : ptr{other.ptr} {}
+
+        template<typename U>
+        constexpr vector_iterator(const vector_iterator<U> &other) noexcept : ptr{other.ptr} {}
 
         constexpr vector_iterator& operator =(const vector_iterator &other) noexcept {
             ptr = other.ptr;
