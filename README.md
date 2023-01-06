@@ -120,3 +120,7 @@ Certain features can be enabled or disabled as needed. The following pre-process
 Default values are availble in [features.hpp](include/ccl/features.hpp).
 
 To override the presence of any feature, define `CCL_OVERRIDE_FEATURE_<FEATURE_NAME>`. This will disable the definition any pre-processor symbols related to the given feature.
+
+### STL Compatibility Layer
+
+There is an STL compatibility layer available in [compat.hpp](include/ccl/compat.hpp). This file is not included by default and provides definitions for enhancing compatibility of CCL with existing STL constructs.

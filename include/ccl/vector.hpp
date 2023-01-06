@@ -35,6 +35,8 @@ namespace ccl {
         template<typename U>
         constexpr vector_iterator(const vector_iterator<U> &other) noexcept : ptr{other.ptr} {}
 
+        constexpr vector_iterator(const vector_iterator &other) noexcept : ptr{other.ptr} {}
+
         constexpr vector_iterator& operator =(const vector_iterator &other) noexcept {
             ptr = other.ptr;
 
