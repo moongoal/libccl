@@ -133,5 +133,23 @@ int main(int argc, char ** argv) {
         );
     });
 
+    suite.add_test("swap", [] () {
+        int a = 5, b = 6;
+
+        swap(a, b);
+
+        equals(a, 6);
+        equals(b, 5);
+    });
+
+    suite.add_test("swap (pointers)", [] () {
+        int a = 5, b = 6, *ap = &a, *bp = &b;
+
+        swap(ap, bp);
+
+        equals(ap, &b);
+        equals(bp, &a);
+    });
+
     return suite.main(argc, argv);
 }

@@ -406,9 +406,8 @@ namespace ccl {
             }
 
             constexpr paged_vector& operator=(paged_vector &&other) {
-                alloc::operator=(std::move(other));
-
                 destroy();
+                alloc::operator=(std::move(other));
 
                 _pages = std::move(other._pages);
                 _size = std::move(other._size);
@@ -441,13 +440,15 @@ namespace ccl {
              * Like clear but also release all allocated memory.
              */
             constexpr void destroy() {
-                clear();
+                if(_pages.data()) {
+                    clear();
 
-                for(const auto p : _pages) {
-                    alloc::get_allocator()->deallocate(p);
+                    for(const auto p : _pages) {
+                        alloc::get_allocator()->deallocate(p);
+                    }
+
+                    _pages.destroy();
                 }
-
-                _pages.destroy();
             }
 
             constexpr size_type size() const noexcept {

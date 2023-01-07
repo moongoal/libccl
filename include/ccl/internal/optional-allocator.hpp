@@ -21,11 +21,11 @@ namespace ccl::internal {
 
         using allocator_type = Allocator;
 
-        protected:
+            ~with_optional_allocator() = default;
+        public:
             constexpr with_optional_allocator(allocator_type * const allocator = nullptr) noexcept : allocator{allocator ? allocator : get_default_allocator<allocator_type>()} {}
             constexpr with_optional_allocator(const with_optional_allocator &) = default;
             constexpr with_optional_allocator(with_optional_allocator &&) = default;
-            ~with_optional_allocator() = default;
 
             constexpr with_optional_allocator& operator =(const with_optional_allocator &) noexcept = default;
             constexpr with_optional_allocator& operator =(with_optional_allocator &&) noexcept = default;
@@ -37,6 +37,7 @@ namespace ccl::internal {
             }
 
             allocator_type *get_allocator() const noexcept { return allocator; }
+            constexpr bool is_allocator_stateless() const noexcept { return false; }
 
         private:
             allocator_type *allocator = nullptr;
@@ -70,6 +71,8 @@ namespace ccl::internal {
             allocator_type *get_allocator() noexcept {
                 return static_cast<allocator_type*>(this);
             }
+
+            constexpr bool is_allocator_stateless() const noexcept { return true; }
     };
 }
 

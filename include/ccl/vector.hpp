@@ -11,7 +11,6 @@
 #include <memory>
 #include <cstring>
 #include <functional>
-#include <iterator>
 #include <algorithm>
 #include <initializer_list>
 #include <ccl/api.hpp>
@@ -20,117 +19,9 @@
 #include <ccl/util.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/either.hpp>
+#include <ccl/contiguous-iterator.hpp>
 
 namespace ccl {
-    template<typename T>
-    struct vector_iterator {
-        using iterator_category = std::contiguous_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = T;
-        using pointer = T*;
-        using reference = T&;
-
-        constexpr vector_iterator(const pointer ptr = nullptr) noexcept : ptr{ptr} {}
-
-        template<typename U>
-        constexpr vector_iterator(const vector_iterator<U> &other) noexcept : ptr{other.ptr} {}
-
-        constexpr vector_iterator(const vector_iterator &other) noexcept : ptr{other.ptr} {}
-
-        constexpr vector_iterator& operator =(const vector_iterator &other) noexcept {
-            ptr = other.ptr;
-
-            return *this;
-        }
-
-        constexpr reference operator*() const noexcept { return *ptr; }
-        constexpr pointer operator->() const noexcept { return ptr; }
-
-        constexpr vector_iterator& operator +=(const difference_type n) noexcept {
-            ptr += n;
-            return *this;
-        }
-
-        constexpr vector_iterator& operator -=(const difference_type n) noexcept {
-            ptr -= n;
-            return *this;
-        }
-
-        constexpr vector_iterator operator +(const difference_type n) const noexcept {
-            return ptr + n;
-        }
-
-        constexpr vector_iterator operator -(const difference_type n) const noexcept {
-            return ptr - n;
-        }
-
-        constexpr difference_type operator -(const vector_iterator other) const noexcept {
-            return ptr - other.ptr;
-        }
-
-        constexpr reference operator[](const difference_type i) const noexcept {
-            return ptr[i];
-        }
-
-        constexpr vector_iterator& operator --() noexcept {
-            --ptr;
-            return *this;
-        }
-
-        constexpr vector_iterator operator --(int) noexcept {
-            return ptr--;
-        }
-
-        constexpr vector_iterator& operator ++() noexcept {
-            ++ptr;
-            return *this;
-        }
-
-        constexpr vector_iterator operator ++(int) noexcept {
-            return ptr++;
-        }
-
-        pointer ptr;
-    };
-
-    template<typename T>
-    constexpr bool operator ==(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
-        return a.ptr == b.ptr;
-    }
-
-    template<typename T>
-    constexpr bool operator !=(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
-        return a.ptr != b.ptr;
-    }
-
-    template<typename T>
-    constexpr bool operator >(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
-        return a.ptr > b.ptr;
-    }
-
-    template<typename T>
-    constexpr bool operator <(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
-        return a.ptr < b.ptr;
-    }
-
-    template<typename T>
-    constexpr bool operator >=(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
-        return a.ptr >= b.ptr;
-    }
-
-    template<typename T>
-    constexpr bool operator <=(const vector_iterator<T> &a, const vector_iterator<T> &b) noexcept {
-        return a.ptr <= b.ptr;
-    }
-
-    template<typename T>
-    static constexpr vector_iterator<T> operator +(
-        const typename vector_iterator<T>::difference_type n,
-        const vector_iterator<T> it
-    ) noexcept {
-        return vector_iterator<T>{it.get_data() + n};
-    }
-
     template<
         typename T,
         typed_allocator<T> Allocator = allocator
@@ -148,8 +39,8 @@ namespace ccl {
             using reference = T&;
             using const_reference = const T&;
             using allocator_type = Allocator;
-            using iterator = vector_iterator<T>;
-            using const_iterator = vector_iterator<const T>;
+            using iterator = contiguous_iterator<T>;
+            using const_iterator = contiguous_iterator<const T>;
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -247,8 +138,9 @@ namespace ccl {
             }
 
             constexpr vector& operator =(const vector &other) {
-                if(other._size > _size) {
+                if(other._size > _size || !alloc::is_allocator_stateless()) {
                     destroy();
+                    alloc::operator=(other);
                     reserve(other._size);
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
@@ -262,17 +154,11 @@ namespace ccl {
             }
 
             constexpr vector& operator =(vector &&other) {
-                destroy();
+                alloc::operator =(std::move(other));
 
-                internal::with_optional_allocator<Allocator>::operator =(std::move(other));
-
-                _size = other._size;
-                _capacity = other._capacity;
-                _data = other._data;
-
-                other._data = nullptr;
-                other._size = 0;
-                other._capacity = 0;
+                swap(_size, other._size);
+                swap(_capacity, other._capacity);
+                swap(_data, other._data);
 
                 return *this;
             }

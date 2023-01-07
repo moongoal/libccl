@@ -296,6 +296,22 @@ namespace ccl {
     constexpr bool is_address_aligned(const T * const ptr) noexcept {
         return ptr == align_address(ptr, Alignment);
     }
+
+    /**
+     * Swap two values.
+     *
+     * @tparam T The type of the variables to swap.
+     *
+     * @param a The first variable to swap.
+     * @param b The second variable to swap.
+     */
+    template<typename T>
+    constexpr void swap(T& a, T& b) noexcept {
+        const T temp = a;
+
+        a = b;
+        b = temp;
+    }
 }
 
 #endif // CCL_UTIL_HPP

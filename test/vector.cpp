@@ -398,17 +398,19 @@ int main(int argc, char **argv) {
         test_vector<int> v{1, 2, 3};
         test_vector<int> v2{5, 6, 7};
 
+        auto * const old_v_data = v.data();
+
         v2 = std::move(v);
 
-        check(v.data() == nullptr);
+        differs(v.data(), old_v_data);
 
-        check(v2.size() == 3);
-        check(v2.capacity() == 4);
-        check(v2.data() != nullptr);
+        equals(v2.size(), 3U);
+        equals(v2.capacity(), 4U);
+        equals(v2.data(), old_v_data);
 
-        check(v2[0] == 1);
-        check(v2[1] == 2);
-        check(v2[2] == 3);
+        equals(v2[0], 1);
+        equals(v2[1], 2);
+        equals(v2[2], 3);
     });
 
     suite.add_test("ctor (range)", [] () {
