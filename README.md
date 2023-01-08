@@ -100,6 +100,7 @@ Several pre-processor definitions configure behaviour:
 |CCL_SET_KEY_CHUNK_SIZE|Max number of consecutive set slots to look for when inserting, before rehashing into a larger set
 |CCL_ALLOCATOR_DEFAULT_ALIGNMENT|Default allocator minimum alignment constraint
 |CCL_PAGE_SIZE|Page size for paged data structures, as number of elements
+|CCL_DEQUE_MIN_CAPACITY|Minimum allocatable capacity for deques
 
 Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
 

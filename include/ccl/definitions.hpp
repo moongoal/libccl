@@ -38,4 +38,8 @@
     #define CCL_PAGE_SIZE 4096
 #endif // CCL_PAGE_SIZE
 
+#ifndef CCL_DEQUE_MIN_CAPACITY
+    #define CCL_DEQUE_MIN_CAPACITY 16
+#endif // CCL_PAGE_SIZE
+
 #endif // CCL_DEFINITIONS_HPP

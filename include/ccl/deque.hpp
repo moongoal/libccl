@@ -35,6 +35,8 @@ namespace ccl {
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+            static constexpr size_type minimum_capacity = CCL_DEQUE_MIN_CAPACITY;
+
         private:
             size_type first = 0;
             size_type last = 0;
@@ -108,7 +110,11 @@ namespace ccl {
 
             constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity > _capacity) {
-                    const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
+                    const size_type actual_new_capacity = max(
+                        increase_capacity(_capacity, new_capacity),
+                        minimum_capacity
+                    );
+
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
                     const size_type old_size = size();
                     const size_type new_first = (new_capacity >> 1) - old_size / 2;
@@ -164,7 +170,7 @@ namespace ccl {
 
             constexpr void push_back(const_reference item) {
                 if(!capacity_back()) { [[unlikely]]
-                    reserve(_capacity);
+                    reserve(_capacity + 1);
                 }
 
                 std::uninitialized_copy(&item, &item + 1, _data + last);
@@ -174,7 +180,7 @@ namespace ccl {
             template<typename ...Args>
             constexpr void emplace_back(Args&& ...args) {
                 if(!capacity_back()) { [[unlikely]]
-                    reserve(_capacity);
+                    reserve(_capacity + 1);
                 }
 
                 std::construct_at(_data + last, std::forward<Args>(args)...);
