@@ -35,6 +35,8 @@ namespace ccl {
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+            static constexpr size_type realloc_capacity_threshold = 16;
+
         private:
             size_type first = 0;
             size_type last = 0;
@@ -107,7 +109,22 @@ namespace ccl {
             constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
 
             constexpr void reserve(const size_type new_capacity) {
+                if(new_capacity > _capacity) {
+                    const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
+                    const size_type old_size = size();
+                    const size_type new_first = (new_capacity >> 1) - old_size / 2;
 
+                    if(_data) {
+                        std::uninitialized_move(begin(), end(), new_data + new_first);
+                        alloc::get_allocator()->deallocate(_data);
+                    }
+
+                    first = new_first;
+                    last = first + old_size;
+                    _data = new_data;
+                    _capacity = actual_new_capacity;
+                }
             }
 
             constexpr deque& operator=(const deque& other) {
@@ -129,17 +146,41 @@ namespace ccl {
             }
 
             constexpr deque& operator =(deque &&other) {
-                destroy();
                 alloc::operator =(std::move(other));
 
-                first = other.first;
-                last = other.last;
-                _capacity = other._capacity;
-                _data = other._data;
-
-                other._data = nullptr;
+                swap(first, other.first);
+                swap(last, other.last);
+                swap(_capacity, other._capacity);
+                swap(_data, other._data);
 
                 return *this;
+            }
+
+            constexpr size_type capacity_back() const noexcept {
+                return _capacity - last;
+            }
+
+            constexpr size_type capacity_front() const noexcept {
+                return first;
+            }
+
+            constexpr void push_back(const_reference item) {
+                if(!capacity_back()) { [[unlikely]]
+                    reserve(_capacity);
+                }
+
+                std::uninitialized_copy(&item, &item + 1, _data + last);
+                last += 1;
+            }
+
+            template<typename ...Args>
+            constexpr void emplace_back(Args&& ...args) {
+                if(!capacity_back()) { [[unlikely]]
+                    reserve(_capacity);
+                }
+
+                std::construct_at(_data + last, std::forward<Args>(args)...);
+                last += 1;
             }
     };
 }
