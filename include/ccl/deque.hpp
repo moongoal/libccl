@@ -35,8 +35,6 @@ namespace ccl {
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-            static constexpr size_type realloc_capacity_threshold = 16;
-
         private:
             size_type first = 0;
             size_type last = 0;
@@ -75,7 +73,7 @@ namespace ccl {
                 if(_data) {
                     std::destroy_n(_data + first, size());
 
-                    get_allocator()->deallocate(_data);
+                    alloc::get_allocator()->deallocate(_data);
                     _data = nullptr;
                 }
             }
