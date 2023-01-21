@@ -96,23 +96,23 @@ namespace ccl {
             constexpr const_iterator cfront() const noexcept { return cbegin(); }
             constexpr const_iterator cback() const noexcept { return cend(); }
 
-            constexpr iterator begin() noexcept { return _data; }
+            constexpr iterator begin() noexcept { return _data + first; }
             constexpr iterator end() noexcept { return _data + last; }
 
-            constexpr const_iterator begin() const noexcept { return _data; }
+            constexpr const_iterator begin() const noexcept { return _data + first; }
             constexpr const_iterator end() const noexcept { return _data + last; }
 
-            constexpr const_iterator cbegin() const noexcept { return _data; }
+            constexpr const_iterator cbegin() const noexcept { return _data + first; }
             constexpr const_iterator cend() const noexcept { return _data + last; }
 
             constexpr reverse_iterator rbegin() noexcept { return reverse_iterator{_data + last}; }
-            constexpr reverse_iterator rend() noexcept { return reverse_iterator{_data}; }
+            constexpr reverse_iterator rend() noexcept { return reverse_iterator{_data + first}; }
 
             constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{_data + last}; }
-            constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{_data}; }
+            constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{_data + first}; }
 
             constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{_data + last}; }
-            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
+            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data + first}; }
 
             constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity > capacity_front() || new_capacity > capacity_back()) {
@@ -198,8 +198,8 @@ namespace ccl {
                     reserve(_capacity + 1);
                 }
 
-                std::uninitialized_copy(&item, &item + 1, _data + first);
                 first -= first != 0; // Decrease by one only if > 0
+                std::uninitialized_copy(&item, &item + 1, _data + first);
             }
 
             template<typename ...Args>
@@ -208,8 +208,8 @@ namespace ccl {
                     reserve(_capacity + 1);
                 }
 
-                std::construct_at(_data + first, std::forward<Args>(args)...);
                 first -= first != 0; // Decrease by one only if > 0
+                std::construct_at(_data + first, std::forward<Args>(args)...);
             }
     };
 }
