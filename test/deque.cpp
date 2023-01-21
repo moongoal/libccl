@@ -54,6 +54,56 @@ int main(int argc, char **argv) {
         equals(q.data(), nullptr);
     });
 
+    suite.add_test("ctor (copy)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+            q2.emplace_back(on_destroy);
+
+            q = q2;
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 4);
+    });
+
+    suite.add_test("ctor (move)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+            q2.emplace_back(on_destroy);
+
+            q = std::move(q2);
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 2);
+    });
+
     suite.add_test("dtor", [] () {
         int destruction_counter = 0;
 
