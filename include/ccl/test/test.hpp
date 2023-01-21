@@ -13,6 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <ccl/api.hpp>
+#include <ccl/concepts.hpp>
 
 namespace ccl {
     using test_function = std::function<void()>;
@@ -122,7 +123,14 @@ namespace ccl {
     template<typename T, typename U, typename Z = std::common_type_t<T, U>>
     inline void equals(T&& value1, U&& value2) {
         if(static_cast<Z>(value1) != static_cast<Z>(value2)) {
-            std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
+            if constexpr(
+                streamable_out<T, decltype(std::cerr)>
+                && streamable_out<U, decltype(std::cerr)>
+            ) {
+                std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
+            } else {
+                std::cerr << "equals(<UNPRINTABLE>) failed." << std::endl;
+            }
 
             fail();
         }
@@ -131,7 +139,14 @@ namespace ccl {
     template<typename T, typename U, typename Z = std::common_type_t<T, U>>
     inline void differs(T&& value1, U&& value2) {
         if(static_cast<Z>(value1) == static_cast<Z>(value2)) {
-            std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
+            if constexpr(
+                streamable_out<T, decltype(std::cerr)>
+                && streamable_out<U, decltype(std::cerr)>
+            ) {
+                std::cerr << "differs(" << value1 << ", " << value2 << ") failed." << std::endl;
+            } else {
+                std::cerr << "differs(<UNPRINTABLE>) failed." << std::endl;
+            }
 
             fail();
         }

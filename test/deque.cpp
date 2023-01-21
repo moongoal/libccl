@@ -362,5 +362,133 @@ int main(int argc, char **argv) {
         check(q.capacity_front() > 0);
     });
 
+    suite.add_test("begin", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(*q.begin(), 1);
+    });
+
+    suite.add_test("cbegin", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(*q.cbegin(), 1);
+    });
+
+    suite.add_test("begin (const)", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        const test_deque<int>& k = q;
+
+        equals(*k.begin(), 1);
+    });
+
+    suite.add_test("end", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(*(q.end() - 1), 3);
+    });
+
+    suite.add_test("cend", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(*(q.cend() - 1), 3);
+    });
+
+    suite.add_test("end (const)", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        const test_deque<int>& k = q;
+
+        equals(*(k.end() - 1), 3);
+    });
+
+    suite.add_test("rbegin", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(*q.rbegin(), 3);
+    });
+
+    suite.add_test("crbegin", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(*q.crbegin(), 3);
+    });
+
+    suite.add_test("rbegin (const)", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        const test_deque<int>& k = q;
+
+        equals(*k.rbegin(), 3);
+    });
+
+    suite.add_test("rend", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(q.rend().base(), q.begin());
+    });
+
+    suite.add_test("crend", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(q.crend().base(), q.cbegin());
+    });
+
+    suite.add_test("rend (const)", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        const test_deque<int>& k = q;
+
+        equals(k.rend().base(), q.cbegin());
+    });
+
     return suite.main(argc, argv);
 }

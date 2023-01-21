@@ -54,6 +54,21 @@ namespace ccl {
      */
     template<typename T>
     concept integral_decaying = std::is_integral_v<std::decay_t<T>>;
+
+    template<typename T, typename S>
+    concept streamable_out = requires(S s, T t) {
+        s << t;
+    };
+
+    template<typename T, typename S>
+    concept streamable_in = requires(S s, T t) {
+        s >> t;
+    };
+
+    template<typename T, typename S>
+    concept streamable = requires(S s, T t) {
+        requires streamable_in<T, S> && streamable_out<T, S>;
+    };
 }
 
 #endif // CCL_CONCEPTS_HPP
