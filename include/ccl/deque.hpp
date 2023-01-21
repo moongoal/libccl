@@ -57,20 +57,26 @@ namespace ccl {
 
             constexpr deque(const deque& other)
                 : alloc{other},
-                first{other.first},
-                last{other.last},
-                _data{other._data},
-                _capacity{other._capacity}
-            {}
+                first{0},
+                last{0},
+                _data{nullptr},
+                _capacity{0}
+            {
+                reserve(other._capacity);
+
+                first = other.first;
+                last = other.last;
+
+                std::uninitialized_copy_n(other.begin(), size(), begin());
+            }
 
             constexpr deque(deque&& other)
                 : alloc{other},
                 first{other.first},
                 last{other.last},
-                _data{other._data},
                 _capacity{other._capacity}
             {
-                other._data = nullptr;
+                swap(_data, other._data);
             }
 
             ~deque() { destroy(); }

@@ -54,51 +54,72 @@ int main(int argc, char **argv) {
         equals(q.data(), nullptr);
     });
 
-    suite.add_test("ctor (copy)", [] () {
+    suite.add_test("ctor (copy, non-trivial)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
 
-        test_deque<spy> q;
+        test_deque<spy> q2;
 
-        {
-            test_deque<spy> q2;
+        q2.emplace_back(on_destroy);
+        q2.emplace_back(on_destroy);
 
-            q2.emplace_back(on_destroy);
-            q2.emplace_back(on_destroy);
-
-            q = q2;
-        }
+        test_deque<spy> q{q2};
 
         differs(q.capacity(), 0);
         equals(q.size(), 2U);
         differs(q.is_empty(), true);
         differs(q.data(), nullptr);
+        differs(q.data(), q2.data());
 
+        equals(q.begin()->construction_magic, constructed_value);
+        equals((q.begin() + 1)->construction_magic, constructed_value);
+
+        q2.destroy();
         q.destroy();
 
         equals(destruction_counter, 4);
+    });
+
+    suite.add_test("ctor (copy, trivial)", [] () {
+        test_deque<int> q2;
+
+        q2.emplace_back(1);
+        q2.emplace_back(2);
+
+        test_deque<int> q{q2};
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+        differs(q.data(), q2.data());
+
+        equals(*q.begin(), 1);
+        equals(*(q.begin() + 1), 2);
+
+        q2.destroy();
+        q.destroy();
     });
 
     suite.add_test("ctor (move)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
 
-        test_deque<spy> q;
+        test_deque<spy> q2;
 
-        {
-            test_deque<spy> q2;
+        q2.emplace_back(on_destroy);
+        q2.emplace_back(on_destroy);
 
-            q2.emplace_back(on_destroy);
-            q2.emplace_back(on_destroy);
+        auto * const old_q2_data = q2.data();
 
-            q = std::move(q2);
-        }
+        test_deque<spy> q{std::move(q2)};
 
         differs(q.capacity(), 0);
         equals(q.size(), 2U);
         differs(q.is_empty(), true);
-        differs(q.data(), nullptr);
+        equals(q.data(), old_q2_data);
 
+        q2.destroy();
         q.destroy();
 
         equals(destruction_counter, 2);
@@ -488,6 +509,56 @@ int main(int argc, char **argv) {
         const test_deque<int>& k = q;
 
         equals(k.rend().base(), q.cbegin());
+    });
+
+    suite.add_test("operator = (copy)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+            q2.emplace_back(on_destroy);
+
+            q = q2;
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 4);
+    });
+
+    suite.add_test("operator = (move)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+            q2.emplace_back(on_destroy);
+
+            q = std::move(q2);
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 2);
     });
 
     return suite.main(argc, argv);
