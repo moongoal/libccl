@@ -198,5 +198,109 @@ int main(int argc, char **argv) {
         equals(q.capacity(), 0);
     });
 
+    suite.add_test("pop_front", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        q.pop_front();
+        q.pop_front();
+        q.pop_front();
+
+        throws<std::out_of_range>([&q] () {
+            q.pop_front();
+        });
+    });
+
+    suite.add_test("pop_back", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        q.pop_back();
+        q.pop_back();
+        q.pop_back();
+
+        throws<std::out_of_range>([&q] () {
+            q.pop_back();
+        });
+    });
+
+    suite.add_test("front", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(q.front(), 1);
+    });
+
+    suite.add_test("front (empty)", [] () {
+        test_deque<int> q;
+
+        throws<std::out_of_range>([&q] () {
+            const volatile auto x CCLUNUSED = q.front();
+        });
+    });
+
+    suite.add_test("back", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(q.back(), 3);
+    });
+
+    suite.add_test("back (empty)", [] () {
+        test_deque<int> q;
+
+        throws<std::out_of_range>([&q] () {
+            const volatile auto x CCLUNUSED = q.back();
+        });
+    });
+
+    suite.add_test("cfront", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(q.cfront(), 1);
+    });
+
+    suite.add_test("cfront (empty)", [] () {
+        test_deque<int> q;
+
+        throws<std::out_of_range>([&q] () {
+            const volatile auto x CCLUNUSED = q.cfront();
+        });
+    });
+
+    suite.add_test("cback", [] () {
+        test_deque<int> q;
+
+        q.emplace_back(1);
+        q.emplace_back(2);
+        q.emplace_back(3);
+
+        equals(q.cback(), 3);
+    });
+
+    suite.add_test("cback (empty)", [] () {
+        test_deque<int> q;
+
+        throws<std::out_of_range>([&q] () {
+            const volatile auto x CCLUNUSED = q.cback();
+        });
+    });
+
     return suite.main(argc, argv);
 }

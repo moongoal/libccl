@@ -97,24 +97,24 @@ namespace ccl {
 
             constexpr bool is_empty() const noexcept { return first == last; }
 
-            constexpr reference front() {
+            CCLNODISCARD constexpr reference front() {
                 CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
                 return *begin();
             }
 
-            constexpr reference back() {
+            CCLNODISCARD constexpr reference back() {
                 CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
-                return *end();
+                return *(end() - 1);
             }
 
-            constexpr const_reference cfront() const {
+            CCLNODISCARD constexpr const_reference cfront() const {
                 CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
                 return *cbegin();
             }
 
-            constexpr const_reference cback() const {
+            CCLNODISCARD constexpr const_reference cback() const {
                 CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
-                return *cend();
+                return *(cend() - 1);
             }
 
             constexpr iterator begin() noexcept { return _data + first; }
