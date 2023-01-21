@@ -11,6 +11,8 @@
 #include <ccl/debug.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/exceptions.hpp>
+#include <ccl/type-traits.hpp>
+#include <ccl/either.hpp>
 
 namespace ccl {
     /**
@@ -35,9 +37,29 @@ namespace ccl {
      *
      * @return The value of `a` if `cond` evaluates to true or that of `b` if it evaluates to false.
      */
+    template<integral_decaying T, integral_decaying U, typename W = std::common_type_t<std::decay_t<T>, std::decay_t<U>>>
+    constexpr W choose(const T a, const U b, const bool cond) noexcept {
+        using Z = either_or_t<W, unsigned, !is_boolean_v<W>>;
+
+        const Z mask = (~static_cast<Z>(0)) & (static_cast<Z>(cond) - 1);
+        const Z first = a & ~mask;
+        const Z second = b & mask;
+
+        return first | second;
+    }
+
     template<typename T>
-    constexpr T choose(const T a, const T b, const bool cond) noexcept {
-        const T choices[2] { b, a };
+    constexpr T* choose(const T* a, const T* b, const bool cond) noexcept {
+        const std::intptr_t mask = (~static_cast<std::intptr_t>(0)) & (static_cast<std::intptr_t>(cond) - 1);
+        const std::intptr_t first = reinterpret_cast<std::intptr_t>(a) & ~mask;
+        const std::intptr_t second = reinterpret_cast<std::intptr_t>(b) & mask;
+
+        return reinterpret_cast<T*>(first | second);
+    }
+
+    template<typename T, typename U, typename Z = std::common_type_t<std::decay_t<T>, std::decay_t<U>>>
+    constexpr Z choose(const T a, const U b, const bool cond) noexcept {
+        const Z choices[2] { b, a };
 
         return choices[cond];
     }
@@ -54,11 +76,11 @@ namespace ccl {
      * @return The argument with the max value.
      */
     template<typename FirstArg, typename ...Ts>
-    constexpr FirstArg max(FirstArg&& arg1, Ts&& ...args) noexcept {
+    constexpr std::common_type_t<std::decay_t<FirstArg>, std::decay_t<Ts>...> max(FirstArg&& arg1, Ts&& ...args) noexcept {
         if constexpr(sizeof...(args) > 0) {
             const auto arg2 = max(std::forward<Ts>(args)...);
 
-            return choose<FirstArg>(
+            return choose(
                 arg1,
                 arg2,
                 arg1 > arg2
@@ -80,11 +102,11 @@ namespace ccl {
      * @return The argument with the min value.
      */
     template<typename FirstArg, typename ...Ts>
-    constexpr FirstArg min(const FirstArg& arg1, Ts&& ...args) noexcept {
+    constexpr std::common_type_t<std::decay_t<FirstArg>, std::decay_t<Ts>...> min(FirstArg&& arg1, Ts&& ...args) noexcept {
         if constexpr(sizeof...(args) > 0) {
             const auto arg2 = max(std::forward<Ts>(args)...);
 
-            return choose<FirstArg>(
+            return choose(
                 arg1,
                 arg2,
                 arg1 < arg2
@@ -105,12 +127,11 @@ namespace ccl {
      *
      * @return The new capacity.
      */
-    template<typename T>
-    requires std::integral<T>
+    template<std::integral T>
     constexpr T increase_capacity(T capacity, const T threshold) {
         CCL_ASSERT(capacity >= 0);
 
-        capacity = max<T>(static_cast<T>(1), capacity);
+        capacity = max(static_cast<T>(1), capacity);
 
         CCL_THROW_IF(!is_power_2(capacity), std::invalid_argument{"Capacity must be a power of two."});
 
@@ -133,8 +154,7 @@ namespace ccl {
      *
      * @return The new capacity.
      */
-    template<typename T>
-    requires std::integral<T>
+    template<std::integral T>
     constexpr T increase_paged_capacity(T capacity, const T threshold, const T page_size) {
         CCL_ASSERT(capacity >= 0);
         CCL_ASSERT(page_size >= 0);

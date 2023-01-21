@@ -48,6 +48,12 @@ namespace ccl {
 
         { allocator.template allocate<T>(n, flags) } -> std::convertible_to<T*>;
     };
+
+    /**
+     * A type decaying to an integral type.
+     */
+    template<typename T>
+    concept integral_decaying = std::is_integral_v<std::decay_t<T>>;
 }
 
 #endif // CCL_CONCEPTS_HPP

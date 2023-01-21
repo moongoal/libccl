@@ -119,16 +119,18 @@ namespace ccl {
         }
     }
 
-    inline void equals(const auto& value1, const auto& value2) {
-        if(value1 != value2) {
+    template<typename T, typename U, typename Z = std::common_type_t<T, U>>
+    inline void equals(T&& value1, U&& value2) {
+        if(static_cast<Z>(value1) != static_cast<Z>(value2)) {
             std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
 
             fail();
         }
     }
 
-    inline void differs(const auto& value1, const auto& value2) {
-        if(value1 == value2) {
+    template<typename T, typename U, typename Z = std::common_type_t<T, U>>
+    inline void differs(T&& value1, U&& value2) {
+        if(static_cast<Z>(value1) == static_cast<Z>(value2)) {
             std::cerr << "equals(" << value1 << ", " << value2 << ") failed." << std::endl;
 
             fail();

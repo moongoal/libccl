@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 
         check(v.size() == 0);
         check(v.capacity() == test_vector<int>::page_size * 2);
-        equals<int, int>(destruction_counter, test_vector<int>::page_size + 1);
+        equals(destruction_counter, test_vector<int>::page_size + 1);
     });
 
     suite.add_test("resize (grow within page)", [] () {
@@ -444,7 +444,7 @@ int main(int argc, char **argv) {
             equals(destruction_counter, 0);
         }
 
-        equals<int, int>(destruction_counter, test_vector<spy>::page_size * 2);
+        equals(destruction_counter, test_vector<spy>::page_size * 2);
     });
 
     suite.add_test("insert rvalue (invalid iterator)", [] () {
@@ -661,8 +661,8 @@ int main(int argc, char **argv) {
 
         v.emplace_at(v.begin() + 1, dummy{4});
 
-        equals<std::size_t, std::size_t>(v.size(), item_count + 1);
-        equals<std::size_t, std::size_t>(v.capacity(), test_vector<dummy>::page_size * 2);
+        equals(v.size(), item_count + 1);
+        equals(v.capacity(), test_vector<dummy>::page_size * 2);
 
         equals(v[v.begin()].value, 999);
         equals(v[v.begin() + 1].value, 5);
@@ -709,8 +709,8 @@ int main(int argc, char **argv) {
 
         v.emplace(dummy{4});
 
-        equals<int, int>(v.size(), test_vector<dummy>::page_size + 1);
-        equals<int, int>(v.capacity(), test_vector<dummy>::page_size * 2);
+        equals(v.size(), test_vector<dummy>::page_size + 1);
+        equals(v.capacity(), test_vector<dummy>::page_size * 2);
         equals((v.end() - 1)->value, 5);
     });
 

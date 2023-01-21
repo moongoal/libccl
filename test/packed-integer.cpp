@@ -14,19 +14,19 @@ int main(int argc, char **argv) {
         equals(n.get(), 0ULL);
         equals(n.high(), 0ULL);
         equals(n.low(), 0ULL);
-        equals<unsigned, unsigned>(my_int::low_part_size, 32);
-        equals<unsigned, unsigned>(my_int::high_part_shift_bits, 32);
-        equals<std::size_t, std::size_t>(my_int::low_part_mask, 0xffffffff);
+        equals(my_int::low_part_size, 32);
+        equals(my_int::high_part_shift_bits, 32);
+        equals(my_int::low_part_mask, 0xffffffff);
     });
 
     suite.add_test("ctor (default, uneven)", [] () {
         using my_int = packed_integer<uint64_t, 48>;
 
-        equals<unsigned, unsigned>(my_int::low_part_size, 48);
-        equals<unsigned, unsigned>(my_int::high_part_shift_bits, 48);
-        equals<std::size_t, std::size_t>(my_int::low_part_mask, 0xffffffffffff);
-        equals<std::size_t, std::size_t>(my_int::low_part_max, (1ULL << 48) - 1);
-        equals<std::size_t, std::size_t>(my_int::high_part_max, (1ULL << 16) - 1);
+        equals(my_int::low_part_size, 48);
+        equals(my_int::high_part_shift_bits, 48);
+        equals(my_int::low_part_mask, 0xffffffffffff);
+        equals(my_int::low_part_max, (1ULL << 48) - 1);
+        equals(my_int::high_part_max, (1ULL << 16) - 1);
     });
 
     suite.add_test("ctor (value)", [] () {
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
         my_int n = 0xaaaaaaaabbbbbbbb;
 
-        equals<uint64_t, uint64_t>(n, 0xaaaaaaaabbbbbbbb);
+        equals(n.get(), 0xaaaaaaaabbbbbbbb);
     });
 
     suite.add_test("assignment (copy)", [] () {
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
         n = n2;
 
-        equals<uint64_t, uint64_t>(n, 4);
+        equals(n.get(), 4);
     });
 
     suite.add_test("assignment (value)", [] () {
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 
         n = 4;
 
-        equals<uint64_t, uint64_t>(n, 4);
+        equals(n.get(), 4);
     });
 
     suite.add_test("high, low & get", [] () {
@@ -84,9 +84,9 @@ int main(int argc, char **argv) {
 
         my_int n = 0xaaaaccccbbbbbbbb;
 
-        equals<uint64_t, uint64_t>(n.high(), 0xaaaa);
-        equals<uint64_t, uint64_t>(n.low(), 0xccccbbbbbbbb);
-        equals<uint64_t, uint64_t>(n.get(), 0xaaaaccccbbbbbbbb);
+        equals(n.high(), 0xaaaa);
+        equals(n.low(), 0xccccbbbbbbbb);
+        equals(n.get(), 0xaaaaccccbbbbbbbb);
     });
 
     suite.add_test("comparison (equality, reference)", [] () {
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
     suite.add_test("make", [] () {
         using my_int = packed_integer<uint64_t, 48>;
 
-        equals(0xaaaaccccbbbbbbbb, my_int::make(0xaaaa, 0xccccbbbbbbbb));
+        equals(0xaaaaccccbbbbbbbb, my_int::make(0xaaaa, 0xccccbbbbbbbb).get());
     });
 
     suite.add_test("make (high value too large)", [] () {

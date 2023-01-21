@@ -22,6 +22,18 @@ namespace ccl {
         using const_reference = const T&;
         using difference_type = std::ptrdiff_t;
     };
+
+    template<typename T>
+    struct is_boolean { static constexpr bool value = false; };
+
+    template<>
+    struct is_boolean<bool> { static constexpr bool value = true; };
+
+    template<>
+    struct is_boolean<const bool> { static constexpr bool value = true; };
+
+    template<typename T>
+    static constexpr decltype(auto) is_boolean_v = is_boolean<T>::value;
 }
 
 #endif // CCL_TYPE_TRAITS_HPP

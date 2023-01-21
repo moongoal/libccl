@@ -123,7 +123,7 @@ namespace ccl {
 
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
                     const size_type old_size = size();
-                    const size_type new_first = (new_capacity >> 1) - old_size / 2;
+                    const size_type new_first = (max(actual_new_capacity, 1ULL) >> 1) - old_size / 2;
 
                     if(_data) {
                         std::uninitialized_move(begin(), end(), new_data + new_first);

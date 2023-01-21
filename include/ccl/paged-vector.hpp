@@ -237,16 +237,16 @@ namespace ccl {
 
                 reserve(new_size);
 
-                const size_type first_page_size_to_fill = min<size_type>(page_size, new_size) - next_item_index();
+                const size_type first_page_size_to_fill = min(page_size, new_size) - next_item_index();
                 const size_type size_delta = new_size - current_size; // Precondition: new size > current size
                 const size_type intermediate_page_count = (size_delta - first_page_size_to_fill) >> page_size_shift_width;
                 const size_type last_page_size = compute_last_page_size(new_size);
                 const bool is_single_page_grow = intermediate_page_count == 0;
 
                 // Default-construct first page items
-                const size_type first_page_index = choose(
+                const size_type first_page_index = choose<size_type>(
                     current_page_count - 1,
-                    static_cast<size_type>(0),
+                    0,
                     current_page_count
                 );
 

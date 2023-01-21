@@ -9,23 +9,23 @@ int main(int argc, char **argv) {
     suite.add_test("ctor (default)", [] () {
         untyped_versioned_handle h;
 
-        equals<unsigned, unsigned>(h.generation(), 0);
-        equals<unsigned, unsigned>(h.value(), 0);
+        equals(h.generation(), 0);
+        equals(h.value(), 0);
     });
 
     suite.add_test("ctor (copy)", [] () {
         untyped_versioned_handle h = untyped_versioned_handle::make(5, 4);
 
-        equals<unsigned, unsigned>(h.generation(), 5);
-        equals<unsigned, unsigned>(h.value(), 4);
+        equals(h.generation(), 5);
+        equals(h.value(), 4);
     });
 
     suite.add_test("ctor (value)", [] () {
         const auto raw = untyped_versioned_handle::underlying_type::make(2, 3);
         untyped_versioned_handle h{raw.get()};
 
-        equals<unsigned, unsigned>(h.generation(), 2);
-        equals<unsigned, unsigned>(h.value(), 3);
+        equals(h.generation(), 2);
+        equals(h.value(), 3);
     });
 
     suite.add_test("equality assignment", [] () {
@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
 
         b = h;
 
-        equals<unsigned, unsigned>(b.generation(), 2);
-        equals<unsigned, unsigned>(b.value(), 3);
+        equals(b.generation(), 2);
+        equals(b.value(), 3);
     });
 
     suite.add_test("comparison <", [] () {
