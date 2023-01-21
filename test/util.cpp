@@ -11,7 +11,7 @@ int main(int argc, char ** argv) {
         equals(choose(1, 2, false), 2);
         equals(choose(1, 2UL, true), 1);
         equals(choose(static_cast<int*>(nullptr), reinterpret_cast<int*>(0x123), true), nullptr);
-        equals(choose(1.0f, 2.0, true), 2.0);
+        equals(choose(1.0f, 2.0, false), 2.0);
     });
 
     suite.add_test("is_power_2", [] () {

@@ -43,6 +43,13 @@ namespace ccl {
             pointer _data = nullptr;
             size_type _capacity = 0;
 
+            /**
+             * Recenter first and last indices.
+             */
+            void recenter() noexcept {
+                first = last = max(_capacity, 1ULL) >> 1;
+            }
+
         public:
             constexpr deque(allocator_type * const allocator = nullptr)
                 : alloc{allocator}
@@ -90,11 +97,25 @@ namespace ccl {
 
             constexpr bool is_empty() const noexcept { return first == last; }
 
-            constexpr iterator front() noexcept { return begin(); }
-            constexpr iterator back() noexcept { return end(); }
+            constexpr reference front() {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+                return *begin();
+            }
 
-            constexpr const_iterator cfront() const noexcept { return cbegin(); }
-            constexpr const_iterator cback() const noexcept { return cend(); }
+            constexpr reference back() {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+                return *end();
+            }
+
+            constexpr const_reference cfront() const {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+                return *cbegin();
+            }
+
+            constexpr const_reference cback() const {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+                return *cend();
+            }
 
             constexpr iterator begin() noexcept { return _data + first; }
             constexpr iterator end() noexcept { return _data + last; }
@@ -210,6 +231,27 @@ namespace ccl {
 
                 first -= first != 0; // Decrease by one only if > 0
                 std::construct_at(_data + first, std::forward<Args>(args)...);
+            }
+
+            void clear() {
+                if(_data) {
+                    std::destroy_n(_data + first, size());
+                    recenter();
+                }
+            }
+
+            void pop_back() {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+
+                std::destroy_at(_data + last - 1);
+                last -= 1;
+            }
+
+            void pop_front() {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+
+                std::destroy_at(_data + first);
+                first += 1;
             }
     };
 }

@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
         equals(q.size(), 1U);
         equals(q.is_empty(), false);
         differs(q.data(), nullptr);
-        equals(q.cfront()->construction_magic, constructed_value);
+        equals(q.cfront().construction_magic, constructed_value);
     });
 
     suite.add_test("emplace_back", [] () {
@@ -129,8 +129,8 @@ int main(int argc, char **argv) {
         equals(q.size(), 2U);
         equals(q.is_empty(), false);
         differs(q.data(), nullptr);
-        equals(q.cfront()->construction_magic, constructed_value);
-        equals((q.cfront() + 1)->construction_magic, constructed_value);
+        equals(q.cfront().construction_magic, constructed_value);
+        equals((q.cbegin() + 1)->construction_magic, constructed_value);
     });
 
     suite.add_test("push_front", [] () {
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
         equals(q.size(), 1U);
         equals(q.is_empty(), false);
         differs(q.data(), nullptr);
-        equals(q.cfront()->construction_magic, constructed_value);
+        equals(q.cfront().construction_magic, constructed_value);
     });
 
     suite.add_test("emplace_front", [] () {
@@ -170,8 +170,32 @@ int main(int argc, char **argv) {
         equals(q.size(), 2U);
         equals(q.is_empty(), false);
         differs(q.data(), nullptr);
-        equals(q.cfront()->construction_magic, constructed_value);
-        equals((q.cfront() + 1)->construction_magic, constructed_value);
+        equals(q.cfront().construction_magic, constructed_value);
+        equals((q.cbegin() + 1)->construction_magic, constructed_value);
+    });
+
+    suite.add_test("clear", [] () {
+        int destruction_counter = 0;
+        test_deque<spy> q;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        q.emplace_back(on_destroy);
+        q.emplace_back(on_destroy);
+
+        q.clear();
+
+        equals(destruction_counter, 2);
+        equals(q.size(), 0);
+        differs(q.capacity(), 0);
+    });
+
+    suite.add_test("clear (empty)", [] () {
+        test_deque<int> q;
+
+        q.clear();
+
+        equals(q.size(), 0);
+        equals(q.capacity(), 0);
     });
 
     return suite.main(argc, argv);
