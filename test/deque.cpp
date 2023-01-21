@@ -302,5 +302,15 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("reserve", [] () {
+        test_deque<int> q;
+
+        q.reserve(100);
+
+        check(q.capacity() >= 100);
+        check(q.capacity_back() > 0);
+        check(q.capacity_front() > 0);
+    });
+
     return suite.main(argc, argv);
 }

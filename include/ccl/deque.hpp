@@ -196,7 +196,7 @@ namespace ccl {
             }
 
             constexpr void push_back(const_reference item) {
-                if(!capacity_back()) { [[unlikely]]
+                if(!capacity_back()) { CCLUNLIKELY
                     reserve(_capacity + 1);
                 }
 
@@ -206,7 +206,7 @@ namespace ccl {
 
             template<typename ...Args>
             constexpr void emplace_back(Args&& ...args) {
-                if(!capacity_back()) { [[unlikely]]
+                if(!capacity_back()) { CCLUNLIKELY
                     reserve(_capacity + 1);
                 }
 
@@ -215,7 +215,7 @@ namespace ccl {
             }
 
             constexpr void push_front(const_reference item) {
-                if(!capacity_front()) { [[unlikely]]
+                if(!capacity_front()) { CCLUNLIKELY
                     reserve(_capacity + 1);
                 }
 
@@ -225,7 +225,7 @@ namespace ccl {
 
             template<typename ...Args>
             constexpr void emplace_front(Args&& ...args) {
-                if(!capacity_front()) { [[unlikely]]
+                if(!capacity_front()) { CCLUNLIKELY
                     reserve(_capacity + 1);
                 }
 
@@ -241,17 +241,29 @@ namespace ccl {
             }
 
             void pop_back() {
-                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+                const bool is_empty = this->is_empty();
+
+                CCL_THROW_IF(is_empty, std::out_of_range{"Deque is empty."});
 
                 std::destroy_at(_data + last - 1);
                 last -= 1;
+
+                if(!is_empty) { return; }
+
+                recenter();
             }
 
             void pop_front() {
-                CCL_THROW_IF(is_empty(), std::out_of_range{"Deque is empty."});
+                const bool is_empty = this->is_empty();
+
+                CCL_THROW_IF(is_empty, std::out_of_range{"Deque is empty."});
 
                 std::destroy_at(_data + first);
                 first += 1;
+
+                if(!is_empty) { return; }
+
+                recenter();
             }
     };
 }
