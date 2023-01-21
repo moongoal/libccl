@@ -90,6 +90,12 @@ namespace ccl {
 
             constexpr bool is_empty() const noexcept { return first == last; }
 
+            constexpr iterator front() noexcept { return begin(); }
+            constexpr iterator back() noexcept { return end(); }
+
+            constexpr const_iterator cfront() const noexcept { return cbegin(); }
+            constexpr const_iterator cback() const noexcept { return cend(); }
+
             constexpr iterator begin() noexcept { return _data; }
             constexpr iterator end() noexcept { return _data + last; }
 
@@ -109,7 +115,7 @@ namespace ccl {
             constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
 
             constexpr void reserve(const size_type new_capacity) {
-                if(new_capacity > _capacity) {
+                if(new_capacity > capacity_front() || new_capacity > capacity_back()) {
                     const size_type actual_new_capacity = max(
                         increase_capacity(_capacity, new_capacity),
                         minimum_capacity
@@ -185,6 +191,25 @@ namespace ccl {
 
                 std::construct_at(_data + last, std::forward<Args>(args)...);
                 last += 1;
+            }
+
+            constexpr void push_front(const_reference item) {
+                if(!capacity_front()) { [[unlikely]]
+                    reserve(_capacity + 1);
+                }
+
+                std::uninitialized_copy(&item, &item + 1, _data + first);
+                first -= first != 0; // Decrease by one only if > 0
+            }
+
+            template<typename ...Args>
+            constexpr void emplace_front(Args&& ...args) {
+                if(!capacity_front()) { [[unlikely]]
+                    reserve(_capacity + 1);
+                }
+
+                std::construct_at(_data + first, std::forward<Args>(args)...);
+                first -= first != 0; // Decrease by one only if > 0
             }
     };
 }
