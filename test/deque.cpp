@@ -511,7 +511,7 @@ int main(int argc, char **argv) {
         equals(k.rend().base(), q.cbegin());
     });
 
-    suite.add_test("operator = (copy)", [] () {
+    suite.add_test("operator = (copy, empty)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
 
@@ -536,7 +536,34 @@ int main(int argc, char **argv) {
         equals(destruction_counter, 4);
     });
 
-    suite.add_test("operator = (move)", [] () {
+    suite.add_test("operator = (copy)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        q.emplace_back(on_destroy);
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+            q2.emplace_back(on_destroy);
+
+            q = q2;
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 5);
+    });
+
+    suite.add_test("operator = (move, empty)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
 
@@ -559,6 +586,33 @@ int main(int argc, char **argv) {
         q.destroy();
 
         equals(destruction_counter, 2);
+    });
+
+    suite.add_test("operator = (move)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        q.emplace_back(on_destroy);
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+            q2.emplace_back(on_destroy);
+
+            q = std::move(q2);
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 2U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 3);
     });
 
     return suite.main(argc, argv);
