@@ -31,6 +31,7 @@ Unstable: 🔴
 |Tagged pointer|🔴
 |Pair|🔴
 |Atomic|🔴
+|Deque|🔴
 
 ## Building
 
