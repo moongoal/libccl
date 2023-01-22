@@ -8,6 +8,7 @@
 
 #include <ccl/api.hpp>
 #include <ccl/bitset.hpp>
+#include <ccl/pair.hpp>
 #include <ccl/compressed-pair.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/debug.hpp>
@@ -26,7 +27,13 @@
 #include <ccl/dense-map.hpp>
 #include <ccl/handle.hpp>
 #include <ccl/packed-integer.hpp>
+#include <ccl/tagged-pointer.hpp>
 #include <ccl/paged-vector.hpp>
+#include <ccl/deque.hpp>
+#include <ccl/atomic.hpp>
+#include <ccl/sparse-set.hpp>
+#include <ccl/type-traits.hpp>
+#include <ccl/either.hpp>
 
 #include <ccl/memory/memory.hpp>
 #include <ccl/tables/tables.hpp>
