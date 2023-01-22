@@ -135,6 +135,18 @@ namespace ccl {
              */
             constexpr std::size_t get_used_memory_size() const noexcept { return used_size; }
     };
+
+    /**
+     * A local allocator specialisation made to allocate items of a specific type
+     * in a local buffer, returning `nullptr` whenever the allocation fails.
+     * This allocator is the preferred choice to build a PMR-like `composite_allocator`
+     * specialisation.
+     *
+     * @tparam T The type of object to store in the buffer.
+     * @tparam BufferLength The length of the internal buffer as number of elements.
+     */
+    template<typename T, std::size_t BufferLength>
+    using local_buffering_allocator = local_allocator<sizeof(T) * BufferLength, local_allocator_policy::return_nullptr>;
 }
 
 #endif // CCL_LOCAL_ALLOCATOR_HPP
