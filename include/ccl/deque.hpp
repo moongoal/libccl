@@ -18,7 +18,7 @@
 #include <ccl/contiguous-iterator.hpp>
 
 namespace ccl {
-    template<typename T, typed_allocator<T> Allocator>
+    template<typename T, typed_allocator<T> Allocator = allocator>
     class deque : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
