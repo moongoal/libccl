@@ -18,8 +18,29 @@
 #include <ccl/contiguous-iterator.hpp>
 
 namespace ccl {
-    template<typename T, typed_allocator<T> Allocator = allocator>
-    class deque : private internal::with_optional_allocator<Allocator> {
+    enum class deque_reset_policy {
+        /**
+         * Put the first element at the beginning of the memory chunk.
+         *
+         * This is useful if the queue is being used with a produce-consume
+         * pattern.
+         */
+        begin,
+
+        /**
+         * Put the first element at the center of the memory chunk.
+         *
+         * This is useful if the queue is intended to grow in both
+         * directions.
+         */
+        center
+    };
+
+    template<
+        typename T,
+        deque_reset_policy ResetPolicy = deque_reset_policy::center,
+        typed_allocator<T> Allocator = allocator
+    > class deque : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
@@ -36,6 +57,8 @@ namespace ccl {
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
             static constexpr size_type minimum_capacity = CCL_DEQUE_MIN_CAPACITY;
+            static constexpr deque_reset_policy reset_policy = ResetPolicy;
+            static constexpr bool reserve_center_default = reset_policy == deque_reset_policy::center;
 
         private:
             size_type first = 0;
@@ -46,8 +69,12 @@ namespace ccl {
             /**
              * Recenter first and last indices.
              */
-            void recenter() noexcept {
-                first = last = max(_capacity, 1ULL) >> 1;
+            void reset() noexcept {
+                if constexpr(reset_policy == deque_reset_policy::center) {
+                    first = last = max(_capacity, 1ULL) >> 1;
+                } else {
+                    first = last = 0;
+                }
             }
 
         public:
@@ -62,7 +89,7 @@ namespace ccl {
                 _data{nullptr},
                 _capacity{0}
             {
-                reserve(other._capacity);
+                reserve(other._capacity, false);
 
                 first = other.first;
                 last = other.last;
@@ -141,7 +168,14 @@ namespace ccl {
             constexpr const_reverse_iterator crbegin() const noexcept { return std::make_reverse_iterator(cend()); }
             constexpr const_reverse_iterator crend() const noexcept { return std::make_reverse_iterator(cbegin()); }
 
-            constexpr void reserve(const size_type new_capacity) {
+            constexpr void reserve(
+                const size_type new_capacity,
+                bool center = reserve_center_default
+            ) {
+                // If used as deque, always center. If used as queue,
+                // only center when explicityly asked.
+                center |= reset_policy == deque_reset_policy::center;
+
                 if(new_capacity > capacity_front() || new_capacity > capacity_back()) {
                     const size_type actual_new_capacity = max(
                         increase_capacity(_capacity, new_capacity),
@@ -150,7 +184,11 @@ namespace ccl {
 
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
                     const size_type old_size = size();
-                    const size_type new_first = (max(actual_new_capacity, 1ULL) >> 1) - old_size / 2;
+                    const size_type new_first = choose(
+                        (max(actual_new_capacity, 1ULL) >> 1) - old_size / 2,
+                        0,
+                        center
+                    );
 
                     if(_data) {
                         std::uninitialized_move(begin(), end(), new_data + new_first);
@@ -168,7 +206,7 @@ namespace ccl {
                 if(other.size() > size() || !alloc::is_allocator_stateless()) {
                     destroy();
                     alloc::operator=(other);
-                    reserve(other._capacity);
+                    reserve(other._capacity, false);
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
                     std::copy(other.begin(), other.end(), begin());
@@ -203,7 +241,7 @@ namespace ccl {
 
             constexpr void push_back(const_reference item) {
                 if(!capacity_back()) { CCLUNLIKELY
-                    reserve(_capacity + 1);
+                    reserve(_capacity + 1, false);
                 }
 
                 std::uninitialized_copy(&item, &item + 1, _data + last);
@@ -213,7 +251,7 @@ namespace ccl {
             template<typename ...Args>
             constexpr void emplace_back(Args&& ...args) {
                 if(!capacity_back()) { CCLUNLIKELY
-                    reserve(_capacity + 1);
+                    reserve(_capacity + 1, false);
                 }
 
                 std::construct_at(_data + last, std::forward<Args>(args)...);
@@ -222,7 +260,7 @@ namespace ccl {
 
             constexpr void push_front(const_reference item) {
                 if(!capacity_front()) { CCLUNLIKELY
-                    reserve(_capacity + 1);
+                    reserve(_capacity + 1, true);
                 }
 
                 first -= first != 0; // Decrease by one only if > 0
@@ -232,7 +270,7 @@ namespace ccl {
             template<typename ...Args>
             constexpr void emplace_front(Args&& ...args) {
                 if(!capacity_front()) { CCLUNLIKELY
-                    reserve(_capacity + 1);
+                    reserve(_capacity + 1, true);
                 }
 
                 first -= first != 0; // Decrease by one only if > 0
@@ -242,7 +280,7 @@ namespace ccl {
             void clear() {
                 if(_data) {
                     std::destroy_n(_data + first, size());
-                    recenter();
+                    reset();
                 }
             }
 
@@ -256,7 +294,7 @@ namespace ccl {
 
                 if(!is_empty) { return; }
 
-                recenter();
+                reset();
             }
 
             void pop_front() {
@@ -269,7 +307,7 @@ namespace ccl {
 
                 if(!is_empty) { return; }
 
-                recenter();
+                reset();
             }
     };
 }

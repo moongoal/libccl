@@ -5,7 +5,7 @@
 using namespace ccl;
 
 template<typename T>
-using test_deque = deque<T, counting_test_allocator>;
+using test_deque = deque<T, deque_reset_policy::begin, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 
@@ -145,8 +145,8 @@ int main(int argc, char **argv) {
         q.reserve(16);
 
         check(q.capacity() >= 16U);
-        equals(q.capacity_back(), 8U);
-        equals(q.capacity_front(), 8U);
+        check(q.capacity_back() >= 16U);
+        equals(q.capacity_front(), 0U);
         equals(q.size(), 0U);
         equals(q.is_empty(), true);
         differs(q.data(), nullptr);
@@ -380,7 +380,7 @@ int main(int argc, char **argv) {
 
         check(q.capacity() >= 100);
         check(q.capacity_back() > 0);
-        check(q.capacity_front() > 0);
+        check(q.capacity_front() == 0);
     });
 
     suite.add_test("begin", [] () {
