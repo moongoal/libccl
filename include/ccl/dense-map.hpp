@@ -22,22 +22,25 @@ namespace ccl {
 template<typename Map>
     struct dense_map_iterator {
         using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_concept = iterator_category;
         using difference_type = std::ptrdiff_t;
 
-        using key_type = either_or_t<
+        using map_key_type = either_or_t<
             const typename Map::key_type,
             typename Map::key_type,
             std::is_const_v<Map>
         >;
 
-        using value_type = either_or_t<
+        using map_value_type = either_or_t<
             const typename Map::value_type,
             typename Map::value_type,
             std::is_const_v<Map>
         >;
 
         using map_type = Map;
-        using key_value_pair = pair<key_type*, value_type*>;
+        using value_type = pair<map_key_type*, map_value_type*>;
+        using pointer = value_type*;
+        using reference = value_type&;
         using size_type = typename Map::size_type;
 
         using index_map_iterator = hashtable_iterator<
@@ -72,52 +75,52 @@ template<typename Map>
             return *this;
         }
 
-        constexpr key_value_pair operator*() noexcept {
+        constexpr value_type operator*() noexcept {
             const auto& key_index_pair = (*index_iterator);
             const uint32_t index = *key_index_pair.second;
 
-            return key_value_pair{ key_index_pair.first, &map->data[index] };
+            return value_type{ key_index_pair.first, &map->data[index] };
         }
 
-        constexpr key_value_pair operator*() const noexcept {
+        constexpr value_type operator*() const noexcept {
             const auto& key_index_pair = (*index_iterator);
             const uint32_t index = *key_index_pair.second;
 
-            return key_value_pair{ key_index_pair.first, &map->data[index] };
+            return value_type{ key_index_pair.first, &map->data[index] };
         }
 
-        constexpr key_value_pair* operator->() const noexcept {
+        constexpr value_type* operator->() const noexcept {
             const auto& key_index_pair = (*index_iterator);
             const uint32_t index = *key_index_pair.second;
 
-            pair = key_value_pair{ key_index_pair.first, &map->data[index] };
+            pair = value_type{ key_index_pair.first, &map->data[index] };
 
             return &pair;
         }
 
-        constexpr auto& operator --() const noexcept {
+        constexpr auto& operator --() noexcept {
             --index_iterator;
 
             return *this;
         }
 
-        constexpr auto operator --(int) const noexcept {
+        constexpr auto operator --(int) noexcept {
             return dense_map_iterator{*map, index_iterator--};
         }
 
-        constexpr auto& operator ++() const noexcept {
+        constexpr auto& operator ++() noexcept {
             ++index_iterator;
 
             return *this;
         }
 
-        constexpr auto operator ++(int) const noexcept {
+        constexpr auto operator ++(int) noexcept {
             return dense_map_iterator{*map, index_iterator++};
         }
 
         map_type *map;
         mutable index_map_iterator index_iterator;
-        mutable key_value_pair pair;
+        mutable value_type pair;
     };
 
     template<typename Map>

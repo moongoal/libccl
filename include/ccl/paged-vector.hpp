@@ -22,6 +22,7 @@ namespace ccl {
     template<typename Vector>
     struct paged_vector_iterator {
         using iterator_category = std::contiguous_iterator_tag;
+        using iterator_concept = iterator_category;
         using difference_type = std::ptrdiff_t;
         using value_type = typename Vector::value_type;
         using pointer = typename Vector::pointer;
