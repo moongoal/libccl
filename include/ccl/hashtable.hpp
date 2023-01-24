@@ -37,6 +37,9 @@ namespace ccl {
             std::is_const_v<Hashtable>
         >;
 
+        using pointer = value_type*;
+        using reference = value_type&;
+
         using key_value_pair = pair<key_type*, value_type*>;
         using const_key_value_pair = pair<const key_type*, const value_type*>;
 

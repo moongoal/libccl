@@ -1,3 +1,4 @@
+#include <iterator>
 #include <ccl/test/test.hpp>
 #include <ccl/hashtable.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
@@ -355,10 +356,6 @@ int main(int argc, char **argv) {
         equals(x.at(1), 1);
         equals(x.at(2), 3);
         equals(x.at(3), 4);
-    });
-
-    suite.add_test("iterator requirements", [] () {
-
     });
 
     return suite.main(argc, argv);
