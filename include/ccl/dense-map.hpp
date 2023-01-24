@@ -8,17 +8,18 @@
 
 #include <utility>
 #include <ccl/api.hpp>
+#include <ccl/type-traits.hpp>
 #include <ccl/hashtable.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hash.hpp>
 #include <ccl/compressed-pair.hpp>
-#include <ccl/either.hpp>
 #include <ccl/pair.hpp>
+#include <ccl/either.hpp>
 
 namespace ccl {
-template<typename Map, bool Const>
+template<typename Map>
     struct dense_map_iterator {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -26,20 +27,26 @@ template<typename Map, bool Const>
         using key_type = either_or_t<
             const typename Map::key_type,
             typename Map::key_type,
-            Const
+            std::is_const_v<Map>
         >;
 
         using value_type = either_or_t<
             const typename Map::value_type,
             typename Map::value_type,
-            Const
+            std::is_const_v<Map>
         >;
 
-        using map_type = either_or_t<const Map, Map, Const>;
+        using map_type = Map;
         using key_value_pair = pair<key_type*, value_type*>;
         using size_type = typename Map::size_type;
 
-        using index_map_iterator = hashtable_iterator<typename map_type::index_map_type, Const>;
+        using index_map_iterator = hashtable_iterator<
+            either_or_t<
+                const typename map_type::index_map_type,
+                typename map_type::index_map_type,
+                std::is_const_v<Map>
+            >
+        >;
 
         constexpr dense_map_iterator() = default;
 
@@ -113,39 +120,39 @@ template<typename Map, bool Const>
         mutable key_value_pair pair;
     };
 
-    template<typename Map, bool Const>
-    constexpr bool operator ==(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
+    template<typename Map>
+    constexpr bool operator ==(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
         return a.map == b.map && a.index_iterator == b.index_iterator;
     }
 
-    template<typename Map, bool Const>
-    constexpr bool operator !=(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
+    template<typename Map>
+    constexpr bool operator !=(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
         return a.map != b.map || a.index_iterator != b.index_iterator;
     }
 
-    template<typename Map, bool Const>
-    constexpr bool operator >(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
+    template<typename Map>
+    constexpr bool operator >(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator > b.index_iterator;
     }
 
-    template<typename Map, bool Const>
-    constexpr bool operator <(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
+    template<typename Map>
+    constexpr bool operator <(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator < b.index_iterator;
     }
 
-    template<typename Map, bool Const>
-    constexpr bool operator >=(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
+    template<typename Map>
+    constexpr bool operator >=(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator >= b.index_iterator;
     }
 
-    template<typename Map, bool Const>
-    constexpr bool operator <=(const dense_map_iterator<Map, Const> a, const dense_map_iterator<Map, Const> b) {
+    template<typename Map>
+    constexpr bool operator <=(const dense_map_iterator<Map> a, const dense_map_iterator<Map> b) {
         CCL_THROW_IF(a.map != b.map, std::runtime_error{"Comparing iterators from different dense maps."});
 
         return a.index_iterator <= b.index_iterator;
@@ -153,8 +160,8 @@ template<typename Map, bool Const>
 
     template<typename K, typename V, typed_allocator<K> Allocator = allocator, typed_hash_function<K> Hash = hash<K>>
     class dense_map {
-        friend struct dense_map_iterator<dense_map, true>;
-        friend struct dense_map_iterator<dense_map, false>;
+        friend struct dense_map_iterator<dense_map>;
+        friend struct dense_map_iterator<const dense_map>;
 
         public:
             using key_type = K;
@@ -170,8 +177,8 @@ template<typename Map, bool Const>
             using index_map_type = hashtable<K, size_type, hash_function_type, allocator_type>;
             using value_iterator = typename data_vector_type::iterator;
             using const_value_iterator = typename data_vector_type::const_iterator;
-            using iterator = dense_map_iterator<dense_map, false>;
-            using const_iterator = dense_map_iterator<dense_map, true>;
+            using iterator = dense_map_iterator<dense_map>;
+            using const_iterator = dense_map_iterator<const dense_map>;
 
         private:
             data_vector_type data;

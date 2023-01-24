@@ -17,11 +17,10 @@
 #include <ccl/util.hpp>
 #include <ccl/bitset.hpp>
 #include <ccl/internal/optional-allocator.hpp>
-#include <ccl/either.hpp>
 #include <ccl/pair.hpp>
 
 namespace ccl {
-    template<typename Hashtable, bool Const>
+    template<typename Hashtable>
     struct hashtable_iterator {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -29,19 +28,19 @@ namespace ccl {
         using key_type = either_or_t<
             const typename Hashtable::key_type,
             typename Hashtable::key_type,
-            Const
+            std::is_const_v<Hashtable>
         >;
 
         using value_type = either_or_t<
             const typename Hashtable::value_type,
             typename Hashtable::value_type,
-            Const
+            std::is_const_v<Hashtable>
         >;
 
         using key_value_pair = pair<key_type*, value_type*>;
         using const_key_value_pair = pair<const key_type*, const value_type*>;
 
-        using hashtable_type = either_or_t<const Hashtable, Hashtable, Const>;
+        using hashtable_type = Hashtable;
         using size_type = typename Hashtable::size_type;
 
         constexpr hashtable_iterator() noexcept : hashtable{nullptr}, index{0} {}
@@ -116,39 +115,39 @@ namespace ccl {
         mutable key_value_pair pair;
     };
 
-    template<typename Hashtable, bool Const>
-    constexpr bool operator ==(const hashtable_iterator<Hashtable, Const> a, const hashtable_iterator<Hashtable, Const> b) {
+    template<typename Hashtable>
+    constexpr bool operator ==(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         return a.hashtable == b.hashtable && a.index == b.index;
     }
 
-    template<typename Hashtable, bool Const>
-    constexpr bool operator !=(const hashtable_iterator<Hashtable, Const> a, const hashtable_iterator<Hashtable, Const> b) {
+    template<typename Hashtable>
+    constexpr bool operator !=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         return a.hashtable != b.hashtable || a.index != b.index;
     }
 
-    template<typename Hashtable, bool Const>
-    constexpr bool operator >(const hashtable_iterator<Hashtable, Const> a, const hashtable_iterator<Hashtable, Const> b) {
+    template<typename Hashtable>
+    constexpr bool operator >(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index > b.index;
     }
 
-    template<typename Hashtable, bool Const>
-    constexpr bool operator <(const hashtable_iterator<Hashtable, Const> a, const hashtable_iterator<Hashtable, Const> b) {
+    template<typename Hashtable>
+    constexpr bool operator <(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index < b.index;
     }
 
-    template<typename Hashtable, bool Const>
-    constexpr bool operator >=(const hashtable_iterator<Hashtable, Const> a, const hashtable_iterator<Hashtable, Const> b) {
+    template<typename Hashtable>
+    constexpr bool operator >=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index >= b.index;
     }
 
-    template<typename Hashtable, bool Const>
-    constexpr bool operator <=(const hashtable_iterator<Hashtable, Const> a, const hashtable_iterator<Hashtable, Const> b) {
+    template<typename Hashtable>
+    constexpr bool operator <=(const hashtable_iterator<Hashtable> a, const hashtable_iterator<Hashtable> b) {
         CCL_THROW_IF(a.hashtable != b.hashtable, std::runtime_error{"Comparing iterators from different hashtables."});
 
         return a.index <= b.index;
@@ -170,8 +169,8 @@ namespace ccl {
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
     class hashtable : private internal::with_optional_allocator<Allocator> {
-        friend struct hashtable_iterator<hashtable, true>;
-        friend struct hashtable_iterator<hashtable, false>;
+        friend struct hashtable_iterator<hashtable>;
+        friend struct hashtable_iterator<const hashtable>;
 
         using alloc = internal::with_optional_allocator<Allocator>;
 
@@ -194,8 +193,8 @@ namespace ccl {
 
             using allocator_type = Allocator;
 
-            using iterator = hashtable_iterator<hashtable, false>;
-            using const_iterator = hashtable_iterator<hashtable, true>;
+            using iterator = hashtable_iterator<hashtable>;
+            using const_iterator = hashtable_iterator<const hashtable>;
 
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
 
