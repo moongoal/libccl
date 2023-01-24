@@ -6,6 +6,7 @@
 #ifndef CCL_SET_HPP
 #define CCL_SET_HPP
 
+#include <initializer_list>
 #include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/definitions.hpp>
@@ -366,6 +367,12 @@ namespace ccl {
 
             template<std::ranges::range InputRange>
             constexpr void insert(InputRange&& input) {
+                for(auto it = input.begin(); it != input.end(); ++it) {
+                    insert(*it);
+                }
+            }
+
+            constexpr void insert(std::initializer_list<key_type> input) {
                 for(auto it = input.begin(); it != input.end(); ++it) {
                     insert(*it);
                 }

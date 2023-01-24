@@ -82,6 +82,18 @@ int main(int argc, char **argv) {
         check(x.contains(3));
     });
 
+    suite.add_test("insert initializer list", [] () {
+        using my_set = test_set<int>;
+
+        my_set x;
+
+        x.insert({ 1, 2, 3 });
+
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+    });
+
     suite.add_test("erase", [] () {
         using my_set = test_set<int>;
 
