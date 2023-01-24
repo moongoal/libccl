@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
         vector<int> v { 1 };
         my_set x { v,  get_default_allocator<counting_test_allocator>() };
 
-        const auto it = x.begin();
+        auto it = x.begin();
 
         check(*it == 1);
         check(++it == x.end());

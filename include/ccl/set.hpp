@@ -20,11 +20,14 @@ namespace ccl {
     template<typename Set>
     struct set_iterator {
         using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_concept = iterator_category;
         using difference_type = std::ptrdiff_t;
 
-        using key_type = typename Set::key_type;
-        using const_key_reference = typename Set::const_key_reference;
-        using const_key_pointer = const key_type*;
+        using value_type = typename Set::key_type;
+        using reference = typename Set::key_reference;
+        using pointer = typename Set::key_pointer;
+        using const_reference = typename Set::const_key_reference;
+        using const_pointer = const value_type*;
 
         using set_type = Set;
         using size_type = typename Set::size_type;
@@ -51,13 +54,13 @@ namespace ccl {
             return *this;
         }
 
-        constexpr const_key_reference operator*() const noexcept { return set->keys[index]; }
+        constexpr const_reference operator*() const noexcept { return set->keys[index]; }
 
-        constexpr const_key_pointer operator->() const noexcept {
+        constexpr const_pointer operator->() const noexcept {
             return &set->keys[index];
         }
 
-        constexpr auto& operator --() const noexcept {
+        constexpr auto& operator --() noexcept {
             do {
                 index--;
             } while(!set->slot_map[index]);
@@ -65,7 +68,7 @@ namespace ccl {
             return *this;
         }
 
-        constexpr auto operator --(int) const noexcept {
+        constexpr auto operator --(int) noexcept {
             const size_type old_index = this->index;
 
             do {
@@ -79,13 +82,13 @@ namespace ccl {
             return set_iterator{*set, old_index};
         }
 
-        constexpr auto& operator ++() const noexcept {
+        constexpr auto& operator ++() noexcept {
             for(index += 1; index < set->_capacity && !set->slot_map[index]; ++index);
 
             return *this;
         }
 
-        constexpr auto operator ++(int) const noexcept {
+        constexpr auto operator ++(int) noexcept {
             const size_type old_index = this->index;
 
             for(; index < set->_capacity && !set->slot_map[index]; ++index);
