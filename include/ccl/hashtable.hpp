@@ -23,6 +23,7 @@ namespace ccl {
     template<typename Hashtable>
     struct hashtable_iterator {
         using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_concept = iterator_category;
         using difference_type = std::ptrdiff_t;
 
         using key_type = either_or_t<
@@ -77,7 +78,7 @@ namespace ccl {
             return &pair;
         }
 
-        constexpr auto& operator --() const noexcept {
+        constexpr auto& operator --() noexcept {
             do {
                 index--;
             } while(!hashtable->slot_map[index]);
@@ -85,7 +86,7 @@ namespace ccl {
             return *this;
         }
 
-        constexpr auto operator --(int) const noexcept {
+        constexpr auto operator --(int) noexcept {
             const size_type old_index = this->index;
 
             do {
@@ -99,13 +100,13 @@ namespace ccl {
             return hashtable_iterator{*hashtable, old_index};
         }
 
-        constexpr auto& operator ++() const noexcept {
+        constexpr auto& operator ++() noexcept {
             for(index += 1; index < hashtable->_capacity && !hashtable->slot_map[index]; ++index);
 
             return *this;
         }
 
-        constexpr auto operator ++(int) const noexcept {
+        constexpr auto operator ++(int) noexcept {
             const size_type old_index = this->index;
 
             for(; index < hashtable->_capacity && !hashtable->slot_map[index]; ++index);

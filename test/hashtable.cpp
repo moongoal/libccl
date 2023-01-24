@@ -1,3 +1,4 @@
+#include <ranges>
 #include <iterator>
 #include <ccl/test/test.hpp>
 #include <ccl/hashtable.hpp>
@@ -213,7 +214,7 @@ int main(int argc, char **argv) {
 
         my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
 
-        const auto it = x.begin();
+        auto it = x.begin();
 
         check(*it->first == 1);
         check(*it->second == 2);
