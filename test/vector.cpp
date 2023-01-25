@@ -144,6 +144,40 @@ int main(int argc, char **argv) {
         }
     );
 
+    suite.add_test("shrink_to_fit", [] () {
+        test_vector<int> v;
+
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+
+        v.erase(v.begin() + 2, v.end());
+        v.shrink_to_fit();
+
+        equals(v.capacity(), 2);
+    });
+
+    suite.add_test("shrink_to_fit (empty)", [] () {
+        test_vector<int> v;
+
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+        v.push_back(10);
+
+        v.erase(v.begin(), v.end());
+        v.shrink_to_fit();
+
+        equals(v.capacity(), 0);
+        equals(v.size(), 0);
+        equals(v.data(), nullptr);
+    });
+
     suite.add_test(
         "insert", []() {
             test_vector<int> v;

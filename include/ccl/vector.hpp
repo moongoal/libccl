@@ -182,6 +182,23 @@ namespace ccl {
                 }
             }
 
+            constexpr void shrink_to_fit() {
+                if(_size > 0) {
+                    const size_type new_capacity = increase_capacity<decltype(_capacity)>(1, _size);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(new_capacity);
+
+                    if(_data) {
+                        std::uninitialized_move(begin(), end(), new_data);
+                        alloc::get_allocator()->deallocate(_data);
+                    }
+
+                    _data = new_data;
+                    _capacity = new_capacity;
+                } else {
+                    destroy();
+                }
+            }
+
             constexpr void insert(iterator where, const_reference item) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
