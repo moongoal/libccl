@@ -86,7 +86,7 @@ namespace ccl::ecs {
             constexpr std::size_t size() const {
                 std::size_t total_size = 0;
 
-                for(archetype * const a : archetypes) {
+                for(const archetype * const a : archetypes) {
                     total_size += a->size();
                 }
 
