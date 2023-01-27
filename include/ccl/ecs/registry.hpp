@@ -204,7 +204,7 @@ namespace ccl::ecs {
             }
 
             template<typename ...Components>
-            constexpr const ccl::ecs::view<allocator_type, Components...> view() {
+            constexpr const ccl::ecs::view<allocator_type, Components...> view() const {
                 const auto archetype_map_end = archetype_map.end_values();
                 ccl::ecs::view<allocator_type, Components...> view_object;
 
