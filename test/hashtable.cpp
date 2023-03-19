@@ -359,5 +359,7 @@ int main(int argc, char **argv) {
         equals(x.at(3), 4);
     });
 
+    static_assert(std::ranges::range<test_map<int, float>>);
+
     return suite.main(argc, argv);
 }
