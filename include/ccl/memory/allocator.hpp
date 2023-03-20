@@ -13,10 +13,20 @@
     #include <memory>
 #endif // CCL_USER_DEFINED_ALLOCATOR
 
+#ifdef CCL_ALLOCATOR_EXPORTER
+    #define CCL_ALLOCAPI __attribute__ ((dllexport))
+#else // CCL_ALLOCATOR_EXPORTER
+    #ifdef CCL_ALLOCATOR_IMPORTER
+        #define CCL_ALLOCAPI __attribute__ ((dllimport))
+    #else // CCL_ALLOCATOR_IMPORTER
+        #define CCL_ALLOCAPI
+    #endif // CCL_ALLOCATOR_IMPORTER
+#endif // CCL_ALLOCATOR_EXPORTER
+
 namespace ccl {
     class allocator;
 
-    allocator* get_default_allocator();
+    allocator* CCL_ALLOCAPI get_default_allocator();
 
     enum allocation_flag_bits {
         #define CCL_VALUE(name, bitno) CCL_ALLOCATION_ ## name ## _BIT = 1 << bitno
@@ -186,11 +196,11 @@ namespace ccl {
     #ifdef CCL_ALLOCATOR_IMPL
         static allocator *s_allocator = nullptr;
 
-        void set_default_allocator(allocator &allocator) {
+        void CCL_ALLOCAPI set_default_allocator(allocator &allocator) {
             s_allocator = &allocator;
         }
 
-        allocator * get_default_allocator() {
+        allocator * CCL_ALLOCAPI get_default_allocator() {
             return s_allocator;
         }
     #endif // CCL_ALLOCATOR_IMPL
@@ -200,7 +210,7 @@ namespace ccl {
      *
      * @param allocator The new memory allocator.
      */
-    void set_default_allocator(allocator &allocator);
+    void CCL_ALLOCAPI set_default_allocator(allocator &allocator);
 
     /**
      * Get the default memory allocator.

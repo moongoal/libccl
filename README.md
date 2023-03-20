@@ -102,6 +102,9 @@ Several pre-processor definitions configure behaviour:
 |CCL_ALLOCATOR_DEFAULT_ALIGNMENT|Default allocator minimum alignment constraint
 |CCL_PAGE_SIZE|Page size for paged data structures, as number of elements
 |CCL_DEQUE_MIN_CAPACITY|Minimum allocatable capacity for deques
+|CCL_ALLOCATOR_IMPL|Enable compiling the default implementations of `ccl::get_default_allocator()` and `ccl::set_default_allocator()`
+|CCL_ALLOCATOR_EXPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-exported
+|CCL_ALLOCATOR_IMPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-imported
 
 Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
 
