@@ -42,7 +42,8 @@ jobs:
       run: pip3 install conan
 
     - name: Configure Conan Profile
-      run: cat > ./conan-profile <<EOF
+      run: |
+        cat > ./conan-profile <<EOF
         [settings]
         compiler=clang
         compiler.version=12
