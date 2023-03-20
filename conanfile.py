@@ -5,6 +5,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
 class LibcclConan(ConanFile):
     name = "libccl"
     version = "0.0.1"
+    package_type = "header-library"
     license = "MIT"
     author = "Alfredo Mungo"
     url = "https://github.com/moongoal/libccl"
