@@ -41,7 +41,7 @@ jobs:
     - name: Install Python Packages
       run: pip3 install conan
 
-    - name: Configure Conan Profile
+    - name: Configure Conan Build Profile
       run: |
         cat > ./conan-profile <<EOF
         [settings]
@@ -50,6 +50,9 @@ jobs:
         compiler.libcxx=libstdc++11
         build_type=${{env.BUILD_TYPE}}
         EOF
+
+    - name: Configure Conan Host Profile
+      run: conan profile detect && conan profile show
 
     - name: Build and Test
       working-directory: ${{github.workspace}}
