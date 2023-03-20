@@ -48,7 +48,7 @@ jobs:
         -s compiler.version=12
         -s compiler.libcxx=libstdc++11
         -s build_type=${{env.BUILD_TYPE}}
-        \> $(conan profile path default)
+        > $(conan profile path default)
 
     - name: Build and Test
       working-directory: ${{github.workspace}}
