@@ -42,11 +42,13 @@ jobs:
       run: pip3 install conan
 
     - name: Configure Conan Profile
-      run: conan profile new --detect default &&
-        conan profile update settings.compiler=clang default &&
-        conan profile update settings.compiler.version=12 default &&
-        conan profile update settings.compiler.libcxx=libstdc++11 default &&
-        conan profile update settings.build_type=${{env.BUILD_TYPE}} default
+      run: conan profile detect --name default &&
+        conan profile show
+        -s compiler=clang
+        -s compiler.version=12
+        -s compiler.libcxx=libstdc++11
+        -s build_type=${{env.BUILD_TYPE}}
+        \> $(conan profile path default)
 
     - name: Build and Test
       working-directory: ${{github.workspace}}
