@@ -139,7 +139,7 @@ int main(int argc, char ** argv) {
     suite.add_test("swap", [] () {
         int a = 5, b = 6;
 
-        swap(a, b);
+        ccl::swap(a, b);
 
         equals(a, 6);
         equals(b, 5);
@@ -148,7 +148,7 @@ int main(int argc, char ** argv) {
     suite.add_test("swap (pointers)", [] () {
         int a = 5, b = 6, *ap = &a, *bp = &b;
 
-        swap(ap, bp);
+        ccl::swap(ap, bp);
 
         equals(ap, &b);
         equals(bp, &a);

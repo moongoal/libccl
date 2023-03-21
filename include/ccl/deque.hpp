@@ -103,7 +103,7 @@ namespace ccl {
                 last{other.last},
                 _capacity{other._capacity}
             {
-                swap(_data, other._data);
+                ccl::swap(_data, other._data);
             }
 
             ~deque() { destroy(); }
@@ -223,10 +223,10 @@ namespace ccl {
             constexpr deque& operator =(deque &&other) {
                 alloc::operator =(std::move(other));
 
-                swap(first, other.first);
-                swap(last, other.last);
-                swap(_capacity, other._capacity);
-                swap(_data, other._data);
+                ccl::swap(first, other.first);
+                ccl::swap(last, other.last);
+                ccl::swap(_capacity, other._capacity);
+                ccl::swap(_data, other._data);
 
                 return *this;
             }

@@ -156,9 +156,9 @@ namespace ccl {
             constexpr vector& operator =(vector &&other) {
                 alloc::operator =(std::move(other));
 
-                swap(_size, other._size);
-                swap(_capacity, other._capacity);
-                swap(_data, other._data);
+                ccl::swap(_size, other._size);
+                ccl::swap(_capacity, other._capacity);
+                ccl::swap(_data, other._data);
 
                 return *this;
             }
