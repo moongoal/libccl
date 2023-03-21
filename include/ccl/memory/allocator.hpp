@@ -193,18 +193,6 @@ namespace ccl {
         }
     #endif // CCL_USER_DEFINED_ALLOCATOR
 
-    #ifdef CCL_ALLOCATOR_IMPL
-        static allocator *s_allocator = nullptr;
-
-        void CCL_ALLOCAPI set_default_allocator(allocator &allocator) {
-            s_allocator = &allocator;
-        }
-
-        allocator * CCL_ALLOCAPI get_default_allocator() {
-            return s_allocator;
-        }
-    #endif // CCL_ALLOCATOR_IMPL
-
     /**
      * Set the default memory allocator.
      *
@@ -226,5 +214,9 @@ namespace ccl {
         return nullptr;
     }
 }
+
+#ifdef CCL_ALLOCATOR_IMPL
+    #include <ccl/memory/default-allocator-impl.hpp>
+#endif // CCL_ALLOCATOR_IMPL
 
 #endif // CCL_ALLOCATOR_HPP
