@@ -40,7 +40,7 @@ namespace ccl {
 
             template<typename ...Args>
             constexpr decltype(auto) emplace(Args&& ...args) {
-                return get().emplace(std::forward<Args>(args)...);
+                return get().emplace_back(std::forward<Args>(args)...);
             }
 
             constexpr typename value_collection_type::reference operator[](const typename value_collection_type::size_type index) {

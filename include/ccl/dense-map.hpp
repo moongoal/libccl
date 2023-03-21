@@ -315,7 +315,7 @@ template<typename Map>
 
                 const size_type item_index = static_cast<size_type>(data.size());
 
-                auto& ref = data.emplace(std::forward<Args>(args)...);
+                auto& ref = data.emplace_back(std::forward<Args>(args)...);
                 index_map.insert(key, item_index);
 
                 return ref;
