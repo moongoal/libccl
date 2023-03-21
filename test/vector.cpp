@@ -514,18 +514,6 @@ int main(int argc, char **argv) {
         check(v.size() == 4);
     });
 
-    suite.add_test("emplace_back", [] () {
-        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
-
-        v.emplace_back(dummy{4});
-
-        check(v[0].value == 1);
-        check(v[1].value == 2);
-        check(v[2].value == 3);
-        check(v[3].value == 4);
-        check(v.size() == 4);
-    });
-
     suite.add_test("emplace_at (invalid iterator)", [] () {
         test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
 
@@ -543,10 +531,22 @@ int main(int argc, char **argv) {
 
         v.emplace(v.begin() + 1, dummy{4});
 
-        check(v[0].value == 1);
-        check(v[1].value == 4);
-        check(v[2].value == 2);
-        check(v[3].value == 3);
+        check(v[0].value == 2);
+        check(v[1].value == 5);
+        check(v[2].value == 3);
+        check(v[3].value == 4);
+        check(v.size() == 4);
+    });
+
+    suite.add_test("emplace_back", [] () {
+        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+
+        v.emplace_back(dummy{4});
+
+        check(v[0].value == 2);
+        check(v[1].value == 3);
+        check(v[2].value == 4);
+        check(v[3].value == 5);
         check(v.size() == 4);
     });
 
