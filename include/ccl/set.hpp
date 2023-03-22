@@ -195,7 +195,9 @@ namespace ccl {
                 _capacity{std::move(other._capacity)},
                 slot_map{std::move(other.slot_map)},
                 keys{std::move(other.keys)}
-            {}
+            {
+                other.keys = nullptr;
+            }
 
             template<typename InputRange>
             requires std::ranges::input_range<InputRange>
@@ -229,6 +231,7 @@ namespace ccl {
                 alloc::operator =(other);
                 slot_map = other.slot_map;
                 keys = other.keys;
+                _capacity = other._capacity;
 
                 return *this;
             }
@@ -239,6 +242,9 @@ namespace ccl {
                 alloc::operator =(std::move(other));
                 slot_map = std::move(other.slot_map);
                 keys = std::move(other.keys);
+                _capacity = other._capacity;
+
+                other.keys = nullptr;
 
                 return *this;
             }

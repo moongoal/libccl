@@ -127,6 +127,32 @@ int main(int argc, char **argv) {
         check(x.contains(3));
     });
 
+    suite.add_test("ctor (move)", [] () {
+        using my_set = test_set<int>;
+
+        vector<int> v { 1, 2, 3 };
+        my_set x { v };
+        my_set y { std::move(x) };
+
+        check(y.contains(1));
+        check(y.contains(2));
+        check(y.contains(3));
+    });
+
+     suite.add_test("assignment operator (move)", [] () {
+        using my_set = test_set<int>;
+
+        vector<int> v { 1, 2, 3 };
+        my_set x { v };
+        my_set y { vector<int>{ 4, 5, 6 } };
+
+        y = std::move(x);
+
+        check(y.contains(1));
+        check(y.contains(2));
+        check(y.contains(3));
+    });
+
     suite.add_test("begin", [] () {
         using my_set = test_set<int>;
 
