@@ -183,12 +183,7 @@ namespace ccl {
                 reserve(minimum_capacity);
             }
 
-            constexpr set(const set &other)
-                : alloc{other},
-                _capacity{other._capacity},
-                slot_map{other.slot_map},
-                keys{other.keys}
-            {}
+            constexpr set(const set &other) = delete;
 
             constexpr set(set &&other)
                 : alloc{std::move(other)},
@@ -228,10 +223,10 @@ namespace ccl {
             }
 
             constexpr set& operator =(const set &other) {
+                destroy();
                 alloc::operator =(other);
-                slot_map = other.slot_map;
-                keys = other.keys;
-                _capacity = other._capacity;
+                reserve(other._capacity);
+                insert(other);
 
                 return *this;
             }

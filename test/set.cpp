@@ -105,6 +105,21 @@ int main(int argc, char **argv) {
         check(!x.contains(1));
     });
 
+    suite.add_test("ctor (copy)", [] () {
+        using my_set = test_set<int>;
+
+        my_set x { vector<int> { 1, 2, 3 } };
+        my_set y { x };
+
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+
+        check(y.contains(1));
+        check(y.contains(2));
+        check(y.contains(3));
+    });
+
     suite.add_test("ctor (range)", [] () {
         using my_set = test_set<int>;
 
@@ -133,6 +148,23 @@ int main(int argc, char **argv) {
         vector<int> v { 1, 2, 3 };
         my_set x { v };
         my_set y { std::move(x) };
+
+        check(y.contains(1));
+        check(y.contains(2));
+        check(y.contains(3));
+    });
+
+    suite.add_test("assignment operator (copy)", [] () {
+        using my_set = test_set<int>;
+
+        my_set x { vector<int> { 1, 2, 3 } };
+        my_set y;
+
+        y = x;
+
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
 
         check(y.contains(1));
         check(y.contains(2));
