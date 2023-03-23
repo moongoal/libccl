@@ -115,7 +115,7 @@ namespace ccl {
             void deallocate(void * const ptr) {
                 if(allocators.first()->owns(ptr)) {
                     allocators.first()->deallocate(ptr);
-                } {
+                } else {
                     allocators.second()->deallocate(ptr);
                 }
             }
