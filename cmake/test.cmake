@@ -16,10 +16,20 @@ function(add_ccl_test test_name test_file_path)
         COMMAND ${test_name}
     )
 
+    if($CACHE{CCL_COVERAGE})
+        set_tests_properties(
+            ${test_name}
+            PROPERTIES
+                ENVIRONMENT
+                    LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/test/${test_name}.profraw
+        )
+    endif()
+
     target_compile_options(
         ${test_name}
         PRIVATE
             -Wall -Wextra -pedantic -Werror
+            $<$<BOOL:$CACHE{CCL_COVERAGE}>:-fprofile-instr-generate -fcoverage-mapping>
     )
 endfunction(add_ccl_test)
 
