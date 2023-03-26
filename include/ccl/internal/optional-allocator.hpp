@@ -37,7 +37,7 @@ namespace ccl::internal {
             }
 
             allocator_type *get_allocator() const noexcept { return allocator; }
-            constexpr bool is_allocator_stateless() const noexcept { return false; }
+            static constexpr bool is_allocator_stateless() noexcept { return false; }
 
         private:
             allocator_type *allocator = nullptr;
@@ -72,7 +72,7 @@ namespace ccl::internal {
                 return static_cast<allocator_type*>(this);
             }
 
-            constexpr bool is_allocator_stateless() const noexcept { return true; }
+            static constexpr bool is_allocator_stateless() noexcept { return true; }
     };
 }
 

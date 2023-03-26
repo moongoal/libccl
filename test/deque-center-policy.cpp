@@ -617,6 +617,35 @@ int main(int argc, char **argv) {
         equals(destruction_counter, 4);
     });
 
+    suite.add_test("operator = (copy, w/smaller destination, stateless)", [] () {
+        using my_queue = deque<spy, deque_reset_policy::center>;
+
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        my_queue q;
+
+        q.emplace_back(on_destroy);
+        q.emplace_back(on_destroy);
+
+        {
+            my_queue q2;
+
+            q2.emplace_back(on_destroy);
+
+            q = q2;
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 1U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 3);
+    });
+
     suite.add_test("operator = (move, empty)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };

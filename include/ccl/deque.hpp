@@ -218,11 +218,12 @@ namespace ccl {
 
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
-                    std::destroy(begin() + size(), end());
-                    std::copy(other.begin(), other.end(), begin());
+                    std::destroy(begin() + other.size(), end());
 
                     first = other.first;
                     last = other.last;
+
+                    std::copy(other.begin(), other.end(), begin());
                 }
 
                 _capacity = other._capacity;
