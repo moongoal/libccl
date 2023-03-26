@@ -64,16 +64,19 @@ endfunction()
 # SYNOPSIS
 #
 # add_ccl_test(
+#   [REPORT report_name]
 #   (TEST test_name test_source)...
 #   COVERAGE covered_source_files...
 # )
 #
 # Add the given tests and related coverage report. The coverage results of all the specified
-# tests are collated together and named after the first test name.
+# tests are collated together and named after either `report_name` or the first test name if the
+# former is not provided.
 #
 function(add_ccl_test)
+    set(arg_single_value_keywords REPORT)
     set(arg_multi_value_keywords TEST COVERAGE)
-    cmake_parse_arguments(PARSE_ARGV 0 ADD_CCL_TEST "" "" "${arg_multi_value_keywords}")
+    cmake_parse_arguments(PARSE_ARGV 0 ADD_CCL_TEST "" "${arg_single_value_keywords}" "${arg_multi_value_keywords}")
 
     if(DEFINED ADD_CCL_TEST_UNPARSED_ARGUMENTS)
         message(FATAL_ERROR "Invalid arguments in function call \"${ADD_CCL_TEST_UNPARSED_ARGUMENTS}\".")
@@ -110,9 +113,14 @@ function(add_ccl_test)
         list(APPEND test_profraw_files ${profraw_file})
     endwhile()
 
-    list(GET ADD_CCL_TEST_TEST 0 first_test_name)
-    set(profdata_file ${CCL_COVERAGE_DIR}/${first_test_name}.profdata)
-    set(coverage_report_file ${CCL_COVERAGE_DIR}/${first_test_name}.cov.html)
+    if(NOT DEFINED ADD_CCL_TEST_REPORT)
+        list(GET ADD_CCL_TEST_TEST 0 report_name)
+    else()
+        set(report_name ${ADD_CCL_TEST_REPORT})
+    endif()
+
+    set(profdata_file ${CCL_COVERAGE_DIR}/${report_name}.profdata)
+    set(coverage_report_file ${CCL_COVERAGE_DIR}/${report_name}.cov.html)
 
     set(CCL_COVERAGE_REPORT_FILES ${CCL_COVERAGE_REPORT_FILES} ${coverage_report_file} PARENT_SCOPE)
 
@@ -266,6 +274,7 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    REPORT deque
     TEST test_deque_begin_policy test/deque-begin-policy.cpp
     TEST test_deque_center_policy test/deque-center-policy.cpp
     COVERAGE include/ccl/deque.hpp
