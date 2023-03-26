@@ -111,7 +111,7 @@ add_ccl_test(test_contiguous_iterator test/contiguous-iterator.cpp include/ccl/c
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}
-    DEPENDS ${CCL_TEST_SOURCES}
+    DEPENDS ${CCL_COVERAGE_RAW_DATA_FILES}
 )
 
 foreach(f ${CCL_TEST_EXECUTABLES})
