@@ -373,7 +373,7 @@ int main(int argc, char **argv) {
         });
     });
 
-    suite.add_test("reserve", [] () {
+    suite.add_test("reserve (front)", [] () {
         test_deque<int> q;
 
         q.reserve(100);
@@ -381,6 +381,33 @@ int main(int argc, char **argv) {
         check(q.capacity() >= 100);
         check(q.capacity_back() > 0);
         check(q.capacity_front() > 0);
+    });
+
+    suite.add_test("reserve (back)", [] () {
+        test_deque<int> q;
+        const size_t initial_capacity = test_deque<int>::minimum_capacity / 2;
+
+        for(unsigned int i = 0; i <= initial_capacity; ++i) {
+            q.push_back(1);
+        }
+
+        check(q.capacity_back() > initial_capacity);
+        check(q.capacity_front() > initial_capacity);
+    });
+
+    suite.add_test("reserve (w/existing data)", [] () {
+        test_deque<int> q;
+
+        for(int i = 0; i < 100; ++i) {
+            q.push_back(i);
+        }
+
+        q.reserve(q.capacity() * 2);
+
+        for(int i = 0; i < 100; ++i) {
+            equals(q.front(), i);
+            q.pop_front();
+        }
     });
 
     suite.add_test("begin", [] () {
@@ -561,6 +588,33 @@ int main(int argc, char **argv) {
         q.destroy();
 
         equals(destruction_counter, 5);
+    });
+
+    suite.add_test("operator = (copy, w/smaller destination)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        test_deque<spy> q;
+
+        q.emplace_back(on_destroy);
+        q.emplace_back(on_destroy);
+
+        {
+            test_deque<spy> q2;
+
+            q2.emplace_back(on_destroy);
+
+            q = q2;
+        }
+
+        differs(q.capacity(), 0);
+        equals(q.size(), 1U);
+        differs(q.is_empty(), true);
+        differs(q.data(), nullptr);
+
+        q.destroy();
+
+        equals(destruction_counter, 4);
     });
 
     suite.add_test("operator = (move, empty)", [] () {

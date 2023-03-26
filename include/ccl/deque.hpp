@@ -203,18 +203,28 @@ namespace ccl {
             }
 
             constexpr deque& operator=(const deque& other) {
+                /*
+                 * Note: Do not change first/last.
+                 * They can't be moved up as this'd interfere with deletion
+                 * and can't be moved down as this'd interfere with copy.
+                 */
                 if(other.size() > size() || !alloc::is_allocator_stateless()) {
                     destroy();
                     alloc::operator=(other);
                     reserve(other._capacity, false);
+
+                    first = other.first;
+                    last = other.last;
+
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
+                    std::destroy(begin() + size(), end());
                     std::copy(other.begin(), other.end(), begin());
-                    std::destroy(begin() + other.size(), end());
+
+                    first = other.first;
+                    last = other.last;
                 }
 
-                first = other.first;
-                last = other.last;
                 _capacity = other._capacity;
 
                 return *this;

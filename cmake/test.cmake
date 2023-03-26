@@ -284,7 +284,7 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    REPORT deque
+    REPORT test_deque
     TEST test_deque_begin_policy test/deque-begin-policy.cpp
     TEST test_deque_center_policy test/deque-center-policy.cpp
     COVERAGE include/ccl/deque.hpp
