@@ -138,14 +138,21 @@ namespace ccl {
 
     template<>
     struct hash<long double> {
-        hash_t operator()(const long double &n) {
+        /**
+         * @internal
+         */
+        hash_t _compute_hash_slow(const long double &n) {
+            const long double k = n ? n : 0.0;
+
+            return fnv1a_hash(sizeof(long double), &reinterpret_cast<const uint8_t&>(k));
+        }
+
+        constexpr hash_t operator()(const long double &n) {
             if constexpr(sizeof(double) != sizeof(long double)) {
-                const long double k = n ? n : 0.0;
-
-                return fnv1a_hash(sizeof(uint8_t) * 10, &reinterpret_cast<const uint8_t&>(k));
+                return _compute_hash_slow(n);
+            } else {
+                return hash<double>{}(static_cast<double>(n));
             }
-
-            return hash<double>{}(static_cast<double>(n));
         }
     };
 

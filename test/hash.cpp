@@ -94,6 +94,23 @@ int main(int argc, char **argv) {
         equals(hash<long double>{}(-0), hash<long double>{}(+0));
     });
 
+    suite.add_test("hash long double (slow)", [] () {
+        const long double value = 5.443;
+        const long double value2 = -5.443;
+
+        differs(
+            hash<long double>{}._compute_hash_slow(value),
+            hash<long double>{}._compute_hash_slow(value2)
+        );
+    }, [] () { return sizeof(long double) != sizeof(double); });
+
+    suite.add_test("hash long double -0 (slow)", [] () {
+        equals(
+            hash<long double>{}._compute_hash_slow(-0),
+            hash<long double>{}._compute_hash_slow(+0)
+        );
+    });
+
     suite.add_test("hash std::nullptr_t", [] () {
         equals(hash<std::nullptr_t>{}(nullptr), 0ULL);
     });
