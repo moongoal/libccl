@@ -136,6 +136,10 @@ int main(int argc, char ** argv) {
         );
     });
 
+    suite.add_test("align_size", [] () {
+        equals(align_size(15, 16), 16);
+    });
+
     suite.add_test("swap", [] () {
         int a = 5, b = 6;
 
