@@ -48,7 +48,7 @@ cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DCMAKE_BUI
 
 Or with `-DCMAKE_BUILD_TYPE=Release` to use the release configuration.
 
-To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON`. This will enable instrumentation of tests in order to collect coverage data and the `coverage-report` build target.
+To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON`. This will enable instrumentation of tests in order to collect coverage data, the `coverage-summary` and `coverage-report` build targets.
 
 To build the project:
 
