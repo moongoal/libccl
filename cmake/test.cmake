@@ -39,6 +39,16 @@ function(_add_ccl_test test_name test_file_path profraw_file exe_file)
 endfunction()
 
 function(_add_ccl_coverage_report exe_files profraw_files profdata_file coverage_report_file coverage_sources)
+    foreach(exe ${exe_files})
+        set(test_commands_args ${test_commands_args} COMMAND ${exe})
+    endforeach()
+
+    add_custom_command(
+        OUTPUT ${profraw_files}
+        ${test_commands_args}
+        DEPENDS ${exe_files}
+    )
+
     add_custom_command(
         OUTPUT ${profdata_file}
         COMMAND llvm-profdata merge ${profraw_files} -o ${profdata_file}

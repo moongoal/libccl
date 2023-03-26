@@ -615,5 +615,15 @@ int main(int argc, char **argv) {
         equals(destruction_counter, 3);
     });
 
+    suite.add_test("reset", [] () {
+        test_deque<int> q;
+
+        q.reserve(test_deque<int>::minimum_capacity);
+        q.clear();
+        q.push_back(1);
+
+        equals(q.data()[test_deque<int>::minimum_capacity / 2], 1);
+    });
+
     return suite.main(argc, argv);
 }
