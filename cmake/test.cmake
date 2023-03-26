@@ -105,6 +105,7 @@ add_ccl_test(test_atomic_flag test/atomic-flag.cpp include/ccl/atomic.hpp)
 add_ccl_test(test_compat test/compat.cpp include/ccl/compat.hpp)
 add_ccl_test(test_deque_begin_policy test/deque-begin-policy.cpp include/ccl/deque.hpp)
 add_ccl_test(test_deque_center_policy test/deque-center-policy.cpp include/ccl/deque.hpp)
+add_ccl_test(test_contiguous_iterator test/contiguous-iterator.cpp include/ccl/contiguous-iterator.hpp)
 
 # Coverage
 add_custom_command(
