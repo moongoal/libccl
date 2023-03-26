@@ -296,27 +296,23 @@ namespace ccl {
             }
 
             void pop_back() {
-                const bool is_empty = this->is_empty();
-
-                CCL_THROW_IF(is_empty, std::out_of_range{"Deque is empty."});
+                CCL_THROW_IF(this->is_empty(), std::out_of_range{"Deque is empty."});
 
                 std::destroy_at(_data + last - 1);
                 last -= 1;
 
-                if(!is_empty) { return; }
+                if(!this->is_empty()) { return; }
 
                 reset();
             }
 
             void pop_front() {
-                const bool is_empty = this->is_empty();
-
-                CCL_THROW_IF(is_empty, std::out_of_range{"Deque is empty."});
+                CCL_THROW_IF(this->is_empty(), std::out_of_range{"Deque is empty."});
 
                 std::destroy_at(_data + first);
                 first += 1;
 
-                if(!is_empty) { return; }
+                if(!this->is_empty()) { return; }
 
                 reset();
             }

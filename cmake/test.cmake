@@ -293,7 +293,7 @@ add_ccl_test(
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}
-    DEPENDS ${CCL_COVERAGE_RAW_DATA_FILES}
+    DEPENDS ${CCL_COVERAGE_RAW_DATA_FILES} ${CCL_TEST_SOURCES}
 )
 
 foreach(f ${CCL_TEST_EXECUTABLES})
@@ -302,11 +302,11 @@ endforeach()
 
 add_custom_target(
     coverage-summary
-    DEPENDS ${CCL_COVERAGE_DATA_FILE}
+    DEPENDS ${CCL_COVERAGE_DATA_FILE} ${CCL_TEST_SOURCES}
     COMMAND llvm-cov report -ignore-filename-regex="\\.cpp$$" --instr-profile ${CCL_COVERAGE_DATA_FILE} ${CCL_COVERAGE_REPORT_SOURCE_ARGS}
 )
 
 add_custom_target(
     coverage-report
-    DEPENDS ${CCL_COVERAGE_REPORT_FILES}
+    DEPENDS ${CCL_COVERAGE_REPORT_FILES} ${CCL_TEST_SOURCES}
 )
