@@ -292,6 +292,11 @@ add_ccl_test(
     COVERAGE include/ccl/deque.hpp
 )
 
+add_ccl_test(
+    TEST test_internal_optional_allocator test/internal/optional-allocator.cpp
+    COVERAGE include/ccl/internal/optional-allocator.hpp
+)
+
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}
