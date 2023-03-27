@@ -66,7 +66,7 @@ function(_add_ccl_coverage_report exe_files profraw_files profdata_file coverage
     add_custom_command(
         OUTPUT ${coverage_report_file}
         DEPENDS ${profdata_file}
-        COMMAND llvm-cov show --show-line-counts --format=html -Xdemangler=llvm-cxxfilt -Xdemangler=-nt --project-title=ccl --instr-profile ${profdata_file} ${llvm_cov_object_args} ${llvm_cov_sources_args} > ${coverage_report_file}
+        COMMAND llvm-cov show --format=html --project-title=ccl --instr-profile ${profdata_file} ${llvm_cov_object_args} ${llvm_cov_sources_args} > ${coverage_report_file}
     )
 endfunction()
 

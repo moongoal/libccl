@@ -90,6 +90,17 @@ int main(int argc, char **argv) {
         }
     });
 
+    suite.add_test("operator [] (same key twice)", []() {
+        using my_hashtable = test_map<int, float>;
+
+        my_hashtable x;
+
+        x[1] = 1;
+        x[1] = 2;
+
+        equals(x.at(1), 2);
+    });
+
     suite.add_test("operator *", []() {
         using my_hashtable = test_map<int, float>;
 
@@ -145,6 +156,55 @@ int main(int argc, char **argv) {
         });
     });
 
+    suite.add_test("reserve (smaller capacity)", [] () {
+        using my_hashtable = test_map<int, float>;
+
+        my_hashtable x;
+
+        x.insert(1, 1);
+        x.insert(2, 1);
+
+        const auto capacity = x.capacity();
+
+        x.reserve(1);
+
+        equals(capacity, x.capacity());
+    });
+
+    suite.add_test("insert (same key twice)", [] () {
+        using my_hashtable = test_map<int, float>;
+
+        my_hashtable x;
+
+        x.insert(1, 1);
+        x.insert(1, 2);
+
+        equals(x.at(1), 1);
+    });
+
+    suite.add_test("insert (full chunk)", [] () {
+        struct same_hash {
+            constexpr hash_t operator()(const int&) const {
+                return 1;
+            }
+        };
+
+        using my_hashtable = hashtable<int, float, same_hash, ccl::counting_test_allocator>;
+
+        my_hashtable x;
+        x.insert(CCL_HASHTABLE_CHUNK_SIZE, 1);
+
+        const auto capacity = x.capacity();
+
+        // Adding too many items with the same key hash will trigger
+        // a resize.
+        for(int i = 0; i < CCL_HASHTABLE_CHUNK_SIZE; ++i) {
+            x.insert(i, 1);
+        }
+
+        check(capacity < x.capacity());
+    });
+
     suite.add_test("erase iterator", [] () {
         using my_hashtable = test_map<int, float>;
 
@@ -171,6 +231,40 @@ int main(int argc, char **argv) {
         x.emplace(7, 28);
 
         check(x[7] == 28);
+    });
+
+    suite.add_test("emplace (same key twice)", [] () {
+        using my_hashtable = test_map<int, float>;
+
+        my_hashtable x;
+
+        x.emplace(7, 28);
+        x.emplace(7, 29);
+
+        check(x[7] == 28);
+    });
+
+    suite.add_test("emplace (full chunk)", [] () {
+        struct same_hash {
+            constexpr hash_t operator()(const int&) const {
+                return 1;
+            }
+        };
+
+        using my_hashtable = hashtable<int, float, same_hash, ccl::counting_test_allocator>;
+
+        my_hashtable x;
+        x.emplace(CCL_HASHTABLE_CHUNK_SIZE, 1);
+
+        const auto capacity = x.capacity();
+
+        // Adding too many items with the same key hash will trigger
+        // a resize.
+        for(int i = 0; i < CCL_HASHTABLE_CHUNK_SIZE; ++i) {
+            x.emplace(i, 1);
+        }
+
+        check(capacity < x.capacity());
     });
 
     suite.add_test("ctor (range)", [] () {

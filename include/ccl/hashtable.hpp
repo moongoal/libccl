@@ -342,7 +342,7 @@ namespace ccl {
 
                     for(auto it = begin(); it < finish && keep_iterating; ++it) {
                         const size_type new_index = compute_key_index(*it->first, new_capacity);
-                        const size_type last_chunk_index = wrap_index(new_index + CCL_HASHTABLE_CHUNK_SIZE, new_capacity);
+                        const size_type last_chunk_index = wrap_index(new_index + compute_chunk_size(), new_capacity);
                         bool item_added = false;
 
                         for(size_type i = new_index; i != last_chunk_index; i = wrap_index(++i, new_capacity)) {
@@ -385,7 +385,7 @@ namespace ccl {
 
             constexpr void insert(const_key_reference key, const_value_reference value) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
                 size_type first_empty = invalid_size;
 
                 // Check all items in a chunk. If we find the exact key,
@@ -417,7 +417,7 @@ namespace ccl {
             template<typename ...Args>
             constexpr value_reference emplace(const_key_reference key, Args&& ...args) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
                 size_type first_empty = invalid_size;
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
@@ -444,7 +444,7 @@ namespace ccl {
 
             constexpr void erase(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -467,7 +467,7 @@ namespace ccl {
 
             CCLNODISCARD constexpr auto& at(const_key_reference key) const {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -482,7 +482,7 @@ namespace ccl {
                 static_assert(std::is_default_constructible_v<V>);
 
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -515,7 +515,7 @@ namespace ccl {
 
             constexpr iterator find(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -528,7 +528,7 @@ namespace ccl {
 
             constexpr const_iterator find(const_key_reference key) const {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + CCL_HASHTABLE_CHUNK_SIZE, _capacity);
+                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -566,6 +566,10 @@ namespace ccl {
 
             static constexpr size_type compute_key_index(const_key_reference x, const size_type capacity) {
                 return wrap_index(hash(x), capacity);
+            }
+
+            constexpr size_type compute_chunk_size() const noexcept {
+                return ccl::max<size_type>(CCL_HASHTABLE_CHUNK_SIZE, _capacity >> 4);
             }
 
             size_type _capacity = 0;
