@@ -173,7 +173,9 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    REPORT test_hashtable
     TEST test_hashtable test/hashtable.cpp
+    TEST test_hashtable_iterator test/hashtable-iterator.cpp
     COVERAGE include/ccl/hashtable.hpp
 )
 

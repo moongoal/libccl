@@ -40,9 +40,7 @@ namespace ccl {
 
         using pointer = value_type*;
         using reference = value_type&;
-
         using key_value_pair = pair<key_type*, value_type*>;
-        using const_key_value_pair = pair<const key_type*, const value_type*>;
 
         using hashtable_type = Hashtable;
         using size_type = typename Hashtable::size_type;
@@ -60,7 +58,6 @@ namespace ccl {
         }
 
         constexpr hashtable_iterator(const hashtable_iterator &other) noexcept : hashtable{other.hashtable}, index{other.index} {}
-        constexpr hashtable_iterator(hashtable_iterator &&other) noexcept : hashtable{std::move(other.hashtable)}, index{std::move(other.index)} {}
 
         constexpr hashtable_iterator& operator =(const hashtable_iterator &other) noexcept {
             hashtable = other.hashtable;
@@ -69,10 +66,9 @@ namespace ccl {
             return *this;
         }
 
-        constexpr key_value_pair operator*() noexcept { return key_value_pair{ &hashtable->keys[index], &hashtable->values[index] }; }
-        constexpr const_key_value_pair operator*() const noexcept { return const_key_value_pair{ &hashtable->keys[index], &hashtable->values[index] }; }
+        constexpr const key_value_pair operator*() const noexcept { return key_value_pair{ &hashtable->keys[index], &hashtable->values[index] }; }
 
-        constexpr key_value_pair* operator->() const noexcept {
+        constexpr const key_value_pair* operator->() const noexcept {
             pair = key_value_pair{ &hashtable->keys[index], &hashtable->values[index] };
 
             return &pair;
@@ -109,7 +105,7 @@ namespace ccl {
         constexpr auto operator ++(int) noexcept {
             const size_type old_index = this->index;
 
-            for(; index < hashtable->_capacity && !hashtable->slot_map[index]; ++index);
+            for(index += 1; index < hashtable->_capacity && !hashtable->slot_map[index]; ++index);
 
             return hashtable_iterator{*hashtable, old_index};
         }
