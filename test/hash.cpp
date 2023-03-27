@@ -87,7 +87,26 @@ int main(int argc, char **argv) {
 
 
     suite.add_test("hash long double (size greater than double)", [] () {
-        equals(hash<long double>{}(0.00000234), 0xea6db4d3314d7b79ULL);
+        union pun { uint8_t b[128]; long double ld; } x1, x2;
+
+        for(int i = 0; i < 128; ++i) {
+            x1.b[i] = i;
+        }
+
+        for(int i = 0; i < 128; ++i) {
+            x2.b[i] = i * 2;
+        }
+
+        x1.ld = x2.ld = 0.00000234;
+
+        equals(
+            hash<long double>{}(x1.ld),
+            hash<long double>{}(x2.ld)
+        );
+        differs(
+            hash<long double>{}(x1.ld),
+            hash<long double>{}(-x1.ld)
+        );
     }, [] () { return sizeof(long double) == sizeof(double); });
 
     suite.add_test("hash long double -0", [] () {
@@ -102,7 +121,7 @@ int main(int argc, char **argv) {
             hash<long double>{}._compute_hash_slow(value),
             hash<long double>{}._compute_hash_slow(value2)
         );
-    }, [] () { return sizeof(long double) != sizeof(double); });
+    });
 
     suite.add_test("hash long double -0 (slow)", [] () {
         equals(
