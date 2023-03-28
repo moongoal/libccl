@@ -39,15 +39,21 @@ function(_add_ccl_test test_name test_file_path profraw_file exe_file)
 endfunction()
 
 function(_add_ccl_coverage_report exe_files profraw_files profdata_file coverage_report_file coverage_sources)
-    foreach(exe ${exe_files})
-        set(test_commands_args ${test_commands_args} COMMAND ${exe})
-    endforeach()
+    set(i 0)
+    list(LENGTH exe_files exe_files_length)
 
-    add_custom_command(
-        OUTPUT ${profraw_files}
-        ${test_commands_args}
-        DEPENDS ${exe_files}
-    )
+    while(i LESS exe_files_length)
+        list(GET exe_files ${i} exe_file)
+        list(GET profraw_files ${i} profraw_file)
+
+        add_custom_command(
+            OUTPUT ${profraw_file}
+            COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE=${profraw_file} ${exe_file}
+            DEPENDS ${exe_file}
+        )
+
+        math(EXPR i "${i} + 1")
+    endwhile()
 
     add_custom_command(
         OUTPUT ${profdata_file}
