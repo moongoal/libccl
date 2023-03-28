@@ -303,6 +303,13 @@ add_ccl_test(
     COVERAGE include/ccl/internal/optional-allocator.hpp
 )
 
+add_ccl_test(
+    REPORT test_allocator
+    TEST test_default_allocator test/memory/default-allocator.cpp
+    TEST test_null_allocator test/memory/null-allocator.cpp
+    COVERAGE include/ccl/memory/allocator.hpp
+)
+
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}

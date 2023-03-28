@@ -8,6 +8,7 @@
 
 #include <ccl/api.hpp>
 #include <ccl/util.hpp>
+#include <ccl/concepts.hpp>
 
 #ifndef CCL_USER_DEFINED_ALLOCATOR
     #include <memory>
@@ -69,12 +70,12 @@ namespace ccl {
         /**
          * Total size of the allocation.
          */
-        std::size_t size;
+        std::size_t size = 0;
 
         /**
          * Alignment constraint used when allocating.
          */
-        std::size_t alignment;
+        std::size_t alignment = 0;
     };
 
     class allocator {
@@ -209,9 +210,14 @@ namespace ccl {
      * Get a default allocator for a given type.
      * Override this function to return the allocator for the object type.
      */
-    template<typename Allocator>
+    template<basic_allocator Allocator>
     Allocator * get_default_allocator() {
         return nullptr;
+    }
+
+    template<>
+    inline allocator * get_default_allocator<allocator>() {
+        return get_default_allocator();
     }
 }
 
