@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
         pair<int, int> p CCLUNUSED;
     });
 
-    suite.add_test("make_pair", [] () {
+    suite.add_test("make_pair (rvalues)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
 
@@ -62,6 +62,23 @@ int main(int argc, char **argv) {
         }
 
         equals(destruction_counter, 1);
+    });
+
+    suite.add_test("make_pair (lvalues)", [] () {
+        int destruction_counter = 0;
+        const auto on_destroy = [&destruction_counter] () { destruction_counter += 1; };
+
+        {
+            const int first = 1;
+            const spy second = spy{on_destroy};
+
+            pair n = make_pair(first, second);
+
+            equals(n.first, 1);
+            equals(n.second.construction_magic, constructed_value);
+        }
+
+        equals(destruction_counter, 2);
     });
 
     suite.add_test("ctor (copy)", [] () {
