@@ -39,7 +39,7 @@ namespace ccl {
             static constexpr local_allocator_policy policy = Policy;
 
         private:
-            uint8_t memory[memory_size];
+            alignas(CCL_ALLOCATOR_DEFAULT_ALIGNMENT) uint8_t memory[memory_size];
             std::size_t used_size;
 
         public:
