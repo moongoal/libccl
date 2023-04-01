@@ -69,12 +69,33 @@ int main(int argc, char **argv) {
         uint8_t * const ptr = allocator.allocate<uint8_t>(16);
 
         check(allocator.owns(ptr));
+        check(allocator.get_features() & CCL_ALLOCATOR_FEATURE_OWNERSHIP_QUERY_BIT);
     });
 
     suite.add_test("owns not", [] () {
         local_allocator<16> allocator;
 
         check(!allocator.owns(nullptr));
+    });
+
+    suite.add_test("get_allocation_info", [] () {
+        local_allocator<16> allocator;
+        const auto * ptr = allocator.allocate<int>(1);
+        const auto info = allocator.get_allocation_info(ptr);
+
+        equals(info.alignment, 0);
+        equals(info.size, 0);
+        check(~allocator.get_features() & CCL_ALLOCATOR_FEATURE_ALLOCATION_INFO_BIT);
+    });
+
+    suite.add_test("get_used_memory_size", [] () {
+        local_allocator<16> allocator;
+
+        equals(allocator.get_used_memory_size(), 0);
+
+        const auto * ptr CCLUNUSED = allocator.allocate<int>(1);
+
+        equals(allocator.get_used_memory_size(), 4);
     });
 
     return suite.main(argc, argv);
