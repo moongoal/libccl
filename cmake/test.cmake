@@ -197,6 +197,7 @@ add_ccl_test(
 
 add_ccl_test(
     TEST test_set test/set.cpp
+    TEST test_set_iterator test/set-iterator.cpp
     COVERAGE include/ccl/set.hpp
 )
 

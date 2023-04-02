@@ -46,7 +46,6 @@ namespace ccl {
         }
 
         constexpr set_iterator(const set_iterator &other) noexcept : set{other.set}, index{other.index} {}
-        constexpr set_iterator(set_iterator &&other) noexcept : set{std::move(other.set)}, index{std::move(other.index)} {}
 
         constexpr set_iterator& operator =(const set_iterator &other) noexcept {
             set = other.set;
@@ -63,6 +62,10 @@ namespace ccl {
 
         constexpr auto& operator --() noexcept {
             do {
+                if(index == 0) {
+                    break;
+                }
+
                 index--;
             } while(!set->slot_map[index]);
 
@@ -84,15 +87,19 @@ namespace ccl {
         }
 
         constexpr auto& operator ++() noexcept {
-            for(index += 1; index < set->_capacity && !set->slot_map[index]; ++index);
+            do {
+                index++;
+            } while(index < set->_capacity && !set->slot_map[index]);
 
             return *this;
         }
 
         constexpr auto operator ++(int) noexcept {
-            const size_type old_index = this->index;
+            const size_type old_index = index;
 
-            for(; index < set->_capacity && !set->slot_map[index]; ++index);
+            do {
+                index++;
+            } while(index < set->_capacity && !set->slot_map[index]);
 
             return set_iterator{*set, old_index};
         }
