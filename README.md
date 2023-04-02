@@ -43,7 +43,7 @@ This library is built with cmake `>= 3.24.2`. Lower versions may work but are no
 To initialise the build system for development, run:
 
 ```
-cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DCMAKE_BUILD_TYPE=Debug
+cmake --preset dev
 ```
 
 Or with `-DCMAKE_BUILD_TYPE=Release` to use the release configuration.
@@ -53,7 +53,7 @@ To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON`. T
 To build the project:
 
 ```
-cmake --build build
+cmake --build --preset dev
 ```
 
 ### Build dependencies
@@ -76,7 +76,7 @@ conan create -pr:b <YOUR_PROFILE> .
 To run the tests:
 
 ```
-ctest --test-dir build
+ctest --preset test
 ```
 
 ## Development
