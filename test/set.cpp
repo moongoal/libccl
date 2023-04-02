@@ -1,6 +1,7 @@
 #include <ccl/test/test.hpp>
-#include <ccl/set.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
+#include <ccl/set.hpp>
+#include <ccl/util.hpp>
 
 using namespace ccl;
 
@@ -16,6 +17,20 @@ int main(int argc, char **argv) {
         my_set x;
 
         x.insert(5);
+
+        check(x.capacity() == my_set::minimum_capacity);
+        check(x.contains(5));
+    });
+
+    suite.add_test("insert same", []() {
+        using my_set = test_set<int>;
+
+        my_set x;
+        const int lvalue = 5;
+
+        x.insert(5);
+        x.insert(lvalue); // lvalue version
+        x.insert(5); // rvalue version
 
         check(x.capacity() == my_set::minimum_capacity);
         check(x.contains(5));
@@ -250,6 +265,30 @@ int main(int argc, char **argv) {
         check(x.contains(1));
         check(x.contains(2));
         check(!x.contains(3));
+    });
+
+    suite.add_test("reserve", []() {
+        using my_set = test_set<int>;
+
+        my_set x;
+
+        const auto old_capacity = x.capacity();
+
+        x.reserve(test_set<int>::minimum_capacity * 2);
+
+        check(x.capacity() > old_capacity);
+        check(is_power_2(x.capacity()));
+    });
+
+    suite.add_test("reserve (smaller capacity)", []() {
+        using my_set = test_set<int>;
+
+        my_set x;
+
+        const auto old_capacity = x.capacity();
+        x.reserve(test_set<int>::minimum_capacity - 1);
+
+        equals(x.capacity(), old_capacity);
     });
 
     return suite.main(argc, argv);
