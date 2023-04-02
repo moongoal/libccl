@@ -46,11 +46,11 @@ To initialise the build system for development, run:
 cmake --preset dev
 ```
 
-Or with `-DCMAKE_BUILD_TYPE=Release` to use the release configuration.
+Or with `--preset release` to use the release configuration.
 
-To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON`. This will enable instrumentation of tests in order to collect coverage data, the `coverage-summary` and `coverage-report` build targets.
+To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON` - enabled by default for the *dev* preset. This will enable instrumentation of tests in order to collect coverage data, the `coverage-summary` and `coverage-report` build targets.
 
-To build the project:
+Similarly, to build the project:
 
 ```
 cmake --build --preset dev
@@ -76,7 +76,7 @@ conan create -pr:b <YOUR_PROFILE> .
 To run the tests:
 
 ```
-ctest --preset test
+ctest --preset dev
 ```
 
 ## Development
