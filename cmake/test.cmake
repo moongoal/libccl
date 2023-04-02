@@ -21,7 +21,7 @@ function(_add_ccl_test test_name test_file_path profraw_file exe_file)
         COMMAND ${test_name}
     )
 
-    if($CACHE{CCL_COVERAGE})
+    if(CCL_COVERAGE)
         set_tests_properties(
             ${test_name}
             PROPERTIES
@@ -34,7 +34,7 @@ function(_add_ccl_test test_name test_file_path profraw_file exe_file)
         ${test_name}
         PRIVATE
             -Wall -Wextra -pedantic -Werror
-            $<$<BOOL:$CACHE{CCL_COVERAGE}>:-fprofile-instr-generate -fcoverage-mapping>
+            $<$<BOOL:$CCL_COVERAGE>:-fprofile-instr-generate -fcoverage-mapping>
     )
 endfunction()
 

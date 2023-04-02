@@ -1,0 +1,43 @@
+{
+    "version": 6,
+    "configurePresets": [{
+        "name": "dev",
+        "displayName": "Development",
+        "description": "Standard development profile (debug mode).",
+        "generator": "Ninja",
+        "binaryDir": "build",
+        "installDir": "build/install",
+        "warnings": {
+            "dev": true
+        },
+        "cacheVariables": {
+            "CMAKE_EXPORT_COMPILE_COMMANDS": {
+                "type": "BOOL",
+                "value": "ON"
+            },
+            "CMAKE_BUILD_TYPE": {
+                "type": "STRING",
+                "value": "Debug"
+            },
+            "CCL_COVERAGE": {
+                "type": "BOOL",
+                "value": "ON"
+            }
+        }
+    }],
+    "buildPresets": [{
+        "name": "dev",
+        "displayName": "Development",
+        "description": "Standard development profile (debug mode).",
+        "configurePreset": "dev"
+    }],
+    "testPresets": [{
+        "name": "test",
+        "displayName": "Test",
+        "description": "Standard test profile.",
+        "configurePreset": "dev",
+        "output": {
+            "outputOnFailure": true
+        }
+    }]
+}

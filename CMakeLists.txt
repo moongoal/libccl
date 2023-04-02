@@ -7,13 +7,6 @@ project(
 
 include(CMakePackageConfigHelpers)
 
-if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
-    message(STATUS "Conan paths file found.")
-    include(${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
-else()
-    message(STATUS "Conan paths file not found.")
-endif()
-
 enable_testing()
 
 option(CCL_ENABLE_TESTS "Enable unit tests" ON)
