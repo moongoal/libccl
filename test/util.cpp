@@ -14,6 +14,14 @@ int main(int argc, char ** argv) {
         equals(choose(1.0f, 2.0, false), 2.0);
     });
 
+    suite.add_test("choose (ptr)", [] () {
+        int * const ptr1 = reinterpret_cast<int*>(0x123);
+        int * const ptr2 = reinterpret_cast<int*>(0x321);
+
+        equals(choose(ptr1, ptr2, true), ptr1);
+        equals(choose(ptr1, ptr2, false), ptr2);
+    });
+
     suite.add_test("is_power_2", [] () {
         check(is_power_2(5) == false);
         check(is_power_2(1) == true);
