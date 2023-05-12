@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 
+include(version.cmake)
+
 project(
     ccl
-    VERSION 0.0.1
+    VERSION ${CCL_VERSION_MAJOR}.${CCL_VERSION_MINOR}.${CCL_VERSION_PATCH}
 )
 
 include(CMakePackageConfigHelpers)
