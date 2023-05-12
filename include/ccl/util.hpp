@@ -117,6 +117,21 @@ namespace ccl {
     }
 
     /**
+     * Clamp a value.
+     *
+     * @param value The value to clamp.
+     * @param low The lower bound.
+     * @param high The upper bound.
+     *
+     * @return `low` if `value <= low`, `high` if `value >= high` or `value` for all other cases.
+     */
+    constexpr auto clamp(auto&& value, auto&& low, auto&& high) noexcept {
+        CCL_ASSERT(high >= low);
+
+        return max(low, min(high, value));
+    }
+
+    /**
      * Double capacity until it reaches or surpasses the value of
      * `threshold`.
      *

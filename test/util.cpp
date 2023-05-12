@@ -166,5 +166,11 @@ int main(int argc, char ** argv) {
         equals(bp, &a);
     });
 
+    suite.add_test("clamp", [] () {
+        equals(clamp(1, 2, 3), 2); // Clamped to min
+        equals(clamp(1, -5, 3), 1); // Not clamped
+        equals(clamp(1, -5, 0), 0); // Clamped to max
+    });
+
     return suite.main(argc, argv);
 }
