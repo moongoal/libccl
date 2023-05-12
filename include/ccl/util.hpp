@@ -7,6 +7,7 @@
 #define CCL_UTIL_HPP
 
 #include <cmath>
+#include <utility>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/concepts.hpp>
@@ -125,10 +126,11 @@ namespace ccl {
      *
      * @return `low` if `value <= low`, `high` if `value >= high` or `value` for all other cases.
      */
-    constexpr auto clamp(auto&& value, auto&& low, auto&& high) noexcept {
+    template<typename Value, typename Low, typename High>
+    constexpr std::common_type_t<std::decay_t<Value>, std::decay_t<Low>, std::decay_t<High>> clamp(Value&& value, Low&& low, High&& high) noexcept {
         CCL_ASSERT(high >= low);
 
-        return max(low, min(high, value));
+        return max(std::forward<Low>(low), min(std::forward<High>(high), std::forward<Value>(value)));
     }
 
     /**
