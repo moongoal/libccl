@@ -90,7 +90,7 @@ namespace ccl {
             /**
              * True if this object is lock-free.
              */
-            constexpr bool CCLINLINE is_lock_free() noexcept {
+            constexpr bool CCLINLINE is_lock_free() const noexcept {
                 return __atomic_is_lock_free(sizeof(T), std::addressof(value));
             }
 
@@ -101,7 +101,7 @@ namespace ccl {
              *
              * @return The value of this object.
              */
-            T CCLINLINE load(const memory_order order = memory_order_seq_cst) noexcept {
+            T CCLINLINE load(const memory_order order = memory_order_seq_cst) const noexcept {
                 return __atomic_load_n(std::addressof(value), order);
             }
 
@@ -515,7 +515,7 @@ namespace ccl {
              *
              * @return True if the flag is set, false if the flag is clear.
              */
-            bool CCLINLINE test(const memory_order order = memory_order_seq_cst) noexcept {
+            bool CCLINLINE test(const memory_order order = memory_order_seq_cst) const noexcept {
                 return __atomic_load_n(&value, order);
             }
     };
