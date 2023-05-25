@@ -1,6 +1,7 @@
 #ifndef CCL_HANDLE_MANAGER_HPP
 #define CCL_HANDLE_MANAGER_HPP
 
+#include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/hash.hpp>
 #include <ccl/handle.hpp>
@@ -28,6 +29,8 @@ namespace ccl {
              */
             vector_type handles;
 
+            size_t last_slot_index = 0;
+
             /**
              * Test whether a handle slot is used.
              *
@@ -52,8 +55,58 @@ namespace ccl {
                 return choose(is_used, value, value | ~value_used_mask);
             }
 
+            /**
+             * Add a new page of slots and initialise
+             * its values.
+             */
+            void add_page() {
+                handles.resize(handles.size() + vector_type::page_size);
+                auto * const last_page = *(handles.pages().end() - 1);
+                std::fill(last_page, last_page + vector_type::page_size, value_used_mask);
+            }
+
+            /**
+             * Find the next available slot. If none is available,
+             * return `handles.end()`.
+             */
+            auto find_next_slot() {
+                auto result = std::find_if(handles.begin() + last_slot_index, handles.end(), [] (const value_type slot) {
+                    return !is_slot_used(slot);
+                });
+
+                if(result) {
+                    return result;
+                }
+
+                result = std::find_if(handles.begin(), handles.begin() + last_slot_index, [] (const value_type slot) {
+                    return !is_slot_used(slot);
+                });
+
+                return result;
+            }
+
         public:
-            handle_type acquire();
+            /**
+             * Acquire a new handle.
+             *
+             * @return The newly acquired handle.
+             */
+            handle_type acquire() {
+                auto result = find_next_slot();
+
+                if(result != handles.end()) {
+                    const size_t size = handles.size();
+
+                    add_page();
+                    result = handles.begin() + size;
+                }
+
+                last_slot_index = result - handles.begin();
+                *result &= ~value_used_mask;
+
+                return handle_type::make(get_slot_generation(*result), last_slot_index);
+            }
+
             void release(const handle_t handle);
     };
 }
