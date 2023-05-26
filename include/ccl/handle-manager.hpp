@@ -30,14 +30,26 @@ namespace ccl {
     };
 
     /**
+     * The default handle manager expiry policy value.
+     */
+    static constexpr handle_manager_expiry_policy default_handle_manager_expiry_policy = handle_manager_expiry_policy::discard;
+
+    /**
      * Facility for managing handles of a given type. This class
      * allows acquiring, validating and relating handles.
      *
+     * This manager defines an "expired" handle as a handle whose generation
+     * has reached its maximum value.
+     *
      * @tparam ObjectType The type of object handles acquired via this manager represent.
+     * @tparam ExpiryPolicy Policy to deal with expired handles.
      * @tparam Allocator The allocator.
      */
-    template<typename ObjectType, typed_allocator<ObjectType> Allocator>
-    class handle_manager {
+    template<
+        typename ObjectType,
+        handle_manager_expiry_policy ExpiryPolicy = default_handle_manager_expiry_policy,
+        typed_allocator<ObjectType> Allocator = allocator
+    > class handle_manager {
         public:
             using object_type = ObjectType;
             using handle_type = versioned_handle<object_type>;
