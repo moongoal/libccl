@@ -59,6 +59,7 @@ namespace ccl {
             using vector_type = paged_vector<value_type, handle_ptr, allocator_type>;
 
             static constexpr value_type value_used_mask = bitcount(static_cast<value_type>(0) - 1) - 1;
+            static constexpr handle_manager_expiry_policy expiry_policy = ExpiryPolicy;
 
         private:
             /**
@@ -112,19 +113,29 @@ namespace ccl {
              * return `handles.end()`.
              */
             auto find_next_slot() {
-                auto result = std::find_if(handles.begin() + last_slot_index, handles.end(), [] (const value_type slot) {
-                    return !is_slot_used(slot);
-                });
+                const auto is_available_slot = [this] (const value_type slot) {
+                    if constexpr(expiry_policy == handle_manager_expiry_policy::recycle) {
+                        return !is_slot_used(slot);
+                    } else {
+                        return !is_slot_used(slot) && get_slot_generation(slot) < handle_type::max_generation;
+                    }
+                };
 
-                if(result) {
+                const auto result = std::find_if(
+                    handles.begin() + last_slot_index,
+                    handles.end(),
+                    is_available_slot
+                );
+
+                if(result != handles.end()) {
                     return result;
                 }
 
-                result = std::find_if(handles.begin(), handles.begin() + last_slot_index, [] (const value_type slot) {
-                    return !is_slot_used(slot);
-                });
-
-                return result;
+                return std::find_if(
+                    handles.begin(),
+                    handles.begin() + last_slot_index,
+                    is_available_slot
+                );
             }
 
         public:
@@ -146,7 +157,10 @@ namespace ccl {
                 last_slot_index = result - handles.begin();
                 *result &= ~value_used_mask;
 
-                return handle_type::make(get_slot_generation(*result), last_slot_index);
+                return handle_type::make(
+                    get_slot_generation(*result),
+                    last_slot_index
+                );
             }
 
             /**
@@ -189,7 +203,11 @@ namespace ccl {
                 const auto index = handle.value();
                 const auto generation = handle.generation();
 
-                handles[index] = generation += 1;
+                if constexpr(expiry_policy == handle_manager_expiry_policy::recycle) {
+                    handles[index] = (generation + 1) & handle_type::max_generation;
+                } else {
+                    handles[index] = generation + 1;
+                }
             }
     };
 }

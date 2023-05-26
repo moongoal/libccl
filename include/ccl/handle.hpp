@@ -36,6 +36,9 @@ namespace ccl {
             using underlying_type::value_type;
             using packed_integer::operator typename underlying_type::value_type;
 
+            static constexpr handle_t max_generation = underlying_type::high_part_max;
+            static constexpr handle_t max_value = underlying_type::low_part_max;
+
             constexpr versioned_handle& operator=(const versioned_handle& other) {
                 underlying_type::operator=(other);
 
