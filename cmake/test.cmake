@@ -247,6 +247,11 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    TEST test_handle_manager test/handle-manager.cpp
+    COVERAGE include/ccl/handle-manager.hpp
+)
+
+add_ccl_test(
     TEST test_ecs_component test/ecs/component.cpp
     COVERAGE include/ccl/ecs/component.hpp
 )

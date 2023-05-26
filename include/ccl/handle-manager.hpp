@@ -113,7 +113,7 @@ namespace ccl {
              * return `handles.end()`.
              */
             auto find_next_slot() {
-                const auto is_available_slot = [this] (const value_type slot) {
+                const auto is_available_slot = [] (const value_type slot) {
                     if constexpr(expiry_policy == handle_manager_expiry_policy::recycle) {
                         return !is_slot_used(slot);
                     } else {
@@ -147,15 +147,17 @@ namespace ccl {
             handle_type acquire() {
                 auto result = find_next_slot();
 
-                if(result != handles.end()) {
+                if(result == handles.end()) {
                     const size_t size = handles.size();
 
                     add_page();
                     result = handles.begin() + size;
                 }
 
+                const auto generation = get_slot_generation(*result);
+
                 last_slot_index = result - handles.begin();
-                *result &= ~value_used_mask;
+                *result = generation;
 
                 return handle_type::make(
                     get_slot_generation(*result),
