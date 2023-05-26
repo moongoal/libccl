@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <ccl/api.hpp>
+#include <ccl/debug.hpp>
+#include <ccl/exceptions.hpp>
 #include <ccl/hash.hpp>
 #include <ccl/handle.hpp>
 #include <ccl/paged-vector.hpp>
@@ -10,6 +12,30 @@
 #include <ccl/memory/allocator.hpp>
 
 namespace ccl {
+    /**
+     * Policy to decide how to deal with a handle reaching
+     * its maximum genereation.
+     */
+    enum class handle_manager_expiry_policy {
+        /**
+         * Set the generation to 0 and recycle the handle slot.
+         */
+        recycle,
+
+        /**
+         * Disable the handle slot and do not use it until the
+         * manager is reset.
+         */
+        discard
+    };
+
+    /**
+     * Facility for managing handles of a given type. This class
+     * allows acquiring, validating and relating handles.
+     *
+     * @tparam ObjectType The type of object handles acquired via this manager represent.
+     * @tparam Allocator The allocator.
+     */
     template<typename ObjectType, typed_allocator<ObjectType> Allocator>
     class handle_manager {
         public:
@@ -29,6 +55,10 @@ namespace ccl {
              */
             vector_type handles;
 
+            /**
+             * Last acquired handle slot. This is used to improve acquisition times
+             * by avoiding having to start search for a new handle always at location 0.
+             */
             size_t last_slot_index = 0;
 
             /**
@@ -107,7 +137,48 @@ namespace ccl {
                 return handle_type::make(get_slot_generation(*result), last_slot_index);
             }
 
-            void release(const handle_t handle);
+            /**
+             * Validate a handle.
+             *
+             * A handle is invalid if:
+             * * It's not within boundary of the currently allocated handle-space
+             * * It's not in use
+             * * Its generation is different from the one in the manager
+             *
+             * @param handle The handle to validate.
+             *
+             * @return True if the handle is valid, false if it's invalid.
+             */
+            bool validate_handle(const handle_type handle) const {
+                const auto index = handle.value();
+                const auto generation = handle.generation();
+
+                if(index < handles.size()) {
+                    const auto slot = handles[index];
+
+                    return (
+                        is_slot_used(slot)
+                        && get_slot_generation(slot) == generation
+                    );
+                }
+
+                return false;
+            }
+
+            /**
+             * Release a handle. After being released, the handle becomes
+             * invalid.
+             *
+             * @param handle The handle to release.
+             */
+            void release(const handle_type handle) {
+                CCL_THROW_IF(!validate_handle(handle), std::invalid_argument{"Invalid handle."});
+
+                const auto index = handle.value();
+                const auto generation = handle.generation();
+
+                handles[index] = generation += 1;
+            }
     };
 }
 
