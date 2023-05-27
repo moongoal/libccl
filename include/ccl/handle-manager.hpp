@@ -58,7 +58,7 @@ namespace ccl {
             using value_type = typename handle_type::value_type;
             using vector_type = paged_vector<value_type, value_type*, allocator_type>;
 
-            static constexpr value_type value_unused_mask = bitcount(static_cast<value_type>(0) - 1) - 1;
+            static constexpr value_type value_unused_mask = handle_type::max_generation + 1;
             static constexpr handle_manager_expiry_policy expiry_policy = ExpiryPolicy;
 
         private:
@@ -121,7 +121,7 @@ namespace ccl {
                     }
                 };
 
-                const auto result = std::find_if(
+                auto result = std::find_if(
                     handles.begin() + last_slot_index,
                     handles.end(),
                     is_available_slot
@@ -131,11 +131,15 @@ namespace ccl {
                     return result;
                 }
 
-                return std::find_if(
+                const auto new_end = handles.begin() + last_slot_index;
+
+                result = std::find_if(
                     handles.begin(),
-                    handles.begin() + last_slot_index,
+                    new_end,
                     is_available_slot
                 );
+
+                return result != new_end ? result : handles.end();
             }
 
         public:
@@ -148,16 +152,16 @@ namespace ccl {
                 typename vector_type::iterator result = find_next_slot();
 
                 if(result == handles.end()) {
-                    const size_t size = handles.size();
+                    last_slot_index = handles.size();
 
                     add_page();
-                    result = handles.begin() + size;
+                    result = handles.begin() + last_slot_index;
                 }
 
                 const value_type generation = get_slot_generation(*result);
                 const value_type index = last_slot_index;
 
-                last_slot_index = (result - handles.begin() + 1) & (vector_type::page_size - 1);
+                last_slot_index = (result - handles.begin() + 1) & (handles.size() - 1);
                 *result = generation;
 
                 return handle_type::make(generation, index);
@@ -175,7 +179,7 @@ namespace ccl {
              *
              * @return True if the handle is valid, false if it's invalid.
              */
-            bool validate_handle(const handle_type handle) const {
+            bool is_valid_handle(const handle_type handle) const {
                 const auto index = handle.value();
                 const auto generation = handle.generation();
 
@@ -198,28 +202,38 @@ namespace ccl {
              * @param handle The handle to release.
              */
             void release(const handle_type handle) {
-                CCL_THROW_IF(!validate_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
 
                 const auto index = handle.value();
                 const auto generation = handle.generation();
 
                 if constexpr(expiry_policy == handle_manager_expiry_policy::recycle) {
-                    handles[index] = (generation + 1) & handle_type::max_generation;
+                    handles[index] = ((generation + 1) & handle_type::max_generation) | value_unused_mask;
                 } else {
-                    handles[index] = generation + 1;
+                    handles[index] = (generation + 1) | value_unused_mask;
                 }
             }
 
             /**
              * Resets all expired handles to the 0th generation so they can be used again.
              */
-            std::enable_if<expiry_policy == handle_manager_expiry_policy::discard>
+            template<bool Enable = expiry_policy == handle_manager_expiry_policy::discard>
+            std::enable_if_t<Enable>
             reset_expired() {
                 std::for_each(handles.begin(), handles.end(), [] (value_type& slot) {
                     if(!is_slot_used(slot) && get_slot_generation(slot) == handle_type::max_generation) {
                         slot = value_unused_mask;
                     }
                 });
+            }
+
+            /**
+             * Reset all handles to the 0th generation. This is equivalent to
+             * creating a new handle manager.
+             */
+            void reset() {
+                std::fill(handles.begin(), handles.end(), value_unused_mask);
+                last_slot_index = 0;
             }
     };
 }
