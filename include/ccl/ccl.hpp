@@ -26,6 +26,7 @@
 #include <ccl/version.hpp>
 #include <ccl/dense-map.hpp>
 #include <ccl/handle.hpp>
+#include <ccl/handle-manager.hpp>
 #include <ccl/packed-integer.hpp>
 #include <ccl/tagged-pointer.hpp>
 #include <ccl/paged-vector.hpp>

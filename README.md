@@ -24,6 +24,7 @@ Unstable: 🔴
 |ECS|🔴
 |Dense Map|🔴
 |Handle|🔴
+|Handle Manager|🔴
 |Packed Integer|🔴
 |Paged Vector|🔴
 |Set|🔴
