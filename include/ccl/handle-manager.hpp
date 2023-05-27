@@ -2,6 +2,7 @@
 #define CCL_HANDLE_MANAGER_HPP
 
 #include <algorithm>
+#include <type_traits>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>
@@ -53,12 +54,11 @@ namespace ccl {
         public:
             using object_type = ObjectType;
             using handle_type = versioned_handle<object_type>;
-            using handle_ptr = handle_type*;
             using allocator_type = Allocator;
             using value_type = typename handle_type::value_type;
-            using vector_type = paged_vector<value_type, handle_ptr, allocator_type>;
+            using vector_type = paged_vector<value_type, value_type*, allocator_type>;
 
-            static constexpr value_type value_used_mask = bitcount(static_cast<value_type>(0) - 1) - 1;
+            static constexpr value_type value_unused_mask = bitcount(static_cast<value_type>(0) - 1) - 1;
             static constexpr handle_manager_expiry_policy expiry_policy = ExpiryPolicy;
 
         private:
@@ -82,7 +82,7 @@ namespace ccl {
              * @return True if the slot is in use, false if it's available.
              */
             static constexpr bool is_slot_used(const value_type value) noexcept {
-                return ~value & value_used_mask;
+                return ~value & value_unused_mask;
             }
 
             /**
@@ -92,10 +92,10 @@ namespace ccl {
              *
              * @return The slot generation.
              */
-            static constexpr bool get_slot_generation(const value_type value) noexcept {
+            static constexpr value_type get_slot_generation(const value_type value) noexcept {
                 const bool is_used = is_slot_used(value);
 
-                return choose(is_used, value, value | ~value_used_mask);
+                return choose(value, value & ~value_unused_mask, is_used);
             }
 
             /**
@@ -105,7 +105,7 @@ namespace ccl {
             void add_page() {
                 handles.resize(handles.size() + vector_type::page_size);
                 auto * const last_page = *(handles.pages().end() - 1);
-                std::fill(last_page, last_page + vector_type::page_size, value_used_mask);
+                std::fill(last_page, last_page + vector_type::page_size, value_unused_mask);
             }
 
             /**
@@ -144,8 +144,8 @@ namespace ccl {
              *
              * @return The newly acquired handle.
              */
-            handle_type acquire() {
-                auto result = find_next_slot();
+            CCLNODISCARD handle_type acquire() {
+                typename vector_type::iterator result = find_next_slot();
 
                 if(result == handles.end()) {
                     const size_t size = handles.size();
@@ -154,15 +154,13 @@ namespace ccl {
                     result = handles.begin() + size;
                 }
 
-                const auto generation = get_slot_generation(*result);
+                const value_type generation = get_slot_generation(*result);
+                const value_type index = last_slot_index;
 
-                last_slot_index = result - handles.begin();
+                last_slot_index = (result - handles.begin() + 1) & (vector_type::page_size - 1);
                 *result = generation;
 
-                return handle_type::make(
-                    get_slot_generation(*result),
-                    last_slot_index
-                );
+                return handle_type::make(generation, index);
             }
 
             /**
@@ -210,6 +208,18 @@ namespace ccl {
                 } else {
                     handles[index] = generation + 1;
                 }
+            }
+
+            /**
+             * Resets all expired handles to the 0th generation so they can be used again.
+             */
+            std::enable_if<expiry_policy == handle_manager_expiry_policy::discard>
+            reset_expired() {
+                std::for_each(handles.begin(), handles.end(), [] (value_type& slot) {
+                    if(!is_slot_used(slot) && get_slot_generation(slot) == handle_type::max_generation) {
+                        slot = value_unused_mask;
+                    }
+                });
             }
     };
 }

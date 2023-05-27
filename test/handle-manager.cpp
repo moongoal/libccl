@@ -22,5 +22,30 @@ int main(int argc, char **argv) {
         differs(handle1, handle2);
     });
 
+    suite.add_test("acquire/release cycle", [] () {
+        test_recycle_handle_manager manager;
+
+        const auto handle1 = manager.acquire();
+        const auto handle2 = manager.acquire();
+        manager.release(handle1);
+        const auto handle3 = manager.acquire();
+
+        differs(handle1, handle3);
+        differs(handle2, handle3);
+    });
+
+    suite.add_test("release", [] () {
+        test_recycle_handle_manager manager;
+
+        for(size_t i = 0; i < test_recycle_handle_manager::vector_type::page_size; ++i) {
+            manager.release(manager.acquire());
+        }
+
+        const auto handle = manager.acquire();
+
+        equals(handle.generation(), 1);
+        equals(handle.value(), 0);
+    });
+
     return suite.main(argc, argv);
 }
