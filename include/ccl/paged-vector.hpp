@@ -346,7 +346,7 @@ namespace ccl {
             }
 
         public:
-            constexpr paged_vector(
+            explicit constexpr paged_vector(
                 allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator}, _size{0} {}
 
@@ -355,7 +355,7 @@ namespace ccl {
                 _size = other._size;
             }
 
-            constexpr paged_vector(paged_vector &&other)
+            constexpr paged_vector(paged_vector &&other) noexcept
                 : alloc{std::move(other.get_allocator())},
                 _pages{std::move(other._pages)},
                 _size{other._size}

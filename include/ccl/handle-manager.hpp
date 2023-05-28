@@ -1,3 +1,8 @@
+/**
+ * @file
+ *
+ * A facility to manage handle creation and and deletion for a specific type.
+ */
 #ifndef CCL_HANDLE_MANAGER_HPP
 #define CCL_HANDLE_MANAGER_HPP
 
@@ -17,7 +22,7 @@ namespace ccl {
      * Policy to decide how to deal with a handle reaching
      * its maximum genereation.
      */
-    enum class handle_manager_expiry_policy {
+    enum class handle_expiry_policy {
         /**
          * Set the generation to 0 and recycle the handle slot.
          */
@@ -31,9 +36,20 @@ namespace ccl {
     };
 
     /**
+     * An allocator suitable for managing handle slot memory.
+     *
+     * @tparam Allocator The allocator type.
+     * @tparam ObjectType The handle type of the manager.
+     */
+    template<typename Allocator, typename ObjectType>
+    concept handle_manager_slot_allocator = requires(Allocator allocator) {
+        typed_allocator<Allocator, typename versioned_handle<ObjectType>::value_type>;
+    };
+
+    /**
      * The default handle manager expiry policy value.
      */
-    static constexpr handle_manager_expiry_policy default_handle_manager_expiry_policy = handle_manager_expiry_policy::discard;
+    static constexpr handle_expiry_policy default_handle_manager_expiry_policy = handle_expiry_policy::discard;
 
     /**
      * Facility for managing handles of a given type. This class
@@ -48,8 +64,8 @@ namespace ccl {
      */
     template<
         typename ObjectType,
-        handle_manager_expiry_policy ExpiryPolicy = default_handle_manager_expiry_policy,
-        typed_allocator<ObjectType> Allocator = allocator
+        handle_expiry_policy ExpiryPolicy = default_handle_manager_expiry_policy,
+        handle_manager_slot_allocator<ObjectType> Allocator = allocator
     > class handle_manager {
         public:
             using object_type = ObjectType;
@@ -59,7 +75,7 @@ namespace ccl {
             using vector_type = paged_vector<value_type, value_type*, allocator_type>;
 
             static constexpr value_type value_unused_mask = handle_type::max_generation + 1;
-            static constexpr handle_manager_expiry_policy expiry_policy = ExpiryPolicy;
+            static constexpr handle_expiry_policy expiry_policy = ExpiryPolicy;
 
         private:
             /**
@@ -114,7 +130,7 @@ namespace ccl {
              */
             auto find_next_slot() {
                 const auto is_available_slot = [] (const value_type slot) {
-                    if constexpr(expiry_policy == handle_manager_expiry_policy::recycle) {
+                    if constexpr(expiry_policy == handle_expiry_policy::recycle) {
                         return !is_slot_used(slot);
                     } else {
                         return !is_slot_used(slot) && get_slot_generation(slot) < handle_type::max_generation;
@@ -143,6 +159,17 @@ namespace ccl {
             }
 
         public:
+            explicit constexpr handle_manager(
+                allocator_type * const allocator = nullptr
+            ) noexcept : handles{allocator} {}
+
+            constexpr handle_manager(const handle_manager &other) = default;
+            constexpr handle_manager(handle_manager &&other) noexcept = default;
+            virtual ~handle_manager() = default;
+
+            handle_manager& operator=(const handle_manager &other) = default;
+            handle_manager& operator=(handle_manager &&other) noexcept = default;
+
             /**
              * Acquire a new handle.
              *
@@ -207,7 +234,7 @@ namespace ccl {
                 const auto index = handle.value();
                 const auto generation = handle.generation();
 
-                if constexpr(expiry_policy == handle_manager_expiry_policy::recycle) {
+                if constexpr(expiry_policy == handle_expiry_policy::recycle) {
                     handles[index] = ((generation + 1) & handle_type::max_generation) | value_unused_mask;
                 } else {
                     handles[index] = (generation + 1) | value_unused_mask;
@@ -217,7 +244,7 @@ namespace ccl {
             /**
              * Resets all expired handles to the 0th generation so they can be used again.
              */
-            template<bool Enable = expiry_policy == handle_manager_expiry_policy::discard>
+            template<bool Enable = expiry_policy == handle_expiry_policy::discard>
             std::enable_if_t<Enable>
             reset_expired() {
                 std::for_each(handles.begin(), handles.end(), [] (value_type& slot) {
