@@ -1,3 +1,4 @@
+#include <utility>
 #include <ccl/test/test.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 #include <ccl/handle-manager.hpp>
@@ -118,10 +119,47 @@ int main(int argc, char **argv) {
         }
 
         manager.reset_expired();
-
         const auto handle = manager.acquire();
 
         equals(handle.raw(), 0);
+    });
+
+    suite.add_test("ctor (copy)", [] () {
+        test_recycle_handle_manager manager;
+
+        const auto handle = manager.acquire();
+        test_recycle_handle_manager manager2{manager};
+
+        manager2.release(handle);
+    });
+
+    suite.add_test("ctor (move)", [] () {
+        test_recycle_handle_manager manager;
+
+        const auto handle = manager.acquire();
+        test_recycle_handle_manager manager2{std::move(manager)};
+
+        manager2.release(handle);
+    });
+
+    suite.add_test("operator= (copy)", [] () {
+        test_recycle_handle_manager manager;
+        test_recycle_handle_manager manager2;
+
+        const auto handle = manager.acquire();
+         manager2 = manager;
+
+        manager2.release(handle);
+    });
+
+    suite.add_test("operator= (move)", [] () {
+        test_recycle_handle_manager manager;
+        test_recycle_handle_manager manager2;
+
+        const auto handle = manager.acquire();
+         manager2 = std::move(manager);
+
+        manager2.release(handle);
     });
 
     return suite.main(argc, argv);
