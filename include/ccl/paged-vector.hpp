@@ -219,13 +219,16 @@ namespace ccl {
                     }
 
                     _pages.push_back(
-                        cloner.clone(*last, v.next_item_index())
+                        cloner.clone(*last, v.compute_last_page_size(v._size))
                     );
                 }
             }
 
             static constexpr size_type compute_last_page_size(const size_type total_size) {
-                return total_size & (page_size - 1);
+                const size_type result = total_size & (page_size - 1);
+                const bool is_full_page = total_size && !result;
+
+                return choose(CCL_PAGE_SIZE, result, is_full_page);
             }
 
             constexpr size_type next_item_index() const {
@@ -346,16 +349,16 @@ namespace ccl {
             }
 
         public:
-            constexpr paged_vector(
+            explicit constexpr paged_vector(
                 allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator}, _size{0} {}
 
-            constexpr paged_vector(const paged_vector& other) : alloc{other.get_allocator()} {
+            constexpr paged_vector(const paged_vector& other) : alloc{other.get_allocator()}, _size{0} {
                 clone_pages_from(other);
                 _size = other._size;
             }
 
-            constexpr paged_vector(paged_vector &&other)
+            constexpr paged_vector(paged_vector &&other) noexcept
                 : alloc{std::move(other.get_allocator())},
                 _pages{std::move(other._pages)},
                 _size{other._size}

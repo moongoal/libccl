@@ -1,14 +1,15 @@
+#include <utility>
 #include <ccl/test/test.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 #include <ccl/handle-manager.hpp>
 
 using namespace ccl;
 
-template<handle_manager_expiry_policy ExpiryPolicy>
+template<handle_expiry_policy ExpiryPolicy>
 using test_handle_manager = handle_manager<int, ExpiryPolicy, counting_test_allocator>;
 
-using test_recycle_handle_manager = test_handle_manager<handle_manager_expiry_policy::recycle>;
-using test_discard_handle_manager = test_handle_manager<handle_manager_expiry_policy::discard>;
+using test_recycle_handle_manager = test_handle_manager<handle_expiry_policy::recycle>;
+using test_discard_handle_manager = test_handle_manager<handle_expiry_policy::discard>;
 
 int main(int argc, char **argv) {
     test_suite suite;
@@ -118,10 +119,47 @@ int main(int argc, char **argv) {
         }
 
         manager.reset_expired();
-
         const auto handle = manager.acquire();
 
         equals(handle.raw(), 0);
+    });
+
+    suite.add_test("ctor (copy)", [] () {
+        test_recycle_handle_manager manager;
+
+        const auto handle = manager.acquire();
+        test_recycle_handle_manager manager2{manager};
+
+        manager2.release(handle);
+    });
+
+    suite.add_test("ctor (move)", [] () {
+        test_recycle_handle_manager manager;
+
+        const auto handle = manager.acquire();
+        test_recycle_handle_manager manager2{std::move(manager)};
+
+        manager2.release(handle);
+    });
+
+    suite.add_test("operator= (copy)", [] () {
+        test_recycle_handle_manager manager;
+        test_recycle_handle_manager manager2;
+
+        const auto handle = manager.acquire();
+         manager2 = manager;
+
+        manager2.release(handle);
+    });
+
+    suite.add_test("operator= (move)", [] () {
+        test_recycle_handle_manager manager;
+        test_recycle_handle_manager manager2;
+
+        const auto handle = manager.acquire();
+         manager2 = std::move(manager);
+
+        manager2.release(handle);
     });
 
     return suite.main(argc, argv);
