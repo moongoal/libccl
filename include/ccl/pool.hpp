@@ -23,6 +23,8 @@ namespace ccl {
      * are not called when a handle is released. This class guarantees pointer
      * stability, so all returned pointers are guaranteed to be valid for the
      * lifetime of the pool object.
+     *
+     * Pointer stability is not preserved across copies of the pool object.
      */
     template<
         typename T,
