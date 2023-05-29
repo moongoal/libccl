@@ -123,7 +123,7 @@ namespace ccl {
              *
              * @return A pointer to the item.
              */
-            CCLNODISCARD pointer get(const handle_type handle) const {
+            CCLNODISCARD const_pointer get(const handle_type handle) const {
                 if(handle_manager.is_valid_handle(handle)) {
                     return &data[handle.value()];
                 }
