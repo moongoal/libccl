@@ -23,8 +23,6 @@ namespace ccl {
      * are not called when a handle is released. This class guarantees pointer
      * stability, so all returned pointers are guaranteed to be valid for the
      * lifetime of the pool object.
-     *
-     * Pointer stability is not preserved across copies of the pool object.
      */
     template<
         typename T,
@@ -36,6 +34,7 @@ namespace ccl {
             using value_type = T;
             using pointer = T*;
             using reference = T&;
+            using const_reference = const T&;
             using const_pointer = const T*;
             using handle_type = versioned_handle<T>;
             using object_allocator_type = ObjectAllocator;
@@ -102,33 +101,27 @@ namespace ccl {
             bool is_valid_handle(const handle_type handle) const { return handle_manager.is_valid_handle(handle); }
 
             /**
-             * Get an item from the pool.
+             * Get an item from the pool. It's undefined behaviour to provide
+             * an invalid handle.
              *
              * @param handle The handle of the item to get.
              *
-             * @return A pointer to the item.
+             * @return A reference to the item.
              */
-            CCLNODISCARD pointer get(const handle_type handle) {
-                if(handle_manager.is_valid_handle(handle)) {
-                    return &data[handle.value()];
-                }
-
-                return nullptr;
+            CCLNODISCARD reference get(const handle_type handle) {
+                return data[handle.value()];
             }
 
             /**
-             * Get an item from the pool.
+             * Get an item from the pool. It's undefined behaviour to provide
+             * an invalid handle.
              *
              * @param handle The handle of the item to get.
              *
-             * @return A pointer to the item.
+             * @return A reference to the item.
              */
-            CCLNODISCARD const_pointer get(const handle_type handle) const {
-                if(handle_manager.is_valid_handle(handle)) {
-                    return &data[handle.value()];
-                }
-
-                return nullptr;
+            CCLNODISCARD const_reference get(const handle_type handle) const {
+                return data[handle.value()];
             }
 
             /**

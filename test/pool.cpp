@@ -15,30 +15,17 @@ int main(int argc, char **argv) {
         pool.release(pool.acquire());
     });
 
-    suite.add_test("get", [] () {
+    suite.add_test("set/get", [] () {
         test_pool pool;
 
         const auto handle = pool.acquire();
-
-        differs(pool.get(handle), nullptr);
-    });
-
-    suite.add_test("get (invalid)", [] () {
-        test_pool pool;
-
-        const auto handle = test_pool::handle_type::make(100, 100);
-
-        equals(pool.get(handle), nullptr);
-    });
-
-    suite.add_test("set", [] () {
-        test_pool pool;
-
-        const auto handle = pool.acquire();
+        const auto handle2 = pool.acquire();
 
         pool.set(handle, 5);
+        pool.set(handle2, 10);
 
-        equals(*pool.get(handle), 5);
+        equals(pool.get(handle), 5);
+        equals(pool.get(handle2), 10);
     });
 
     return suite.main(argc, argv);
