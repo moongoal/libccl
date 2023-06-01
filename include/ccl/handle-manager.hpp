@@ -12,7 +12,7 @@
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>
 #include <ccl/hash.hpp>
-#include <ccl/handle.hpp>
+#include <ccl/handle/versioned-handle.hpp>
 #include <ccl/paged-vector.hpp>
 #include <ccl/util.hpp>
 #include <ccl/memory/allocator.hpp>

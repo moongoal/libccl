@@ -22,4 +22,11 @@
     #define CCLZEROSIZE [[no_unique_address]]
 #endif // _MSC_VER
 
+namespace ccl {
+    /**
+     * A raw, numeric handle type.
+     */
+    using handle_t = uint32_t;
+}
+
 #endif // CCL_API_HPP

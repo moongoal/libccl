@@ -7,7 +7,7 @@
 #define CCL_ECS_ENTITY_HPP
 
 #include <ccl/api.hpp>
-#include <ccl/handle.hpp>
+#include <ccl/handle/versioned-handle.hpp>
 
 namespace ccl::ecs {
     struct entity_tag_t {};

@@ -9,11 +9,9 @@
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/vector.hpp>
+#include <ccl/memory/allocator.hpp>
 
 namespace ccl {
-    template<typed_allocator<uint64_t> Allocator>
-    struct bitset_iterator;
-
     /**
      * A variable sequence of bits.
      */
@@ -23,8 +21,6 @@ namespace ccl {
             using cluster_type = uint64_t;
             using size_type = std::size_t;
             using allocator_type = Allocator;
-            using iterator = bitset_iterator<allocator_type>;
-            using const_iterator = const bitset_iterator<allocator_type>;
 
             class bit_proxy {
                 bitset *set;

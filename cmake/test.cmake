@@ -242,8 +242,13 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    TEST test_handle test/handle.cpp
-    COVERAGE include/ccl/handle.hpp
+    TEST test_versioned_handle test/handle/versioned-handle.cpp
+    COVERAGE include/ccl/handle/versioned-handle.hpp
+)
+
+add_ccl_test(
+    TEST test_typed_handle test/handle/typed-handle.cpp
+    COVERAGE include/ccl/handle/typed-handle.hpp
 )
 
 add_ccl_test(

@@ -23,7 +23,8 @@ Unstable: 🔴
 |Tables|🔴
 |ECS|🔴
 |Dense Map|🔴
-|Handle|🔴
+|Typed Handle|🔴
+|Versioned Handle|🔴
 |Handle Manager|🔴
 |Packed Integer|🔴
 |Paged Vector|🔴
@@ -33,6 +34,7 @@ Unstable: 🔴
 |Pair|🔴
 |Atomic|🔴
 |Deque|🔴
+|Pool|🔴
 
 ## Building
 

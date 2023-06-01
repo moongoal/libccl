@@ -27,8 +27,7 @@ namespace ccl {
     template<
         typename T,
         handle_expiry_policy HandleExpiryPolicy,
-        typed_allocator<T> ObjectAllocator = allocator,
-        handle_manager_slot_allocator<T> HandleManagerAllocator = allocator
+        typed_allocator<T> Allocator = allocator
     > class pool {
         public:
             using value_type = T;
@@ -37,20 +36,23 @@ namespace ccl {
             using const_reference = const T&;
             using const_pointer = const T*;
             using handle_type = versioned_handle<T>;
-            using object_allocator_type = ObjectAllocator;
-            using handle_manager_allocator_type = HandleManagerAllocator;
-            using object_vector_type = paged_vector<value_type, pointer, object_allocator_type>;
-            using handle_manager_type = handle_manager<T, HandleExpiryPolicy, handle_manager_allocator_type>;
+            using allocator_type = Allocator;
+            using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
+            using handle_manager_type = handle_manager<T, HandleExpiryPolicy, allocator_type>;
 
         private:
             handle_manager_type handle_manager;
             object_vector_type data;
+            value_type default_value;
 
         public:
             explicit constexpr pool(
-                object_allocator_type * const object_allocator = nullptr,
-                handle_manager_allocator_type * const handle_manager_allocator = nullptr
-            ) noexcept : handle_manager{handle_manager_allocator}, data{object_allocator}
+                const_reference default_value,
+                allocator_type * const allocator = nullptr
+            ) noexcept :
+                handle_manager{allocator},
+                data{allocator},
+                default_value{default_value}
             {}
 
             constexpr pool(const pool& other) = default;
@@ -58,6 +60,8 @@ namespace ccl {
 
             pool& operator=(const pool& other) = default;
             pool& operator=(pool&& other) noexcept = default;
+
+            virtual ~pool() = default;
 
             /**
              * Acquire a new item in the pool.
@@ -67,9 +71,8 @@ namespace ccl {
             CCLNODISCARD handle_type acquire() {
                 const auto handle = handle_manager.acquire();
 
-                if(handle.value() >= data.size()) {
-                    data.resize(handle.value() + 1);
-                }
+                data.resize(handle.value() + 1);
+                set(handle, default_value);
 
                 return handle;
             }
@@ -80,6 +83,7 @@ namespace ccl {
              * @param handle The handle of the item to release.
              */
             void release(const handle_type handle) {
+                set(handle, default_value);
                 handle_manager.release(handle);
             }
 
@@ -93,7 +97,10 @@ namespace ccl {
             /**
              * @see handle_manager::reset()
              */
-            void reset() { handle_manager.reset(); }
+            void reset() {
+                handle_manager.reset();
+                std::fill(data.begin(), data.end(), default_value);
+            }
 
             /**
              * @see handle_manager::is_valid_handle()
@@ -101,8 +108,10 @@ namespace ccl {
             bool is_valid_handle(const handle_type handle) const { return handle_manager.is_valid_handle(handle); }
 
             /**
-             * Get an item from the pool. It's undefined behaviour to provide
-             * an invalid handle.
+             * Get an item from the pool. An old (used in the past but free now) handle
+             * will return the default value. A handle never acquired via this pool
+             * will generate undefined behaviour. Setting the value of a reference
+             * obtained via an old handle will produce undefined behaviour.
              *
              * @param handle The handle of the item to get.
              *
@@ -113,8 +122,9 @@ namespace ccl {
             }
 
             /**
-             * Get an item from the pool. It's undefined behaviour to provide
-             * an invalid handle.
+             * Get an item from the pool. An old (used in the past but free now) handle
+             * will return the default value. A handle never acquired via this pool
+             * will generate undefined behaviour.
              *
              * @param handle The handle of the item to get.
              *
@@ -132,10 +142,10 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            reference set(const handle_type handle, T&& value) {
+            reference set(const handle_type handle, const T& value) {
                 CCL_THROW_IF(!handle_manager.is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
 
-                return data[handle.value()] = std::forward<T&&>(value);
+                return data[handle.value()] = value;
             }
     };
 }

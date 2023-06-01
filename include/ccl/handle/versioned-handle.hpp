@@ -3,8 +3,8 @@
  *
  * Versioned handle definition.
  */
-#ifndef CCL_HANDLE_HPP
-#define CCL_HANDLE_HPP
+#ifndef CCL_HANDLE_VERSIONED_HANDLE_HPP
+#define CCL_HANDLE_VERSIONED_HANDLE_HPP
 
 #include <ccl/api.hpp>
 #include <ccl/packed-integer.hpp>
@@ -103,11 +103,6 @@ namespace ccl {
         return a.raw() == b.raw();
     }
 
-    /**
-     * A generic versioned handle.
-     */
-    using untyped_versioned_handle = versioned_handle<void>;
-
     template<typename HandleType>
     struct hash<versioned_handle<HandleType>> {
         constexpr hash_t operator()(const versioned_handle<HandleType>& h) const {
@@ -116,4 +111,4 @@ namespace ccl {
     };
 }
 
-#endif // CCL_HANDLE_HPP
+#endif // CCL_HANDLE_VERSIONED_HANDLE_HPP
