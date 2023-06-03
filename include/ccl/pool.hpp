@@ -47,7 +47,7 @@ namespace ccl {
 
         public:
             explicit constexpr pool(
-                const_reference default_value,
+                const_reference default_value = T{},
                 allocator_type * const allocator = nullptr
             ) noexcept :
                 handle_manager{allocator},
