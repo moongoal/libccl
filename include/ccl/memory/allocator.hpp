@@ -78,7 +78,7 @@ namespace ccl {
         std::size_t alignment = 0;
     };
 
-    class allocator {
+    class CCL_ALLOCAPI allocator {
         public:
             /**
              * Allocate with default alignment constraint.
