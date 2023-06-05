@@ -77,7 +77,7 @@ namespace ccl {
             /**
              * Initialise the atomic object. This operation is not atomic.
              */
-            constexpr atomic() noexcept(std::is_nothrow_default_constructible_v<T>) = default;
+            constexpr atomic() noexcept(std::is_nothrow_default_constructible_v<T>): value{} {};
 
             /**
              * Initialise the atomic object. This operation is not atomic.
