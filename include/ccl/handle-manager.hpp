@@ -7,6 +7,7 @@
 #define CCL_HANDLE_MANAGER_HPP
 
 #include <algorithm>
+#include <functional>
 #include <type_traits>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
@@ -73,6 +74,7 @@ namespace ccl {
             using allocator_type = Allocator;
             using value_type = typename handle_type::value_type;
             using vector_type = paged_vector<value_type, value_type*, allocator_type>;
+            using handle_callback = std::function<void(const handle_type)>;
 
             static constexpr value_type value_unused_mask = handle_type::max_generation + 1;
             static constexpr handle_expiry_policy expiry_policy = ExpiryPolicy;
@@ -82,7 +84,7 @@ namespace ccl {
              * A vector of available slots. Each value of these contains the current generation of the handle
              * and its MSB is set to 1 if the handle slot is currently not in used.
              */
-            vector_type handles;
+            vector_type handle_slots;
 
             /**
              * Last acquired handle slot. This is used to improve acquisition times
@@ -119,8 +121,8 @@ namespace ccl {
              * its values.
              */
             void add_page() {
-                handles.resize(handles.size() + vector_type::page_size);
-                auto * const last_page = *(handles.pages().end() - 1);
+                handle_slots.resize(handle_slots.size() + vector_type::page_size);
+                auto * const last_page = *(handle_slots.pages().end() - 1);
                 std::fill(last_page, last_page + vector_type::page_size, value_unused_mask);
             }
 
@@ -138,30 +140,30 @@ namespace ccl {
                 };
 
                 auto result = std::find_if(
-                    handles.begin() + last_slot_index,
-                    handles.end(),
+                    handle_slots.begin() + last_slot_index,
+                    handle_slots.end(),
                     is_available_slot
                 );
 
-                if(result != handles.end()) {
+                if(result != handle_slots.end()) {
                     return result;
                 }
 
-                const auto new_end = handles.begin() + last_slot_index;
+                const auto new_end = handle_slots.begin() + last_slot_index;
 
                 result = std::find_if(
-                    handles.begin(),
+                    handle_slots.begin(),
                     new_end,
                     is_available_slot
                 );
 
-                return result != new_end ? result : handles.end();
+                return result != new_end ? result : handle_slots.end();
             }
 
         public:
             explicit constexpr handle_manager(
                 allocator_type * const allocator = nullptr
-            ) noexcept : handles{allocator} {}
+            ) noexcept : handle_slots{allocator} {}
 
             constexpr handle_manager(const handle_manager &other) = default;
             constexpr handle_manager(handle_manager &&other) noexcept = default;
@@ -178,17 +180,17 @@ namespace ccl {
             CCLNODISCARD handle_type acquire() {
                 typename vector_type::iterator result = find_next_slot();
 
-                if(result == handles.end()) {
-                    last_slot_index = handles.size();
+                if(result == handle_slots.end()) {
+                    last_slot_index = handle_slots.size();
 
                     add_page();
-                    result = handles.begin() + last_slot_index;
+                    result = handle_slots.begin() + last_slot_index;
                 }
 
                 const value_type generation = get_slot_generation(*result);
                 const value_type index = last_slot_index;
 
-                last_slot_index = (result - handles.begin() + 1) & (handles.size() - 1);
+                last_slot_index = (result - handle_slots.begin() + 1) & (handle_slots.size() - 1);
                 *result = generation;
 
                 return handle_type::make(generation, index);
@@ -210,8 +212,8 @@ namespace ccl {
                 const auto index = handle.value();
                 const auto generation = handle.generation();
 
-                if(index < handles.size()) {
-                    const auto slot = handles[index];
+                if(index < handle_slots.size()) {
+                    const auto slot = handle_slots[index];
 
                     return (
                         is_slot_used(slot)
@@ -235,9 +237,9 @@ namespace ccl {
                 const auto generation = handle.generation();
 
                 if constexpr(expiry_policy == handle_expiry_policy::recycle) {
-                    handles[index] = ((generation + 1) & handle_type::max_generation) | value_unused_mask;
+                    handle_slots[index] = ((generation + 1) & handle_type::max_generation) | value_unused_mask;
                 } else {
-                    handles[index] = (generation + 1) | value_unused_mask;
+                    handle_slots[index] = (generation + 1) | value_unused_mask;
                 }
             }
 
@@ -247,7 +249,7 @@ namespace ccl {
             template<bool Enable = expiry_policy == handle_expiry_policy::discard>
             std::enable_if_t<Enable>
             reset_expired() {
-                std::for_each(handles.begin(), handles.end(), [] (value_type& slot) {
+                std::for_each(handle_slots.begin(), handle_slots.end(), [] (value_type& slot) {
                     if(!is_slot_used(slot) && get_slot_generation(slot) == handle_type::max_generation) {
                         slot = value_unused_mask;
                     }
@@ -259,8 +261,33 @@ namespace ccl {
              * creating a new handle manager.
              */
             void reset() {
-                std::fill(handles.begin(), handles.end(), value_unused_mask);
+                std::fill(handle_slots.begin(), handle_slots.end(), value_unused_mask);
                 last_slot_index = 0;
+            }
+
+            /**
+             * Invoke a given callback for all acquired handles.
+             *
+             * @param callback The callback to invoke.
+             */
+            void for_each(const handle_callback callback) const {
+                const size_t slot_count = handle_slots.size();
+
+                for(value_type i = 0; i < slot_count; ++i) {
+                    const value_type slot = handle_slots[i];
+                    bool is_slot_in_use = is_slot_used(slot);
+
+                    if constexpr(expiry_policy == handle_expiry_policy::discard) {
+                        is_slot_in_use = is_slot_in_use && get_slot_generation(slot) < handle_type::max_generation;
+                    }
+
+                    if(is_slot_used(slot)) {
+                        const value_type generation = get_slot_generation(slot);
+                        const handle_type handle = handle_type::make(generation, i);
+
+                        callback(handle);
+                    }
+                }
             }
     };
 }

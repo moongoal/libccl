@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
         test_recycle_handle_manager manager2;
 
         const auto handle = manager.acquire();
-         manager2 = manager;
+        manager2 = manager;
 
         manager2.release(handle);
     });
@@ -157,9 +157,49 @@ int main(int argc, char **argv) {
         test_recycle_handle_manager manager2;
 
         const auto handle = manager.acquire();
-         manager2 = std::move(manager);
+        manager2 = std::move(manager);
 
         manager2.release(handle);
+    });
+
+    suite.add_test("for_each (recycle)", [] () {
+        test_recycle_handle_manager manager;
+        int count = 0;
+
+        const auto h1 = manager.acquire();
+        const auto h2 = manager.acquire();
+        const auto h3 = manager.acquire();
+        const auto h4 = manager.acquire();
+
+        manager.release(h4);
+
+        manager.for_each([&count, h1, h2, h3] (const auto handle) {
+            check(h1 == handle || h2 == handle || h3 == handle);
+
+            count += 1;
+        });
+
+        equals(count, 3);
+    });
+
+    suite.add_test("for_each (discaard)", [] () {
+        test_discard_handle_manager manager;
+        int count = 0;
+
+        const auto h1 = manager.acquire();
+        const auto h2 = manager.acquire();
+        const auto h3 = manager.acquire();
+        const auto h4 = manager.acquire();
+
+        manager.release(h4);
+
+        manager.for_each([&count, h1, h2, h3] (const auto handle) {
+            check(h1 == handle || h2 == handle || h3 == handle);
+
+            count += 1;
+        });
+
+        equals(count, 3);
     });
 
     return suite.main(argc, argv);
