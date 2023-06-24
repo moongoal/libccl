@@ -5,6 +5,9 @@ using namespace ccl;
 
 using generic_versioned_handle = versioned_handle<void>;
 
+class A {};
+class B : public A {};
+
 int main(int argc, char **argv) {
     test_suite suite;
 
@@ -111,6 +114,17 @@ int main(int argc, char **argv) {
 
         check(!(base != same_generation));
         check(base != invalid_generation);
+    });
+
+    suite.add_test("static_handle_cast", [] () {
+        using base_handle_type = versioned_handle<A>;
+        using subc_handle_type = versioned_handle<B>;
+
+        const auto base_handle = base_handle_type::make(1, 2);
+        const auto subc_handle = subc_handle_type::make(1, 2);
+        const base_handle_type converted_handle = static_handle_cast<A>(subc_handle);
+
+        equals(converted_handle, base_handle);
     });
 
     return suite.main(argc, argv);

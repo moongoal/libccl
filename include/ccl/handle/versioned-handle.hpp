@@ -109,6 +109,13 @@ namespace ccl {
             return hash<typename versioned_handle<HandleType>::underlying_type>{}(h.raw());
         }
     };
+
+    template<typename HandleTypeTo, typename HandleTypeFrom>
+    constexpr versioned_handle<HandleTypeTo> static_handle_cast(const versioned_handle<HandleTypeFrom> handle) {
+        static_assert(std::is_base_of_v<HandleTypeTo, HandleTypeFrom>);
+
+        return versioned_handle<HandleTypeTo>::make(handle.generation(), handle.value());
+    }
 }
 
 #endif // CCL_HANDLE_VERSIONED_HANDLE_HPP

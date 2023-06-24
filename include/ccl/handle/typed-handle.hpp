@@ -71,6 +71,13 @@ namespace ccl {
             return hash<handle_t>{}(h.value());
         }
     };
+
+    template<typename HandleTypeTo, typename HandleTypeFrom>
+    constexpr typed_handle<HandleTypeTo> static_handle_cast(const typed_handle<HandleTypeFrom> handle) {
+        static_assert(std::is_base_of_v<HandleTypeTo, HandleTypeFrom>);
+
+        return typed_handle<HandleTypeTo>{handle.value()};
+    }
 }
 
 #endif // CCL_HANDLE_TYPED_HANDLE_HPP

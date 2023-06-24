@@ -5,6 +5,9 @@ using namespace ccl;
 
 using generic_typed_handle = typed_handle<void>;
 
+class A {};
+class B : public A {};
+
 int main(int argc, char **argv) {
     test_suite suite;
 
@@ -98,6 +101,17 @@ int main(int argc, char **argv) {
 
         check(!(first != third));
         check(first != second);
+    });
+
+    suite.add_test("static_handle_cast", [] () {
+        using base_handle_type = typed_handle<A>;
+        using subc_handle_type = typed_handle<B>;
+
+        const auto base_handle = base_handle_type{1};
+        const auto subc_handle = subc_handle_type{1};
+        const base_handle_type converted_handle = static_handle_cast<A>(subc_handle);
+
+        equals(converted_handle, base_handle);
     });
 
     return suite.main(argc, argv);
