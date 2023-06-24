@@ -78,6 +78,11 @@ namespace ccl {
 
         return typed_handle<HandleTypeTo>{handle.value()};
     }
+
+    template<typename HandleTypeTo, typename HandleTypeFrom>
+    constexpr typed_handle<HandleTypeTo> reinterpret_handle_cast(const typed_handle<HandleTypeFrom> handle) {
+        return typed_handle<HandleTypeTo>{handle.value()};
+    }
 }
 
 #endif // CCL_HANDLE_TYPED_HANDLE_HPP

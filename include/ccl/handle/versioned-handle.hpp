@@ -116,6 +116,11 @@ namespace ccl {
 
         return versioned_handle<HandleTypeTo>::make(handle.generation(), handle.value());
     }
+
+    template<typename HandleTypeTo, typename HandleTypeFrom>
+    constexpr versioned_handle<HandleTypeTo> reinterpret_handle_cast(const versioned_handle<HandleTypeFrom> handle) {
+        return versioned_handle<HandleTypeTo>::make(handle.generation(), handle.value());
+    }
 }
 
 #endif // CCL_HANDLE_VERSIONED_HANDLE_HPP
