@@ -6,6 +6,7 @@
 #ifndef CCL_POOL_HPP
 #define CCL_POOL_HPP
 
+#include <functional>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>
@@ -39,6 +40,7 @@ namespace ccl {
             using allocator_type = Allocator;
             using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
             using handle_manager_type = handle_manager<T, HandleExpiryPolicy, allocator_type>;
+            using handle_object_callback = std::function<void(const handle_type, reference)>;
 
         private:
             handle_manager_type handle_manager;
@@ -146,6 +148,28 @@ namespace ccl {
                 CCL_THROW_IF(!handle_manager.is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()] = value;
+            }
+
+            /**
+             * Invoke a given callback for all acquired handles and items.
+             *
+             * @param callback The callback to invoke.
+             */
+            void for_each(const handle_object_callback callback) {
+                handle_manager.for_each([this, callback] (const handle_type handle) {
+                    callback(handle, get(handle));
+                });
+            }
+
+            /**
+             * Invoke a given callback for all acquired handles and items.
+             *
+             * @param callback The callback to invoke.
+             */
+            void for_each(const handle_object_callback callback) const {
+                handle_manager.for_each([this, callback] (const handle_type handle) {
+                    callback(handle, get(handle));
+                });
             }
     };
 }

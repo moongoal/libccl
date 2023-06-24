@@ -58,5 +58,26 @@ int main(int argc, char **argv) {
         check(!pool.is_valid_handle(handle));
     });
 
+    suite.add_test("for_each", [] () {
+        test_pool pool{5};
+        int count = 0;
+
+        const auto handle1 = pool.acquire();
+        const auto handle2 = pool.acquire();
+        const auto handle3 = pool.acquire();
+        pool.release(handle1);
+
+        pool.set(handle2, 1);
+        pool.set(handle3, 3);
+
+        pool.for_each([&count, handle2, handle3] (const auto handle, const int n) {
+            check(handle == handle2 || handle == handle3);
+
+            count += n;
+        });
+
+        equals(count, 4);
+    });
+
     return suite.main(argc, argv);
 }
