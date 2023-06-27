@@ -238,12 +238,12 @@ template<typename Map>
                 }
             }
 
-            constexpr void remove(const iterator where) {
+            constexpr void erase(const iterator where) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
                 if(where != end()) {
                     const auto& key = *where->first;
-                    const size_type index = static_cast<size_type>(*where->second);
+                    const size_type index = static_cast<size_type>(*where.index_iterator->second);
 
                     data.erase(data.begin() + index);
                     index_map.erase(key);
@@ -251,7 +251,7 @@ template<typename Map>
                 }
             }
 
-            constexpr void remove(const_key_reference key) {
+            constexpr void erase(const_key_reference key) {
                 const auto it = index_map.find(key);
 
                 if(it != index_map.end()) {

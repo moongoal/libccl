@@ -444,7 +444,7 @@ namespace ccl::ecs {
                     source_entity_index = entity_index;
                 }
 
-                entity_index_map.remove(entity_index_it);
+                entity_index_map.erase(entity_index_it);
             }
 
             /**

@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
         check(map.size() == 3);
     });
 
-    suite.add_test("remove", [] () {
+    suite.add_test("erase (key)", [] () {
         test_map<int, S> map;
 
         map.insert(1, { 1, 2.0 });
@@ -52,19 +52,34 @@ int main(int argc, char **argv) {
         map.insert(3, { 3, 3.0 });
         map.insert(3, { 3, 3.0 });
 
-        map.remove(2);
+        map.erase(2);
 
         check(map.size() == 2);
     });
 
-    suite.add_test("access after remove", [] () {
+    suite.add_test("erase (iterator)", [] () {
+        test_map<int, S> map;
+
+        map.insert(1, { 1, 2.0 });
+        map.insert(2, { 2, 3.0 });
+        map.insert(3, { 3, 3.0 });
+        map.insert(3, { 3, 3.0 });
+
+        auto it = map.find(2);
+
+        map.erase(it);
+
+        check(map.size() == 2);
+    });
+
+    suite.add_test("access after erase", [] () {
         test_map<int, S> map;
 
         map.insert(1, { 1, 2.0 });
         map.insert(2, { 2, 3.0 });
         map.insert(3, { 3, 3.0 });
 
-        map.remove(2);
+        map.erase(2);
 
         equals(map.at(3), S{ 3, 3.0 });
     });
