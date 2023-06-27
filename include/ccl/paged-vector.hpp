@@ -13,6 +13,7 @@
 #include <ccl/vector.hpp>
 #include <ccl/definitions.hpp>
 #include <ccl/type-traits.hpp>
+#include <ccl/either.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/concepts.hpp>
@@ -24,11 +25,11 @@ namespace ccl {
         using iterator_category = std::contiguous_iterator_tag;
         using iterator_concept = iterator_category;
         using difference_type = std::ptrdiff_t;
-        using value_type = typename Vector::value_type;
-        using pointer = typename Vector::pointer;
-        using reference = typename Vector::reference;
         using const_pointer = typename Vector::const_pointer;
         using const_reference = typename Vector::const_reference;
+        using value_type = either_or_t<const typename Vector::value_type, typename Vector::value_type, std::is_const_v<Vector>>;
+        using pointer = either_or_t<const_pointer, typename Vector::pointer, std::is_const_v<Vector>>;
+        using reference = either_or_t<const_reference, typename Vector::reference, std::is_const_v<Vector>>;
         using size_type = typename Vector::size_type;
         using vector_type = Vector;
 
@@ -52,11 +53,8 @@ namespace ccl {
             return *this;
         }
 
-        constexpr reference operator*() noexcept { return (*vector)[index]; }
-        constexpr pointer operator->() noexcept { return &(*vector)[index]; }
-
-        constexpr const_reference operator*() const noexcept { return (*vector)[index]; }
-        constexpr const_pointer operator->() const noexcept { return &(*vector)[index]; }
+        constexpr reference operator*() const noexcept { return (*vector)[index]; }
+        constexpr pointer operator->() const noexcept { return &(*vector)[index]; }
 
         constexpr paged_vector_iterator& operator +=(const difference_type n) noexcept {
             index += n;
@@ -503,6 +501,10 @@ namespace ccl {
                 return operator[](it.index);
             }
 
+            constexpr reference operator[](const const_iterator it) {
+                return operator[](it.index);
+            }
+
             constexpr const_reference operator[](const size_type index) const {
                 return get(index);
             }
@@ -568,16 +570,22 @@ namespace ccl {
                 std::uninitialized_copy(&value, &value + 1, &new_item);
             }
 
+            // template<typename ...Args>
+            // constexpr void emplace(Args&& ...args) {
+            //     const size_type old_size = _size;
+
+            //     reserve(size() + 1);
+            //     _size += 1;
+
+            //     reference new_item = get(old_size);
+            //     std::construct_at(&new_item, std::forward<Args>(args)...);
+            // }
+
             template<typename ...Args>
-            constexpr void emplace(Args&& ...args) {
-                const size_type old_size = _size;
+            constexpr reference emplace(iterator where, Args&& ...args) { return emplace_at(where, std::forward<Args>(args)...); }
 
-                reserve(size() + 1);
-                _size += 1;
-
-                reference new_item = get(old_size);
-                std::construct_at(&new_item, std::forward<Args>(args)...);
-            }
+            template<typename ...Args>
+            constexpr reference emplace_back(Args&& ...args) { return emplace_at(end(), std::forward<Args>(args)...); }
 
             constexpr void resize(const size_type new_size) {
                 const size_type current_size = size();

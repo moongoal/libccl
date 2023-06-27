@@ -151,7 +151,7 @@ namespace ccl::ecs {
                 }
 
                 virtual void emplace_empty() override {
-                    items.emplace();
+                    items.emplace_back();
                 }
 
                 virtual void resize(const std::size_t new_size) override {

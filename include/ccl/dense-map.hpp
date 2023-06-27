@@ -1,7 +1,7 @@
 /**
  * @file
  *
- * Sparse set.
+ * Dense map.
  */
 #ifndef CCL_DENSE_MAP_HPP
 #define CCL_DENSE_MAP_HPP
@@ -10,7 +10,7 @@
 #include <ccl/api.hpp>
 #include <ccl/type-traits.hpp>
 #include <ccl/hashtable.hpp>
-#include <ccl/vector.hpp>
+#include <ccl/paged-vector.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hash.hpp>
@@ -176,7 +176,7 @@ template<typename Map>
             using hash_function_type = Hash;
             using hash_type = hash_t;
             using size_type = uint32_t;
-            using data_vector_type = vector<V, allocator_type>;
+            using data_vector_type = paged_vector<V, V*, allocator_type>;
             using index_map_type = hashtable<K, size_type, hash_function_type, allocator_type>;
             using value_iterator = typename data_vector_type::iterator;
             using const_value_iterator = typename data_vector_type::const_iterator;

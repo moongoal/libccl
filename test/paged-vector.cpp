@@ -684,14 +684,14 @@ int main(int argc, char **argv) {
         });
     }, skip_if_exceptions_disabled);
 
-    suite.add_test("emplace", [] () {
+    suite.add_test("emplace_back", [] () {
         test_vector<dummy> v;
 
         v.push_back(dummy{1});
         v.push_back(dummy{2});
         v.push_back(dummy{3});
 
-        v.emplace(dummy{4});
+        v.emplace_back(dummy{4});
 
         check(v[0].value == 2);
         check(v[1].value == 3);
@@ -700,14 +700,14 @@ int main(int argc, char **argv) {
         check(v.size() == 4);
     });
 
-    suite.add_test("emplace page full", [] () {
+    suite.add_test("emplace_back page full", [] () {
         test_vector<dummy> v;
 
         for(std::size_t i = 0; i < test_vector<dummy>::page_size; ++i) {
             v.push_back(dummy{1});
         }
 
-        v.emplace(dummy{4});
+        v.emplace_back(dummy{4});
 
         equals(v.size(), test_vector<dummy>::page_size + 1);
         equals(v.capacity(), test_vector<dummy>::page_size * 2);
