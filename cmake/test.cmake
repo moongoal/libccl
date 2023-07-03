@@ -315,6 +315,11 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    TEST test_memory_pool test/memory-pool.cpp
+    COVERAGE include/ccl/memory-pool.hpp
+)
+
+add_ccl_test(
     TEST test_internal_optional_allocator test/internal/optional-allocator.cpp
     COVERAGE include/ccl/internal/optional-allocator.hpp
 )
