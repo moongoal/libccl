@@ -35,6 +35,8 @@
 #include <ccl/sparse-set.hpp>
 #include <ccl/type-traits.hpp>
 #include <ccl/either.hpp>
+#include <ccl/pool.hpp>
+#include <ccl/memory-pool.hpp>
 
 #include <ccl/memory/memory.hpp>
 #include <ccl/tables/tables.hpp>
