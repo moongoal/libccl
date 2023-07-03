@@ -41,5 +41,6 @@
 #include <ccl/memory/memory.hpp>
 #include <ccl/tables/tables.hpp>
 #include <ccl/ecs/registry.hpp>
+#include <ccl/pointer/pointer.hpp>
 
 #endif // CCL_HPP

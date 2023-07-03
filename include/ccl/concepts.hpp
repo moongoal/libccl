@@ -69,6 +69,17 @@ namespace ccl {
     concept streamable = requires(S s, T t) {
         requires streamable_in<T, S> && streamable_out<T, S>;
     };
+
+    /**
+     * A deleter type.
+     *
+     * @tparam D The deleter type.
+     * @tparam T The deleted type.
+     */
+    template<typename D, typename T>
+    concept deleter = requires(D &d, T * t) {
+        d(t);
+    };
 }
 
 #endif // CCL_CONCEPTS_HPP

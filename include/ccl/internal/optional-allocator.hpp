@@ -13,6 +13,7 @@
 #include <ccl/api.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/concepts.hpp>
+#include <ccl/util.hpp>
 
 namespace ccl::internal {
     template<typename Allocator, bool IsAllocatorEmpty = std::is_empty_v<Allocator>>
@@ -21,14 +22,20 @@ namespace ccl::internal {
 
         using allocator_type = Allocator;
 
-            ~with_optional_allocator() = default;
+        ~with_optional_allocator() = default;
+
         public:
             constexpr with_optional_allocator(allocator_type * const allocator = nullptr) noexcept : allocator{allocator ? allocator : get_default_allocator<allocator_type>()} {}
             constexpr with_optional_allocator(const with_optional_allocator &) = default;
             constexpr with_optional_allocator(with_optional_allocator &&) = default;
 
             constexpr with_optional_allocator& operator =(const with_optional_allocator &) noexcept = default;
-            constexpr with_optional_allocator& operator =(with_optional_allocator &&) noexcept = default;
+
+            constexpr with_optional_allocator& operator =(with_optional_allocator &&other) noexcept {
+                swap(other);
+
+                return *this;
+            }
 
             constexpr with_optional_allocator& operator =(allocator_type * const allocator) noexcept {
                 this->allocator = allocator;
@@ -38,6 +45,10 @@ namespace ccl::internal {
 
             allocator_type *get_allocator() const noexcept { return allocator; }
             static constexpr bool is_allocator_stateless() noexcept { return false; }
+
+            constexpr void swap(with_optional_allocator & other) noexcept {
+                ccl::swap(allocator, other.allocator);
+            }
 
         private:
             allocator_type *allocator = nullptr;
