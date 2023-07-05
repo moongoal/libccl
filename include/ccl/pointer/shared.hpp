@@ -126,10 +126,8 @@ namespace ccl {
         private:
             mutable ctrl_block_type *ctrl_block = nullptr;
 
-            static constexpr bool is_array = std::is_array_v<T>;
-
             static void default_deleter(const pointer ptr) {
-                if constexpr(is_array) {
+                if constexpr(base_ptr<T>::is_array) {
                     delete[] ptr;
                 } else {
                     delete ptr;

@@ -8,6 +8,7 @@
 #define CCL_PAGED_VECTOR_HPP
 
 #include <memory>
+#include <span>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/vector.hpp>
@@ -638,8 +639,8 @@ namespace ccl {
                 }
             }
 
-            constexpr page_vector& pages() { return _pages; }
-            constexpr const page_vector& pages() const { return _pages; }
+            constexpr std::span<pointer> pages() { return { _pages.data(), _pages.size() }; }
+            constexpr std::span<const pointer> pages() const { return { _pages.data(), _pages.size() }; }
 
             template<typename ...Args>
             constexpr reference emplace_at(iterator where, Args&& ...args) {

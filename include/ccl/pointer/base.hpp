@@ -17,6 +17,8 @@ namespace ccl {
             pointer ptr;
 
         protected:
+            static constexpr bool is_array = std::is_array_v<T>;
+
             void set(const pointer value) { ptr = value; }
 
             base_ptr() noexcept : ptr{nullptr} {}

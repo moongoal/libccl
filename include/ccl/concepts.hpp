@@ -80,6 +80,14 @@ namespace ccl {
     concept deleter = requires(D &d, T * t) {
         d(t);
     };
+
+    /**
+     * A singleton objct.
+     */
+    template<typename T>
+    concept singleton = requires() {
+        { T::instance() } -> std::convertible_to<T&>;
+    };
 }
 
 #endif // CCL_CONCEPTS_HPP
