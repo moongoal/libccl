@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
         generic_versioned_handle h;
 
         equals(h.generation(), 0);
-        equals(h.value(), 0);
+        equals(h.value(), generic_versioned_handle::invalid_handle_value);
     });
 
     suite.add_test("ctor (copy)", [] () {
@@ -137,6 +137,14 @@ int main(int argc, char **argv) {
         const base_handle_type converted_handle = reinterpret_handle_cast<A>(subc_handle);
 
         equals(converted_handle, base_handle);
+    });
+
+    suite.add_test("is_null", [] () {
+        generic_versioned_handle null_handle;
+        generic_versioned_handle non_null_handle{0};
+
+        check(null_handle.is_null());
+        check(!non_null_handle.is_null());
     });
 
     return suite.main(argc, argv);

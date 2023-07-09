@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
          */
         const size_t total_iterations =
             test_recycle_handle_manager::vector_type::page_size
-            * (test_recycle_handle_manager::handle_type::max_generation + 1);
+            * test_recycle_handle_manager::handle_type::max_generation;
 
         for(size_t i = 0; i < total_iterations; ++i) {
             manager.release(manager.acquire());

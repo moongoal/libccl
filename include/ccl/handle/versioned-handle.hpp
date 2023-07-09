@@ -9,13 +9,9 @@
 #include <ccl/api.hpp>
 #include <ccl/packed-integer.hpp>
 #include <ccl/hash.hpp>
+#include <ccl/handle/raw-handle.hpp>
 
 namespace ccl {
-    /**
-     * A raw, numeric handle type.
-     */
-    using handle_t = uint32_t;
-
     /**
      * A handle possessing a value and a generation.
      *
@@ -38,6 +34,7 @@ namespace ccl {
 
             static constexpr handle_t max_generation = underlying_type::high_part_max;
             static constexpr handle_t max_value = underlying_type::low_part_max;
+            static constexpr handle_t invalid_handle_value = max_value;
 
             constexpr versioned_handle& operator=(const versioned_handle& other) {
                 underlying_type::operator=(other);
@@ -45,13 +42,15 @@ namespace ccl {
                 return *this;
             }
 
-            constexpr versioned_handle() = default;
+            constexpr versioned_handle() : underlying_type{invalid_handle_value} {}
+
             constexpr versioned_handle(const versioned_handle&) = default;
             explicit constexpr versioned_handle(const handle_t raw) : underlying_type{raw} {}
 
             constexpr auto generation() const { return high(); }
             constexpr auto value() const { return low(); }
             constexpr auto raw() const { return underlying_type::get(); }
+            constexpr bool is_null() const { return value() == invalid_handle_value; }
 
             /**
              * Make a handle from its components.

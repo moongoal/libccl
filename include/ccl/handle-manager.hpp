@@ -237,10 +237,16 @@ namespace ccl {
                 const auto generation = handle.generation();
 
                 if constexpr(expiry_policy == handle_expiry_policy::recycle) {
-                    handle_slots[index] = ((generation + 1) & handle_type::max_generation) | value_unused_mask;
+                    handle_slots[index] = choose(
+                        generation + 1,
+                        0,
+                        generation < handle_type::max_generation - 1
+                    ); // Avoid invalid handle value
                 } else {
-                    handle_slots[index] = (generation + 1) | value_unused_mask;
+                    handle_slots[index] = generation + 1;
                 }
+
+                handle_slots[index] |= value_unused_mask;
             }
 
             /**

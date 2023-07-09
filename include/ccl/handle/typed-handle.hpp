@@ -9,6 +9,7 @@
 #include <ccl/api.hpp>
 #include <ccl/packed-integer.hpp>
 #include <ccl/hash.hpp>
+#include <ccl/handle/raw-handle.hpp>
 
 namespace ccl {
     /**
@@ -27,6 +28,7 @@ namespace ccl {
             using object_type = ObjectType;
 
             static constexpr handle_t max_value = ~static_cast<handle_t>(0);
+            static constexpr handle_t invalid_handle_value = max_value;
 
         private:
             handle_t _value;
@@ -38,6 +40,7 @@ namespace ccl {
             constexpr typed_handle& operator=(const typed_handle& other) = default;
 
             constexpr auto value() const { return _value; }
+            constexpr bool is_null() const { return _value == invalid_handle_value; }
     };
 
     template<typename T>
