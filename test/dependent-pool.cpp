@@ -4,7 +4,7 @@
 
 using namespace ccl;
 
-using test_primary_pool = pool<int, handle_expiry_policy::recycle, counting_test_allocator>;
+using test_primary_pool = pool<int, handle_expiry_policy::recycle, versioned_handle<int>, counting_test_allocator>;
 using test_dependent_pool = dependent_pool<double, test_primary_pool, counting_test_allocator>;
 
 int main(int argc, char **argv) {

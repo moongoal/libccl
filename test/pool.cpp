@@ -4,7 +4,7 @@
 
 using namespace ccl;
 
-using test_pool = pool<int, handle_expiry_policy::recycle, counting_test_allocator>;
+using test_pool = pool<int, handle_expiry_policy::recycle, versioned_handle<int>, counting_test_allocator>;
 
 int main(int argc, char **argv) {
     test_suite suite;

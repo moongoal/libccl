@@ -28,6 +28,7 @@ namespace ccl {
     template<
         typename T,
         handle_expiry_policy HandleExpiryPolicy,
+        typename Handle = versioned_handle<T>,
         typed_allocator<T> Allocator = allocator
     > class pool {
         public:
@@ -36,7 +37,7 @@ namespace ccl {
             using reference = T&;
             using const_reference = const T&;
             using const_pointer = const T*;
-            using handle_type = versioned_handle<T>;
+            using handle_type = Handle;
             using allocator_type = Allocator;
             using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
             using handle_manager_type = handle_manager<T, HandleExpiryPolicy, allocator_type>;
