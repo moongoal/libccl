@@ -25,42 +25,47 @@ namespace ccl {
      * @tparam ObjectType The type of object this handle represents.
      */
     template<typename ObjectType>
-    class versioned_handle : protected packed_integer<handle_t, CCL_HANDLE_VALUE_WIDTH> {
+    class versioned_handle {
         public:
             using underlying_type = packed_integer<handle_t, CCL_HANDLE_VALUE_WIDTH>;
+
+        private:
+            underlying_type _value;
+
+        public:
             using object_type = ObjectType;
-            using underlying_type::value_type;
+            using value_type = underlying_type::value_type;
 
             static constexpr handle_t max_generation = underlying_type::high_part_max;
             static constexpr handle_t max_value = underlying_type::low_part_max;
             static constexpr handle_t invalid_handle_value = max_value;
 
             constexpr versioned_handle& operator=(const versioned_handle& other) {
-                underlying_type::operator=(other);
+                _value = other._value;
 
                 return *this;
             }
 
             constexpr versioned_handle& operator=(versioned_handle&& other) {
-                underlying_type::operator=(std::move(other));
+                _value = std::move(other._value);
 
                 return *this;
             }
 
-            constexpr versioned_handle() : underlying_type{invalid_handle_value} {}
+            constexpr versioned_handle() : _value{invalid_handle_value} {}
 
             constexpr versioned_handle(const versioned_handle&) = default;
 
-            constexpr versioned_handle(versioned_handle&& other) : underlying_type{invalid_handle_value} {
+            constexpr versioned_handle(versioned_handle&& other) : _value{invalid_handle_value} {
                 swap(*this, other);
 
             }
 
-            explicit constexpr versioned_handle(const handle_t raw) : underlying_type{raw} {}
+            explicit constexpr versioned_handle(const handle_t raw) : _value{raw} {}
 
-            constexpr auto generation() const { return high(); }
-            constexpr auto value() const { return low(); }
-            constexpr auto raw() const { return underlying_type::get(); }
+            constexpr auto generation() const { return _value.high(); }
+            constexpr auto value() const { return _value.low(); }
+            constexpr auto raw() const { return _value.get(); }
             constexpr bool is_null() const { return value() == invalid_handle_value; }
 
             /**
@@ -77,7 +82,7 @@ namespace ccl {
             }
 
             private:
-                constexpr versioned_handle(const underlying_type value) : underlying_type{value} {}
+                constexpr versioned_handle(const underlying_type value) : _value{value} {}
     };
 
     template<typename T>
