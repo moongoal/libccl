@@ -88,7 +88,7 @@ namespace ccl {
              *
              * @param handle The handle of the item to release.
              */
-            void release(const handle_type handle) {
+            void release(const handle_type &handle) {
                 set(handle, default_value);
                 handle_manager.release(handle);
             }
@@ -111,7 +111,7 @@ namespace ccl {
             /**
              * @see handle_manager::is_valid_handle()
              */
-            bool is_valid_handle(const handle_type handle) const { return handle_manager.is_valid_handle(handle); }
+            bool is_valid_handle(const handle_type &handle) const { return handle_manager.is_valid_handle(handle); }
 
             /**
              * Get an item from the pool. An old (used in the past but free now) handle
@@ -123,7 +123,7 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            CCLNODISCARD reference get(const handle_type handle) {
+            CCLNODISCARD reference get(const handle_type &handle) {
                 return data[handle.value()];
             }
 
@@ -136,7 +136,7 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            CCLNODISCARD const_reference get(const handle_type handle) const {
+            CCLNODISCARD const_reference get(const handle_type &handle) const {
                 return data[handle.value()];
             }
 
@@ -148,7 +148,7 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            reference set(const handle_type handle, const T& value) {
+            reference set(const handle_type &handle, const T& value) {
                 CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()] = value;
@@ -160,7 +160,7 @@ namespace ccl {
              * @param callback The callback to invoke.
              */
             void for_each(const handle_object_callback callback) {
-                handle_manager.for_each([this, callback] (const handle_type handle) {
+                handle_manager.for_each([this, callback] (const handle_type &handle) {
                     callback(handle, get(handle));
                 });
             }
@@ -171,7 +171,7 @@ namespace ccl {
              * @param callback The callback to invoke.
              */
             void for_each(const handle_object_callback callback) const {
-                handle_manager.for_each([this, callback] (const handle_type handle) {
+                handle_manager.for_each([this, callback] (const handle_type &handle) {
                     callback(handle, get(handle));
                 });
             }

@@ -69,7 +69,7 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            reference set(const handle_type handle, const T& value) {
+            reference set(const handle_type &handle, const T& value) {
                 CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()] = value;
@@ -84,7 +84,7 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            CCLNODISCARD const_reference get(const handle_type handle) const {
+            CCLNODISCARD const_reference get(const handle_type &handle) const {
                 return data[handle.value()];
             }
 
@@ -98,7 +98,7 @@ namespace ccl {
              *
              * @return A reference to the item.
              */
-            CCLNODISCARD reference get(const handle_type handle) {
+            CCLNODISCARD reference get(const handle_type &handle) {
                 return data[handle.value()];
             }
 
@@ -112,7 +112,7 @@ namespace ccl {
             /**
              * @see handle_manager::is_valid_handle()
              */
-            bool is_valid_handle(const handle_type handle) const { return primary_pool->is_valid_handle(handle); }
+            bool is_valid_handle(const handle_type &handle) const { return primary_pool->is_valid_handle(handle); }
 
             /**
              * Register a handle coming from the primary pool against this pool to
