@@ -42,9 +42,21 @@ namespace ccl {
                 return *this;
             }
 
+            constexpr versioned_handle& operator=(versioned_handle&& other) {
+                underlying_type::operator=(std::move(other));
+
+                return *this;
+            }
+
             constexpr versioned_handle() : underlying_type{invalid_handle_value} {}
 
             constexpr versioned_handle(const versioned_handle&) = default;
+
+            constexpr versioned_handle(versioned_handle&& other) : underlying_type{invalid_handle_value} {
+                swap(*this, other);
+                
+            }
+
             explicit constexpr versioned_handle(const handle_t raw) : underlying_type{raw} {}
 
             constexpr auto generation() const { return high(); }

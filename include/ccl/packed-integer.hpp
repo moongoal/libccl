@@ -63,6 +63,7 @@ namespace ccl {
 
             constexpr operator value_type() const { return value; }
             constexpr packed_integer& operator =(const packed_integer &) = default;
+            constexpr packed_integer& operator =(packed_integer &&) = default;
 
             constexpr packed_integer& operator =(const value_type value) {
                 this->value = value;

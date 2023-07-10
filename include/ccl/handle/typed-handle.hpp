@@ -38,6 +38,7 @@ namespace ccl {
             constexpr typed_handle(const typed_handle&) = default;
             explicit constexpr typed_handle(const handle_t raw) : _value{raw} {}
             constexpr typed_handle& operator=(const typed_handle& other) = default;
+            constexpr typed_handle& operator=(typed_handle&& other) = default;
 
             constexpr auto value() const { return _value; }
             constexpr bool is_null() const { return _value == invalid_handle_value; }
