@@ -36,6 +36,7 @@ Unstable: 🔴
 |Deque|🔴
 |Pool|🔴
 |Memory Pool|🔴
+|Dependent Pool|🔴
 |Shared Pointer|🔴
 
 ## Building
