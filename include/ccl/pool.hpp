@@ -73,7 +73,10 @@ namespace ccl {
             CCLNODISCARD handle_type acquire() {
                 const auto handle = handle_manager.acquire();
 
-                data.resize(handle.value() + 1);
+                if(handle.value() >= data.size()) {
+                    data.resize(handle.value() + 1);
+                }
+
                 set(handle, default_value);
 
                 return handle;
@@ -145,7 +148,7 @@ namespace ccl {
              * @return A reference to the item.
              */
             reference set(const handle_type handle, const T& value) {
-                CCL_THROW_IF(!handle_manager.is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()] = value;
             }

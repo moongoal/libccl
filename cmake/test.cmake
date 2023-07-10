@@ -262,6 +262,11 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    TEST test_dependent_pool test/dependent-pool.cpp
+    COVERAGE include/ccl/dependent-pool.hpp
+)
+
+add_ccl_test(
     TEST test_ecs_component test/ecs/component.cpp
     COVERAGE include/ccl/ecs/component.hpp
 )
