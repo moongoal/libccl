@@ -74,7 +74,7 @@ namespace ccl {
             using allocator_type = Allocator;
             using value_type = typename handle_type::value_type;
             using vector_type = paged_vector<value_type, value_type*, allocator_type>;
-            using handle_callback = std::function<void(const handle_type)>;
+            using handle_callback = std::function<void(const handle_type&)>;
 
             static constexpr value_type value_unused_mask = handle_type::max_generation + 1;
             static constexpr handle_expiry_policy expiry_policy = ExpiryPolicy;
