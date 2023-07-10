@@ -30,7 +30,6 @@ namespace ccl {
             using underlying_type = packed_integer<handle_t, CCL_HANDLE_VALUE_WIDTH>;
             using object_type = ObjectType;
             using underlying_type::value_type;
-            using packed_integer::operator typename underlying_type::value_type;
 
             static constexpr handle_t max_generation = underlying_type::high_part_max;
             static constexpr handle_t max_value = underlying_type::low_part_max;
@@ -54,7 +53,7 @@ namespace ccl {
 
             constexpr versioned_handle(versioned_handle&& other) : underlying_type{invalid_handle_value} {
                 swap(*this, other);
-                
+
             }
 
             explicit constexpr versioned_handle(const handle_t raw) : underlying_type{raw} {}

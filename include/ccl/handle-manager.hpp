@@ -40,11 +40,11 @@ namespace ccl {
      * An allocator suitable for managing handle slot memory.
      *
      * @tparam Allocator The allocator type.
-     * @tparam ObjectType The handle type of the manager.
+     * @tparam HandleType The handle type of the manager.
      */
-    template<typename Allocator, typename ObjectType>
+    template<typename Allocator, typename HandleType>
     concept handle_manager_slot_allocator = requires(Allocator allocator) {
-        typed_allocator<Allocator, typename versioned_handle<ObjectType>::value_type>;
+        typed_allocator<Allocator, typename HandleType::value_type>;
     };
 
     /**
@@ -61,16 +61,18 @@ namespace ccl {
      *
      * @tparam ObjectType The type of object handles acquired via this manager represent.
      * @tparam ExpiryPolicy Policy to deal with expired handles.
+     * @tparam Handle The handle type.
      * @tparam Allocator The allocator.
      */
     template<
         typename ObjectType,
         handle_expiry_policy ExpiryPolicy = default_handle_manager_expiry_policy,
-        handle_manager_slot_allocator<ObjectType> Allocator = allocator
+        typename Handle = versioned_handle<ObjectType>,
+        handle_manager_slot_allocator<Handle> Allocator = allocator
     > class handle_manager {
         public:
             using object_type = ObjectType;
-            using handle_type = versioned_handle<object_type>;
+            using handle_type = Handle;
             using allocator_type = Allocator;
             using value_type = typename handle_type::value_type;
             using vector_type = paged_vector<value_type, value_type*, allocator_type>;

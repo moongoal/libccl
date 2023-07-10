@@ -40,7 +40,7 @@ namespace ccl {
             using handle_type = Handle;
             using allocator_type = Allocator;
             using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
-            using handle_manager_type = handle_manager<T, HandleExpiryPolicy, allocator_type>;
+            using handle_manager_type = handle_manager<T, HandleExpiryPolicy, handle_type, allocator_type>;
             using handle_object_callback = std::function<void(const handle_type, reference)>;
 
         private:

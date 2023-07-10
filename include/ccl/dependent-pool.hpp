@@ -110,7 +110,7 @@ namespace ccl {
             }
 
             /**
-             * @see handle_manager::is_valid_handle()
+             * @see pool::is_valid_handle()
              */
             bool is_valid_handle(const handle_type &handle) const { return primary_pool->is_valid_handle(handle); }
 
