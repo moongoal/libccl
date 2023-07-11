@@ -47,7 +47,6 @@ namespace ccl {
                 const primary_pool_type &primary_pool,
                 const_reference default_value = T{},
                 allocator_type * const allocator = nullptr
-
             ) : data{allocator},
                 default_value{default_value},
                 primary_pool{&primary_pool}
@@ -107,6 +106,15 @@ namespace ccl {
              */
             void reset() {
                 std::fill(data.begin(), data.end(), default_value);
+            }
+
+            /**
+             * Reset a single item.
+             *
+             * @param handle The item handle.
+             */
+            void reset(const handle_type &handle) {
+                set(handle, default_value);
             }
 
             /**
