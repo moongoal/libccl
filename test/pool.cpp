@@ -41,21 +41,21 @@ int main(int argc, char **argv) {
         equals(pool.get(handle2), 10);
     });
 
-    suite.add_test("is_valid_handle", [] () {
+    suite.add_test("is_valid", [] () {
         test_pool pool{9};
 
         const auto handle = pool.acquire();
 
-        check(pool.is_valid_handle(handle));
+        check(pool.is_valid(handle));
     });
 
-    suite.add_test("is_valid_handle (invalid)", [] () {
+    suite.add_test("is_valid (invalid)", [] () {
         test_pool pool{9};
 
         const auto handle = pool.acquire();
         pool.release(handle);
 
-        check(!pool.is_valid_handle(handle));
+        check(!pool.is_valid(handle));
     });
 
     suite.add_test("for_each", [] () {

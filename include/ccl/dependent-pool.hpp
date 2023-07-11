@@ -89,7 +89,7 @@ namespace ccl {
              * @return A reference to the item.
              */
             reference set_unsafe(const handle_type &handle, const T& value) {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid(handle), std::invalid_argument{"Invalid handle."});
                 CCL_THROW_IF(handle.value() >= data.size(), std::invalid_argument{"Dependent handle slot not initialised."});
 
                 return data[handle.value()] = value;
@@ -105,7 +105,7 @@ namespace ccl {
              * @return A reference to the item.
              */
             CCLNODISCARD const_reference get(const handle_type &handle) const {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()];
             }
@@ -121,7 +121,7 @@ namespace ccl {
              * @return A reference to the item.
              */
             CCLNODISCARD reference get(const handle_type &handle) {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()];
             }
@@ -144,9 +144,9 @@ namespace ccl {
             }
 
             /**
-             * @see pool::is_valid_handle()
+             * @see pool::is_valid()
              */
-            bool is_valid_handle(const handle_type &handle) const { return primary_pool->is_valid_handle(handle); }
+            bool is_valid(const handle_type &handle) const { return primary_pool->is_valid(handle); }
     };
 }
 

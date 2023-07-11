@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         equals(handle1, handle2);
     });
 
-    suite.add_test("is_valid_handle", []() {
+    suite.add_test("is_valid", []() {
         test_recycle_handle_manager manager;
 
         const auto handle1 = manager.acquire();
@@ -66,8 +66,8 @@ int main(int argc, char **argv) {
 
         manager.release(handle1);
 
-        check(!manager.is_valid_handle(handle1));
-        check(manager.is_valid_handle(handle2));
+        check(!manager.is_valid(handle1));
+        check(manager.is_valid(handle2));
     });
 
     suite.add_test("handle expiry (recycle)", []() {

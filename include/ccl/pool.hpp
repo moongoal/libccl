@@ -109,9 +109,9 @@ namespace ccl {
             }
 
             /**
-             * @see handle_manager::is_valid_handle()
+             * @see handle_manager::is_valid()
              */
-            bool is_valid_handle(const handle_type &handle) const { return handle_manager.is_valid_handle(handle); }
+            bool is_valid(const handle_type &handle) const { return handle_manager.is_valid(handle); }
 
             /**
              * Get an item from the pool. An old (used in the past but free now) handle
@@ -149,7 +149,7 @@ namespace ccl {
              * @return A reference to the item.
              */
             reference set(const handle_type &handle, const T& value) {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid(handle), std::invalid_argument{"Invalid handle."});
 
                 return data[handle.value()] = value;
             }

@@ -210,7 +210,7 @@ namespace ccl {
              *
              * @return True if the handle is valid, false if it's invalid.
              */
-            bool is_valid_handle(const handle_type handle) const {
+            bool is_valid(const handle_type handle) const {
                 const auto index = handle.value();
                 const auto generation = handle.generation();
 
@@ -233,7 +233,7 @@ namespace ccl {
              * @param handle The handle to release.
              */
             void release(const handle_type handle) {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(!is_valid(handle), std::invalid_argument{"Invalid handle."});
 
                 const auto index = handle.value();
                 const auto generation = handle.generation();
