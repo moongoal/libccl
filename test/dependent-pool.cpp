@@ -17,9 +17,6 @@ int main(int argc, char **argv) {
         const auto handle = primary_pool.acquire();
         const auto handle2 = primary_pool.acquire();
 
-        pool.populate(handle);
-        pool.populate(handle2);
-
         pool.set(handle, 5.2);
         pool.set(handle2, 10);
 
@@ -46,18 +43,40 @@ int main(int argc, char **argv) {
         check(!pool.is_valid_handle(handle));
     });
 
-    suite.add_test("populate", [] () {
+    suite.add_test("set_unsafe", [] () {
         test_primary_pool primary_pool{9};
         test_dependent_pool pool{primary_pool, 1.0};
 
         const auto handle = primary_pool.acquire();
-        const auto handle2 = primary_pool.acquire();
 
-        pool.populate(handle);
-        pool.populate(handle2, 10);
+        pool.set(handle, 3.0);
+        pool.set_unsafe(handle, 2.0);
+
+        equals(pool.get(handle), 2.0);
+    });
+
+    suite.add_test("reset (handle)", [] () {
+        test_primary_pool primary_pool{9};
+        test_dependent_pool pool{primary_pool, 1.0};
+
+        const auto handle = primary_pool.acquire();
+
+        pool.set(handle, 3.0);
+        pool.reset(handle);
 
         equals(pool.get(handle), 1.0);
-        equals(pool.get(handle2), 10);
+    });
+
+    suite.add_test("reset (all)", [] () {
+        test_primary_pool primary_pool{9};
+        test_dependent_pool pool{primary_pool, 1.0};
+
+        const auto handle = primary_pool.acquire();
+
+        pool.set(handle, 3.0);
+        pool.reset();
+
+        equals(pool.get(handle), 1.0);
     });
 
     return suite.main(argc, argv);

@@ -69,7 +69,28 @@ namespace ccl {
              * @return A reference to the item.
              */
             reference set(const handle_type &handle, const T& value) {
+                if(handle.value() >= data.size()) {
+                    data.resize(handle.value() + 1);
+                }
+
+                return set_unsafe(handle, value);
+            }
+
+            /**
+             * Unsafely set the value for an item from the pool. This function does not check
+             * for or extend the available storage. It can be used to set values in critical
+             * paths where storage presence was already ensured by calling `set()`.
+             *
+             * Calling this function before setting a value is undefined behaviour.
+             *
+             * @param handle The handle of the item to get.
+             * @param value The new value to set.
+             *
+             * @return A reference to the item.
+             */
+            reference set_unsafe(const handle_type &handle, const T& value) {
                 CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+                CCL_THROW_IF(handle.value() >= data.size(), std::invalid_argument{"Dependent handle slot not initialised."});
 
                 return data[handle.value()] = value;
             }
@@ -84,6 +105,8 @@ namespace ccl {
              * @return A reference to the item.
              */
             CCLNODISCARD const_reference get(const handle_type &handle) const {
+                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+
                 return data[handle.value()];
             }
 
@@ -98,6 +121,8 @@ namespace ccl {
              * @return A reference to the item.
              */
             CCLNODISCARD reference get(const handle_type &handle) {
+                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
+
                 return data[handle.value()];
             }
 
@@ -109,57 +134,19 @@ namespace ccl {
             }
 
             /**
-             * Reset a single item.
+             * Reset a single item. The item must have been previously
+             * `set()`.
              *
              * @param handle The item handle.
              */
             void reset(const handle_type &handle) {
-                set(handle, default_value);
+                set_unsafe(handle, default_value);
             }
 
             /**
              * @see pool::is_valid_handle()
              */
             bool is_valid_handle(const handle_type &handle) const { return primary_pool->is_valid_handle(handle); }
-
-            /**
-             * Register a handle coming from the primary pool against this pool to
-             * ensure its value is allocated and initialised. This function must be called
-             * only once, when the handle is first acquired.
-             *
-             * @param handle The handle to populate the data for.
-             *
-             * @return A reference to the new value.
-             */
-            reference populate(const handle_type handle) {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
-
-                if(handle.value() >= data.size()) {
-                    data.resize(handle.value() + 1);
-                }
-
-                return set(handle, default_value);
-            }
-
-            /**
-             * Register a handle coming from the primary pool against this pool to
-             * ensure its value is allocated and initialised. This function must be called
-             * only once, when the handle is first acquired.
-             *
-             * @param handle The handle to populate the data for.
-             * @param initial_value The initial value to associate with the handle.
-             *
-             * @return A reference to the new value.
-             */
-            reference populate(const handle_type handle, const_reference initial_value) {
-                CCL_THROW_IF(!is_valid_handle(handle), std::invalid_argument{"Invalid handle."});
-
-                if(handle.value() >= data.size()) {
-                    data.resize(handle.value() + 1);
-                }
-
-                return set(handle, initial_value);
-            }
     };
 }
 
