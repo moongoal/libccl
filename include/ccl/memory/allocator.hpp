@@ -131,6 +131,20 @@ namespace ccl {
             void deallocate(void * const ptr);
 
             /**
+             * Free memory.
+             *
+             * @param ptr A pointer allocated with this allocator.
+             */
+            template<typename T>
+            void deallocate(T * const ptr) {
+                deallocate(
+                    reinterpret_cast<void*>(
+                        const_cast<std::decay_t<T>*>(ptr)
+                    )
+                );
+            }
+
+            /**
              * Return a boolean value stating whether the allocator owns
              * the memory represented by the pointer.
              *
