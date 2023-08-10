@@ -349,6 +349,22 @@ namespace ccl {
         a = b;
         b = temp;
     }
+
+    /**
+     * Bitwise-and all arguments.
+     */
+    template<typename ...Args>
+    constexpr bool and_(Args&& ...args) noexcept {
+        return (static_cast<uint64_t>(args) & ...);
+    }
+
+    /**
+     * Bitwise-or all arguments.
+     */
+    template<typename ...Args>
+    constexpr bool or_(Args&& ...args) noexcept {
+        return (static_cast<uint64_t>(args) | ...);
+    }
 }
 
 #endif // CCL_UTIL_HPP

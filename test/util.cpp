@@ -172,5 +172,15 @@ int main(int argc, char ** argv) {
         equals(clamp(1, -5, 0), 0); // Clamped to max
     });
 
+    suite.add_test("and", [] () {
+        equals(and_(true, false, true), false);
+        equals(and_(true, true), true);
+    });
+
+    suite.add_test("or", [] () {
+        equals(or_(true, false, true), true);
+        equals(or_(true, true), true);
+    });
+
     return suite.main(argc, argv);
 }
