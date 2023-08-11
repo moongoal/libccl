@@ -266,6 +266,20 @@ namespace ccl {
     }
 
     /**
+     * Align backwards a size to some alignment constraint.
+     *
+     * @param orig_size The original size.
+     * @param alignment The alignment constraint - must be a power of 2.
+     *
+     * @return The aligned size. Backwards-aligned sizes are always <= than `orig_size`.
+     */
+    constexpr std::size_t align_back_size(const std::size_t orig_size, const std::size_t alignment) noexcept {
+        CCL_ASSERT(is_power_2(alignment));
+
+        return orig_size & ~(alignment - 1);
+    }
+
+    /**
      * Align an address to some alignment constraint.
      *
      * @param orig_address The address to align.
@@ -281,6 +295,21 @@ namespace ccl {
         uintptr_t const mask = alignment - 1;
 
         return (T*)((int_addr + mask) & ~mask);
+    }
+
+    /**
+     * Align an address backwards to some alignment constraint.
+     *
+     * @param orig_address The address to align.
+     * @param alignment The alignment constraint - must be a power of 2.
+     *
+     * @return The aligned pointer. Backwards-aligned addresses are always <= than `orig_address`.
+     */
+    template<typename T>
+    constexpr T* align_back_address(const T* const orig_address, const uintptr_t alignment) noexcept {
+        CCL_ASSERT(is_power_2(alignment));
+
+        return reinterpret_cast<T*>((uintptr_t)(orig_address) & ~((uintptr_t)alignment - 1));
     }
 
     /**
