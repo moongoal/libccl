@@ -24,13 +24,15 @@
 namespace ccl {
     template<
         typename T,
-        typed_allocator<T> Allocator = allocator
+        typed_allocator<T> Allocator = allocator,
+        allocation_flags AllocationFlags = 0
     >
     class vector : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         struct value_init_tag_t {};
         static constexpr value_init_tag_t value_init_tag{};
+        static constexpr allocation_flags allocation_flags = AllocationFlags;
 
         public:
             using size_type = std::size_t;
@@ -170,7 +172,7 @@ namespace ccl {
             constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity > _capacity) {
                     const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity, allocation_flags);
 
                     if(_data) {
                         std::uninitialized_move(begin(), end(), new_data);
@@ -185,7 +187,7 @@ namespace ccl {
             constexpr void shrink_to_fit() {
                 if(_size > 0) {
                     const size_type new_capacity = increase_capacity<decltype(_capacity)>(1, _size);
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(new_capacity);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(new_capacity, allocation_flags);
 
                     if(_data) {
                         std::uninitialized_move(begin(), end(), new_data);

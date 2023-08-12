@@ -143,11 +143,11 @@ namespace ccl {
         return paged_vector_iterator<Args...>{*it.vector, n};
     }
 
-    template<typename T, typename Ptr, typed_allocator<T> Allocator>
+    template<typename T, typename Ptr, typed_allocator<T> Allocator, allocation_flags AllocationFlags>
     struct page_cloner {};
 
-    template<typename T, typed_allocator<T> Allocator>
-    struct page_cloner<T, T*, Allocator> : public internal::with_optional_allocator<Allocator> {
+    template<typename T, typed_allocator<T> Allocator, allocation_flags AllocationFlags>
+    struct page_cloner<T, T*, Allocator, AllocationFlags> : public internal::with_optional_allocator<Allocator> {
         using value_type = T;
         using pointer = T*;
         using const_pointer = const T*;
@@ -167,7 +167,7 @@ namespace ccl {
                 CCL_THROW_IF(!page, std::invalid_argument{"Page must not be null."});
                 CCL_THROW_IF(!page_size, std::invalid_argument{"Page size must not be 0."});
 
-                const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size);
+                const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size, AllocationFlags);
 
                 std::uninitialized_copy(page, page + page_size, new_page);
 
@@ -175,8 +175,12 @@ namespace ccl {
             }
     };
 
-    template<typename T, typename Ptr = T*, typed_allocator<T> Allocator = allocator>
-    class paged_vector : public internal::with_optional_allocator<Allocator> {
+    template<
+        typename T,
+        typename Ptr = T*,
+        typed_allocator<T> Allocator = allocator,
+        allocation_flags AllocationFlags = 0
+    > class paged_vector : public internal::with_optional_allocator<Allocator> {
         static_assert(is_power_2(CCL_PAGE_SIZE));
 
         public:
@@ -188,12 +192,13 @@ namespace ccl {
             using const_reference = typename pointer_traits::const_reference;
             using size_type = std::size_t;
             using allocator_type = Allocator;
-            using cloner = page_cloner<value_type, pointer, allocator_type>;
+            using cloner = page_cloner<value_type, pointer, allocator_type, AllocationFlags>;
             using iterator = paged_vector_iterator<paged_vector>;
             using const_iterator = paged_vector_iterator<const paged_vector>;
 
             static constexpr size_type page_size = CCL_PAGE_SIZE;
             static constexpr size_type page_size_shift_width = bitcount(page_size) - 1;
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
         private:
             using alloc = internal::with_optional_allocator<Allocator>;
@@ -545,7 +550,7 @@ namespace ccl {
                     const size_type page_to_add_count = new_page_count - _pages.size();
 
                     for(std::size_t i = 0; i < page_to_add_count; ++i) {
-                        const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size);
+                        const pointer new_page = alloc::get_allocator()->template allocate<value_type>(page_size, allocation_flags);
                         _pages.push_back(new_page);
                     }
                 }

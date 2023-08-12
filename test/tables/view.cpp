@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     test_suite suite;
 
     suite.add_test("get", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         auto view = my_table.view<int>();
         auto v = view.get<int>();
@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("each", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.reserve(3);
 
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("size", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.reserve(3);
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("get (w/index)", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); });
 

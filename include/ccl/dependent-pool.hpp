@@ -21,20 +21,24 @@ namespace ccl {
      * @tparam T The value type to store in this pool.
      * @tparam PrimaryPool The primary pool type.
      * @tparam Allocator The allocator to use for data storage.
+     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename T,
         typename PrimaryPool,
-        typed_allocator<T> Allocator = allocator
+        typed_allocator<T> Allocator = allocator,
+        allocation_flags AllocationFlags = 0
     > class dependent_pool {
         public:
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
+
             using value_type = T;
             using pointer = T*;
             using reference = T&;
             using const_reference = const T&;
             using handle_type = typename PrimaryPool::handle_type;
             using allocator_type = Allocator;
-            using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
+            using object_vector_type = paged_vector<value_type, pointer, allocator_type, allocation_flags>;
             using primary_pool_type = PrimaryPool;
 
         private:

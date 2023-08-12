@@ -29,6 +29,9 @@ namespace ccl {
 
     allocator* CCL_ALLOCAPI get_default_allocator();
 
+    /**
+     * User-defined allocation flags.
+     */
     typedef uint32_t allocation_flags;
 
     enum allocator_feature_flag_bits {

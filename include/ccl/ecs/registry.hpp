@@ -20,26 +20,27 @@
 
 namespace ccl::ecs {
     namespace internal {
-        template<basic_allocator Allocator>
+        template<basic_allocator Allocator, allocation_flags AllocationFlags>
         class registry_editor;
     }
 
-    template<basic_allocator Allocator>
+    template<basic_allocator Allocator, allocation_flags AllocationFlags>
     class registry : ccl::internal::with_optional_allocator<Allocator> {
-        friend class internal::registry_editor<Allocator>;
+        friend class internal::registry_editor<Allocator, AllocationFlags>;
 
         using alloc = ccl::internal::with_optional_allocator<Allocator>;
 
         public:
             using allocator_type = Allocator;
-            using archetype = ccl::ecs::archetype<Allocator>;
+            using archetype = ccl::ecs::archetype<Allocator, AllocationFlags>;
 
             static constexpr entity_id_t max_entity_id = entity_t::underlying_type::low_part_max;
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
         private:
             entity_id_t current_generation;
             entity_id_t next_entity_id;
-            dense_map<hash_t, archetype, allocator_type> archetype_map;
+            dense_map<hash_t, archetype, hash<hash_t>, allocator_type, allocation_flags> archetype_map;
 
         public:
             explicit constexpr registry(allocator_type * const allocator = nullptr)
@@ -204,9 +205,9 @@ namespace ccl::ecs {
             }
 
             template<typename ...Components>
-            constexpr const ccl::ecs::view<allocator_type, Components...> view() const {
+            constexpr const ccl::ecs::view<allocator_type, allocation_flags, Components...> view() const {
                 const auto archetype_map_end = archetype_map.end_values();
-                ccl::ecs::view<allocator_type, Components...> view_object;
+                ccl::ecs::view<allocator_type, allocation_flags, Components...> view_object;
 
                 for(auto it = archetype_map.begin_values(); it != archetype_map_end; ++it) {
                     const bool has_all_components = (it->template has_component<Components>() && ...);

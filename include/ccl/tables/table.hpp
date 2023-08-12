@@ -22,18 +22,22 @@ namespace ccl {
      *
      * @tparam T The value type of this column's data.
      * @tparam Allocator The allocator used for the underlying collection memory management.
+     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename T,
-        typed_allocator<T> Allocator = allocator
+        typed_allocator<T> Allocator = allocator,
+        allocation_flags AllocationFlags = 0
     >
     class column {
         public:
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
+
             using value_type = T;
             using allocator_type = Allocator;
-            using value_collection_type = vector<value_type, allocator_type>;
-            using reference_collection_type = vector<value_type, allocator_type>&;
-            using const_reference_collection_type = const vector<value_type, allocator_type>&;
+            using value_collection_type = vector<value_type, allocator_type, allocation_flags>;
+            using reference_collection_type = vector<value_type, allocator_type, allocation_flags>&;
+            using const_reference_collection_type = const vector<value_type, allocator_type, allocation_flags>&;
 
             constexpr reference_collection_type get() noexcept { return data; }
             constexpr const_reference_collection_type get() const noexcept { return data; }
@@ -61,11 +65,11 @@ namespace ccl {
      * This is effectively a wrapper around a std::function object to expose
      * extra type information.
      */
-    template<typename T, typename Allocator>
+    template<typename T, typename Allocator, allocation_flags AllocationFlags>
     struct op_functor {
         using value_type = T;
-        using column_type = column<T, Allocator>;
-        using column_reference_type = column<T, Allocator>&;
+        using column_type = column<T, Allocator, AllocationFlags>;
+        using column_reference_type = column<T, Allocator, AllocationFlags>&;
         using function_type = std::function<void(column_reference_type)>;
 
         private:
@@ -89,18 +93,22 @@ namespace ccl {
      * at the correct indices.
      *
      * @tparam Allocator The allocator type for the table's data.
+     * @tparam AllocationFlags The optional flags to pass to the allocator.
      * @tparam ColumnTypes The data type for each column. Each type must be different.
      */
     template<
         basic_allocator Allocator,
+        allocation_flags AllocationFlags = 0,
         typename ...ColumnTypes
-    > class table : private column<ColumnTypes, Allocator>... {
+    > class table : private column<ColumnTypes, Allocator, AllocationFlags>... {
         public:
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
+
             using allocator_type = Allocator;
             using size_type = std::size_t;
 
             template<typename T>
-            using column_type = column<T, allocator_type>;
+            using column_type = column<T, allocator_type, allocation_flags>;
 
             template<typename T>
             using column_collection_type = typename column_type<T>::reference_collection_type;
@@ -165,7 +173,7 @@ namespace ccl {
              *
              * @param ops The operation functors, one per column.
              */
-            constexpr void apply(op_functor<ColumnTypes, allocator_type>&& ...ops) {
+            constexpr void apply(op_functor<ColumnTypes, allocator_type, allocation_flags>&& ...ops) {
                 (ops(*this),...);
             }
 
@@ -175,7 +183,7 @@ namespace ccl {
              * @param ops The operation functors, one per column.
              */
             template<typename ...Ts>
-            constexpr void apply(op_functor<Ts, allocator_type>&& ...ops) {
+            constexpr void apply(op_functor<Ts, allocator_type, allocation_flags>&& ...ops) {
                 (ops(*this),...);
             }
 
@@ -185,7 +193,7 @@ namespace ccl {
              * @param op The operation functor.
              */
             template<typename T>
-            constexpr void apply_one(op_functor<T, allocator_type> op) {
+            constexpr void apply_one(op_functor<T, allocator_type, allocation_flags> op) {
                 op(*this);
             }
 

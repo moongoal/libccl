@@ -160,12 +160,14 @@ namespace ccl {
      * @tparam V Value type.
      * @tparam HashFunction The function used to compute the key hashes.
      * @tparam Allocator The allocator type.
+     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         std::equality_comparable K,
         typename V,
         typed_hash_function<K> HashFunction = hash<K>,
-        typename Allocator = allocator
+        typename Allocator = allocator,
+        allocation_flags AllocationFlags = 0
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
     class hashtable : private internal::with_optional_allocator<Allocator> {
@@ -197,6 +199,7 @@ namespace ccl {
             using const_iterator = hashtable_iterator<const hashtable>;
 
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
@@ -334,8 +337,8 @@ namespace ccl {
                 do {
                     bool keep_iterating = true;
                     done = true;
-                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
-                    new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity);
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, allocation_flags);
+                    new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity, allocation_flags);
 
                     new_slot_map.resize(new_capacity);
                     new_slot_map.zero();

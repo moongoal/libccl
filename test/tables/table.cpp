@@ -7,13 +7,13 @@ int main(int argc, char **argv) {
     test_suite suite;
 
     suite.add_test("ctor", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         check(my_table.get<float>().size() == 0);
     });
 
     suite.add_test("apply", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); });
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("reserve", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.reserve(16);
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("apply_one", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); });
         my_table.apply_one<float>([] (auto& x) { x[0] *= 15; });
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     suite.add_test("apply (some columns)", [] () {
         struct S { int value; };
 
-        table<allocator, int, float, S> my_table;
+        table<allocator, 0, int, float, S> my_table;
 
         my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); }, [] (auto& x) { x.emplace().value = 16; });
         my_table.apply<S, float>([] (auto& x) { x[0].value /= 2; }, [] (auto& x) { x[0] = -1; });
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     suite.add_test("emplace", [] () {
         struct S { int value; };
 
-        table<allocator, int, float, S> my_table;
+        table<allocator, 0, int, float, S> my_table;
 
         my_table.emplace();
 
@@ -76,19 +76,19 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("view (full)", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         auto view CCLUNUSED = my_table.view();
     });
 
     suite.add_test("view (partial)", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         auto view CCLUNUSED = my_table.view<int>();
     });
 
     suite.add_test("each (full)", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.reserve(3);
 
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("size", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.reserve(3);
 
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("get (w/index)", [] () {
-        table<allocator, int, float> my_table;
+        table<allocator, 0, int, float> my_table;
 
         my_table.apply([] (auto& x) { x.emplace(5); }, [] (auto& x) { x.emplace(1); });
 

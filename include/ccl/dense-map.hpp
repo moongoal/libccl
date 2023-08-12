@@ -161,12 +161,19 @@ template<typename Map>
         return a.index_iterator <= b.index_iterator;
     }
 
-    template<typename K, typename V, typed_allocator<K> Allocator = allocator, typed_hash_function<K> Hash = hash<K>>
-    class dense_map {
+    template<
+        typename K,
+        typename V,
+        typed_hash_function<K> Hash = hash<K>,
+        typed_allocator<K> Allocator = allocator,
+        allocation_flags AllocationFlags = 0
+    > class dense_map {
         friend struct dense_map_iterator<dense_map>;
         friend struct dense_map_iterator<const dense_map>;
 
         public:
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
+
             using key_type = K;
             using value_type = V;
             using value_reference = V&;
@@ -176,8 +183,8 @@ template<typename Map>
             using hash_function_type = Hash;
             using hash_type = hash_t;
             using size_type = uint32_t;
-            using data_vector_type = paged_vector<V, V*, allocator_type>;
-            using index_map_type = hashtable<K, size_type, hash_function_type, allocator_type>;
+            using data_vector_type = paged_vector<V, V*, allocator_type, allocation_flags>;
+            using index_map_type = hashtable<K, size_type, hash_function_type, allocator_type, allocation_flags>;
             using value_iterator = typename data_vector_type::iterator;
             using const_value_iterator = typename data_vector_type::const_iterator;
             using iterator = dense_map_iterator<dense_map>;

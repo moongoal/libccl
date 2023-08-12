@@ -5,7 +5,7 @@
 using namespace ccl;
 using namespace ccl::ecs;
 
-using test_registry = registry<counting_test_allocator>;
+using test_registry = registry<counting_test_allocator, 0>;
 
 int main(int argc, char **argv) {
     test_suite suite;

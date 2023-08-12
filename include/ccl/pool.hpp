@@ -29,7 +29,8 @@ namespace ccl {
         typename T,
         handle_expiry_policy HandleExpiryPolicy,
         typename Handle = versioned_handle<T>,
-        typed_allocator<T> Allocator = allocator
+        typed_allocator<T> Allocator = allocator,
+        allocation_flags AllocationFlags = 0
     > class pool {
         public:
             using value_type = T;
@@ -42,6 +43,8 @@ namespace ccl {
             using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
             using handle_manager_type = handle_manager<T, HandleExpiryPolicy, handle_type, allocator_type>;
             using handle_object_callback = std::function<void(const handle_type, reference)>;
+
+            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
         private:
             handle_manager_type handle_manager;
