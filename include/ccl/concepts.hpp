@@ -24,7 +24,7 @@ namespace ccl {
         Allocator alloc,
         const std::size_t n_bytes,
         const std::size_t alignment,
-        const int flags,
+        const uint32_t flags,
         void * const ptr
     ) {
         { alloc.allocate(n_bytes, flags) } -> std::convertible_to<void*>;

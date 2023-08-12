@@ -25,18 +25,18 @@ namespace ccl {
                 }
             }
 
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const int flags = 0) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const allocation_flags flags = 0) {
                 count++;
                 return get_default_allocator()->allocate(n_bytes, flags);
             }
 
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const int flags = 0) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags = 0) {
                 count++;
                 return get_default_allocator()->allocate(n_bytes, alignment, flags);
             }
 
             template<typename T>
-            CCLNODISCARD T* allocate(const std::size_t n, const int flags = 0) {
+            CCLNODISCARD T* allocate(const std::size_t n, const allocation_flags flags = 0) {
                 return reinterpret_cast<T*>(allocate(size_of<T>(n), alignof(T), flags));
             }
 

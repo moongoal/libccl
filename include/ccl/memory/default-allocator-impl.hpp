@@ -1,5 +1,3 @@
-// #include <ccl/memory/allocator.hpp>
-
 namespace ccl {
     static allocator *s_allocator = nullptr;
 
