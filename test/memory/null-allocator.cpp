@@ -9,15 +9,6 @@ int main(int argc, char **argv) {
     suite.add_test("allocate/deallocate", [] () {
         null_allocator a;
 
-        int * const x = reinterpret_cast<int*>(a.allocate(sizeof(int)));
-        a.deallocate(x);
-
-        equals(x, nullptr);
-    });
-
-    suite.add_test("aligned allocate", [] () {
-        null_allocator a;
-
         int * const x = reinterpret_cast<int*>(a.allocate(sizeof(int), sizeof(int) * 2, 0));
 
         equals(x, nullptr);

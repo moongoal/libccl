@@ -74,16 +74,6 @@ namespace ccl {
     class CCL_ALLOCAPI allocator {
         public:
             /**
-             * Allocate with default alignment constraint.
-             *
-             * @param n_bytes Number of bytes to allocate.
-             * @param flags Optional allocation flags.
-             *
-             * @return A pointer to the newly allocated memory.
-             */
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const allocation_flags flags = 0);
-
-            /**
              * Allocate memory.
              *
              * @param n_bytes Number of bytes to allocate.
@@ -163,7 +153,6 @@ namespace ccl {
      */
     class null_allocator {
         public:
-            CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const allocation_flags flags CCLUNUSED = 0) { return nullptr; }
             CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const std::size_t alignment CCLUNUSED, const allocation_flags flags CCLUNUSED = 0) { return nullptr; }
             void deallocate(void * const ptr CCLUNUSED) {}
 
@@ -176,10 +165,6 @@ namespace ccl {
     };
 
     #ifndef CCL_USER_DEFINED_ALLOCATOR
-        inline void *allocator::allocate(const std::size_t n_bytes, const allocation_flags flags CCLUNUSED) {
-            return ::malloc(n_bytes);
-        }
-
         inline void *allocator::allocate(const std::size_t n_bytes, const std::size_t alignment CCLUNUSED, const allocation_flags flags CCLUNUSED) {
             return ::malloc(n_bytes);
         }

@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
         uint8_t * const ptr CCLUNUSED = allocator.allocate<uint8_t>(16);
 
         throws<std::bad_alloc>([&allocator] () {
-            auto * const ptr_fail CCLUNUSED = allocator.allocate(1);
+            auto * const ptr_fail CCLUNUSED = allocator.allocate(1, 1);
         });
     });
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
         local_allocator<16, local_allocator_policy::return_nullptr> allocator;
 
         uint8_t * const ptr CCLUNUSED = allocator.allocate<uint8_t>(16);
-        auto * const ptr_fail = allocator.allocate(1);
+        auto * const ptr_fail = allocator.allocate(1, 1);
 
         check(!ptr_fail);
     });
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
         allocator.deallocate(ptr);
 
         throws<std::bad_alloc>([&allocator] () {
-            auto * const ptr_fail CCLUNUSED = allocator.allocate(1);
+            auto * const ptr_fail CCLUNUSED = allocator.allocate(1, 1);
         });
     });
 

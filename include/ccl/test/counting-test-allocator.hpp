@@ -25,11 +25,6 @@ namespace ccl {
                 }
             }
 
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const allocation_flags flags = 0) {
-                count++;
-                return get_default_allocator()->allocate(n_bytes, flags);
-            }
-
             CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags = 0) {
                 count++;
                 return get_default_allocator()->allocate(n_bytes, alignment, flags);

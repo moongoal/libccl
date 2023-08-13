@@ -9,7 +9,6 @@ struct spy_allocator {
     bool deallocated = false;
     bool does_own = false;
 
-    CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const allocation_flags flags CCLUNUSED = 0) { allocated = true; return nullptr; }
     CCLNODISCARD void* allocate(const std::size_t n_bytes CCLUNUSED, const std::size_t alignment CCLUNUSED, const allocation_flags flags CCLUNUSED = 0) { allocated = true; return nullptr; }
     allocation_info get_allocation_info(const void* const ptr CCLUNUSED) const { return {}; }
     void deallocate(void * const ptr CCLUNUSED) { deallocated = true; }
@@ -48,8 +47,8 @@ int main(int argc, char **argv) {
         test_local_allocator allocator1, allocator2;
         test_composite_allocator composite{allocator1, allocator2};
 
-        const void * const ptr1 = composite.allocate(1);
-        const void * const ptr2 = composite.allocate(16);
+        const void * const ptr1 = composite.allocate(1, 1);
+        const void * const ptr2 = composite.allocate(16, 1);
 
         check(allocator1.owns(ptr1));
         check(allocator2.owns(ptr2));

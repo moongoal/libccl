@@ -46,18 +46,6 @@ namespace ccl {
             local_allocator() : used_size{0} {}
 
             /**
-             * Allocate with default alignment constraint.
-             *
-             * @param n_bytes Number of bytes to allocate.
-             * @param flags Optional allocation flags.
-             *
-             * @return A pointer to the newly allocated memory.
-             */
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const allocation_flags flags = 0) {
-                return allocate(n_bytes, CCL_ALLOCATOR_DEFAULT_ALIGNMENT, flags);
-            }
-
-            /**
              * Allocate memory.
              *
              * @param n_bytes Number of bytes to allocate.
