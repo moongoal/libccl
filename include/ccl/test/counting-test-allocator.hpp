@@ -26,7 +26,10 @@ namespace ccl {
             }
 
             CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags = 0) {
-                count++;
+                if(n_bytes) {
+                    count++;
+                }
+
                 return get_default_allocator()->allocate(n_bytes, alignment, flags);
             }
 
@@ -40,7 +43,10 @@ namespace ccl {
             }
 
             void deallocate(void * const ptr) {
-                count--;
+                if(ptr) {
+                    count--;
+                }
+
                 return get_default_allocator()->deallocate(ptr);
             }
 
