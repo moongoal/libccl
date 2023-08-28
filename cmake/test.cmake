@@ -102,10 +102,6 @@ function(add_ccl_test)
         message(FATAL_ERROR "At least one TEST is required.")
     endif()
 
-    if(NOT DEFINED ADD_CCL_TEST_COVERAGE)
-        message(FATAL_ERROR "COVERAGE is required.")
-    endif()
-
     set(all_tests ${ADD_CCL_TEST_TEST})
 
     while(all_tests)
@@ -135,12 +131,13 @@ function(add_ccl_test)
         set(report_name ${ADD_CCL_TEST_REPORT})
     endif()
 
-    set(profdata_file ${CCL_COVERAGE_DIR}/${report_name}.profdata)
-    set(coverage_report_file ${CCL_COVERAGE_DIR}/${report_name}.cov.html)
+    if(DEFINED ADD_CCL_TEST_COVERAGE)
+        set(profdata_file ${CCL_COVERAGE_DIR}/${report_name}.profdata)
+        set(coverage_report_file ${CCL_COVERAGE_DIR}/${report_name}.cov.html)
+        set(CCL_COVERAGE_REPORT_FILES ${CCL_COVERAGE_REPORT_FILES} ${coverage_report_file} PARENT_SCOPE)
 
-    set(CCL_COVERAGE_REPORT_FILES ${CCL_COVERAGE_REPORT_FILES} ${coverage_report_file} PARENT_SCOPE)
-
-    _add_ccl_coverage_report("${test_exe_files}" "${test_profraw_files}" "${profdata_file}" "${coverage_report_file}" "${ADD_CCL_TEST_COVERAGE}")
+        _add_ccl_coverage_report("${test_exe_files}" "${test_profraw_files}" "${profdata_file}" "${coverage_report_file}" "${ADD_CCL_TEST_COVERAGE}")
+    endif()
 endfunction(add_ccl_test)
 
 set(CCL_COVERAGE_DIR ${CMAKE_BINARY_DIR}/coverage)
@@ -339,6 +336,10 @@ add_ccl_test(
     TEST test_default_allocator test/memory/default-allocator.cpp
     TEST test_null_allocator test/memory/null-allocator.cpp
     COVERAGE include/ccl/memory/allocator.hpp include/ccl/memory/default-allocator-impl.hpp
+)
+
+add_ccl_test(
+    TEST test_i18n_language test/i18n/language.cpp
 )
 
 add_custom_command(
