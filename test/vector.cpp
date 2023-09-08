@@ -459,17 +459,17 @@ int main(int argc, char **argv) {
         check(v[4] == 5);
     });
 
-    suite.add_test("insert (ranges)", [] () {
+    suite.add_test("insert_range", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         std::forward_list<int> my_list2 {6};
         test_vector<int> v { 123 };
 
-        v.insert(
+        v.insert_range(
             v.begin(),
             my_list
         );
 
-        v.insert(
+        v.insert_range(
             v.end(),
             my_list2
         );
@@ -484,19 +484,19 @@ int main(int argc, char **argv) {
         check(v[6] == 6);
     });
 
-    suite.add_test("insert (ranges - invalid)", [] () {
+    suite.add_test("insert_range (invalid)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         test_vector<int> v { 123 };
 
         throws<std::out_of_range>([&] () {
-            v.insert(
+            v.insert_range(
                 v.begin() - 1,
                 my_list
             );
         });
 
         throws<std::out_of_range>([&] () {
-            v.insert(
+            v.insert_range(
                 v.end() + 1,
                 my_list
             );

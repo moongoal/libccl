@@ -217,7 +217,7 @@ namespace ccl {
             }
 
             template <std::ranges::input_range InputRange>
-            constexpr void insert(iterator where, const InputRange& input) {
+            constexpr void insert_range(iterator where, const InputRange& input) {
                 CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
 
                 const size_type input_size = std::abs(std::ranges::distance(input));

@@ -43,4 +43,10 @@
 #include <ccl/ecs/registry.hpp>
 #include <ccl/pointer/pointer.hpp>
 
+#include <ccl/i18n/language.hpp>
+
+#ifdef CCL_FEATURE_STL_COMPAT
+    #include <ccl/compat.hpp>
+#endif // CCL_FEATURE_STL_COMPAT
+
 #endif // CCL_HPP

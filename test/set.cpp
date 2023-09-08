@@ -84,18 +84,18 @@ int main(int argc, char **argv) {
         check(x.contains(3));
     });
 
-    // suite.add_test("insert range", [] () {
-    //     using my_set = test_set<int>;
+    suite.add_test("insert_range", [] () {
+        using my_set = test_set<int>;
 
-    //     vector<int> v { 1, 2, 3 };
-    //     my_set x;
+        vector<int> v { 1, 2, 3 };
+        my_set x;
 
-    //     x.insert(v);
+        x.insert_range(v);
 
-    //     check(x.contains(1));
-    //     check(x.contains(2));
-    //     check(x.contains(3));
-    // });
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+    });
 
     suite.add_test("insert initializer list", [] () {
         using my_set = test_set<int>;
@@ -135,27 +135,27 @@ int main(int argc, char **argv) {
         check(y.contains(3));
     });
 
-    // suite.add_test("ctor (range)", [] () {
-    //     using my_set = test_set<int>;
+    suite.add_test("ctor (range)", [] () {
+        using my_set = test_set<int>;
 
-    //     vector<int> v { 1, 2, 3 };
-    //     my_set x { v };
+        vector<int> v { 1, 2, 3 };
+        my_set x { v };
 
-    //     check(x.contains(1));
-    //     check(x.contains(2));
-    //     check(x.contains(3));
-    // });
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+    });
 
-    // suite.add_test("ctor (range w/allocator)", [] () {
-    //     using my_set = test_set<int>;
+    suite.add_test("ctor (range w/allocator)", [] () {
+        using my_set = test_set<int>;
 
-    //     vector<int> v { 1, 2, 3 };
-    //     my_set x { v,  get_default_allocator<counting_test_allocator>() };
+        vector<int> v { 1, 2, 3 };
+        my_set x { v,  get_default_allocator<counting_test_allocator>() };
 
-    //     check(x.contains(1));
-    //     check(x.contains(2));
-    //     check(x.contains(3));
-    // });
+        check(x.contains(1));
+        check(x.contains(2));
+        check(x.contains(3));
+    });
 
     suite.add_test("ctor (move)", [] () {
         using my_set = test_set<int>;
