@@ -384,7 +384,7 @@ namespace ccl {
      */
     template<typename ...Args>
     constexpr bool and_(Args&& ...args) noexcept {
-        return (static_cast<uint64_t>(args) & ...);
+        return ((uint64_t)(args) & ...);
     }
 
     /**
@@ -392,7 +392,7 @@ namespace ccl {
      */
     template<typename ...Args>
     constexpr bool or_(Args&& ...args) noexcept {
-        return (static_cast<uint64_t>(args) | ...);
+        return ((uint64_t)(args) | ...);
     }
 }
 
