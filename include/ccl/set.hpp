@@ -156,9 +156,9 @@ namespace ccl {
      */
     template<
         typename K,
+        allocation_flags AllocationFlags = 0,
         typename HashFunction = hash<K>,
-        typename Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        typename Allocator = allocator
     >
     requires typed_allocator<Allocator, K> && std::equality_comparable<K>
     class set : private internal::with_optional_allocator<Allocator> {
@@ -261,7 +261,7 @@ namespace ccl {
 
                 bool done;
                 new_capacity = increase_capacity(_capacity, new_capacity);
-                bitset<allocator_type> new_slot_map;
+                bitset<allocation_flags, allocator_type> new_slot_map;
                 const auto finish = end();
                 key_pointer new_keys;
 
@@ -466,7 +466,7 @@ namespace ccl {
             }
 
             size_type _capacity = 0;
-            bitset<allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
+            bitset<allocation_flags, allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
             key_pointer keys = nullptr;
 
             static constexpr size_type invalid_size = ~static_cast<size_type>(0);

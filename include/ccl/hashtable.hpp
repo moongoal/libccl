@@ -165,9 +165,9 @@ namespace ccl {
     template<
         std::equality_comparable K,
         typename V,
+        allocation_flags AllocationFlags = 0,
         typed_hash_function<K> HashFunction = hash<K>,
-        typename Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        typename Allocator = allocator
     >
     requires typed_allocator<Allocator, K> && typed_allocator<Allocator, V>
     class hashtable : private internal::with_optional_allocator<Allocator> {
@@ -329,7 +329,7 @@ namespace ccl {
 
                 bool done;
                 new_capacity = increase_capacity(_capacity, new_capacity);
-                bitset<allocator_type> new_slot_map;
+                bitset<AllocationFlags, allocator_type> new_slot_map;
                 const auto finish = end();
                 key_pointer new_keys;
                 value_pointer new_values;
@@ -576,7 +576,7 @@ namespace ccl {
             }
 
             size_type _capacity = 0;
-            bitset<allocator_type> slot_map; // Slot availability bit map
+            bitset<AllocationFlags, allocator_type> slot_map; // Slot availability bit map
             key_pointer keys = nullptr;
             value_pointer values = nullptr;
 

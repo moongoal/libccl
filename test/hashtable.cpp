@@ -7,7 +7,7 @@
 using namespace ccl;
 
 template<typename K, typename V, typename H = hash<K>>
-using test_map = hashtable<K, V, H, counting_test_allocator>;
+using test_map = hashtable<K, V, 0, H, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 static int next_unique_value = 0;
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
             }
         };
 
-        using my_hashtable = hashtable<int, float, same_hash, ccl::counting_test_allocator>;
+        using my_hashtable = hashtable<int, float, 0, same_hash, ccl::counting_test_allocator>;
 
         my_hashtable x;
         x.insert(CCL_HASHTABLE_CHUNK_SIZE, 1);
@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
             }
         };
 
-        using my_hashtable = hashtable<int, float, same_hash, ccl::counting_test_allocator>;
+        using my_hashtable = hashtable<int, float, 0, same_hash, ccl::counting_test_allocator>;
 
         my_hashtable x;
         x.emplace(CCL_HASHTABLE_CHUNK_SIZE, 1);

@@ -28,9 +28,9 @@ namespace ccl::ecs {
             using entity_id = entity_id_t;
             using allocator_type = Allocator;
             using size_type = uint32_t;
-            using entity_index_collection = dense_map<entity_type, size_type, hash<entity_type>, allocator_type, allocation_flags>;
+            using entity_index_collection = dense_map<entity_type, size_type, allocation_flags, hash<entity_type>, allocator_type>;
             using component = ccl::ecs::component<allocator_type, allocation_flags>;
-            using component_collection = hashtable<std::size_t, component, hash<std::size_t>, allocator_type, allocation_flags>;
+            using component_collection = hashtable<std::size_t, component, allocation_flags, hash<std::size_t>, allocator_type>;
 
             static constexpr hash_t invalid_id = ~static_cast<hash_t>(0);
 

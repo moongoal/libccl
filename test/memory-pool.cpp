@@ -5,7 +5,7 @@
 using namespace ccl;
 
 template<typename T>
-using test_memory_pool = memory_pool<T, counting_test_allocator>;
+using test_memory_pool = memory_pool<T, 0, counting_test_allocator>;
 
 struct S {
     uint8_t x[3]; // Three bytes shall be aligned to four by the memory pool

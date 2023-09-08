@@ -177,9 +177,9 @@ namespace ccl {
 
     template<
         typename T,
+        allocation_flags AllocationFlags = 0,
         typename Ptr = T*,
-        typed_allocator<T> Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        typed_allocator<T> Allocator = allocator
     > class paged_vector : public internal::with_optional_allocator<Allocator> {
         static_assert(is_power_2(CCL_PAGE_SIZE));
 
@@ -202,7 +202,7 @@ namespace ccl {
 
         private:
             using alloc = internal::with_optional_allocator<Allocator>;
-            using page_vector = vector<pointer, allocator_type>;
+            using page_vector = vector<pointer, allocation_flags, allocator_type>;
 
             page_vector _pages;
             size_type _size; // Item count

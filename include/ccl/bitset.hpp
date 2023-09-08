@@ -16,8 +16,8 @@ namespace ccl {
      * A variable sequence of bits.
      */
     template<
-        typed_allocator<uint64_t> Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        allocation_flags AllocationFlags = 0,
+        typed_allocator<uint64_t> Allocator = allocator
     > class bitset {
         public:
             using cluster_type = uint64_t;
@@ -323,7 +323,7 @@ namespace ccl {
                 /**
                  * The sequence of clusters containing the bits.
                  */
-                vector<cluster_type, allocator_type, allocation_flags> clusters;
+                vector<cluster_type, allocation_flags, allocator_type> clusters;
 
                 /**
                  * Bit count.

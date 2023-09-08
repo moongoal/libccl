@@ -24,8 +24,8 @@
 namespace ccl {
     template<
         typename T,
-        typed_allocator<T> Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        allocation_flags AllocationFlags = 0,
+        typed_allocator<T> Allocator = allocator
     >
     class vector : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;

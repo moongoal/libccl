@@ -23,7 +23,7 @@ namespace ccl::ecs {
             using allocator_type = Allocator;
 
             template<typename T>
-            using item_collection = paged_vector<T, T*, allocator_type, allocation_flags>;
+            using item_collection = paged_vector<T, allocation_flags, T*, allocator_type>;
 
         private:
             struct iface {

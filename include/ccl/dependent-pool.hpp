@@ -26,8 +26,8 @@ namespace ccl {
     template<
         typename T,
         typename PrimaryPool,
-        typed_allocator<T> Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        allocation_flags AllocationFlags = 0,
+        typed_allocator<T> Allocator = allocator
     > class dependent_pool {
         public:
             static constexpr allocation_flags allocation_flags = AllocationFlags;
@@ -38,7 +38,7 @@ namespace ccl {
             using const_reference = const T&;
             using handle_type = typename PrimaryPool::handle_type;
             using allocator_type = Allocator;
-            using object_vector_type = paged_vector<value_type, pointer, allocator_type, allocation_flags>;
+            using object_vector_type = paged_vector<value_type, allocation_flags, pointer, allocator_type>;
             using primary_pool_type = PrimaryPool;
 
         private:

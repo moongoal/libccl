@@ -5,7 +5,7 @@
 using namespace ccl;
 
 template<typename T>
-using test_deque = deque<T, deque_reset_policy::begin, counting_test_allocator>;
+using test_deque = deque<T, deque_reset_policy::begin, 0, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 

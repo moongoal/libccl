@@ -40,7 +40,7 @@ namespace ccl::ecs {
         private:
             entity_id_t current_generation;
             entity_id_t next_entity_id;
-            dense_map<hash_t, archetype, hash<hash_t>, allocator_type, allocation_flags> archetype_map;
+            dense_map<hash_t, archetype, allocation_flags, hash<hash_t>, allocator_type> archetype_map;
 
         public:
             explicit constexpr registry(allocator_type * const allocator = nullptr)

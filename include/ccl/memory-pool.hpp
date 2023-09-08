@@ -26,8 +26,8 @@ namespace ccl {
      */
     template<
         typename T,
-        basic_allocator Allocator = allocator,
-        allocation_flags AllocationFlags = 0
+        allocation_flags AllocationFlags = 0,
+        basic_allocator Allocator = allocator
     > class memory_pool {
         public:
             static constexpr size_t object_size = sizeof(T);
@@ -40,8 +40,8 @@ namespace ccl {
             using const_reference = const T&;
             using const_pointer = const T*;
             using allocator_type = Allocator;
-            using memory_vector_type = paged_vector<uint8_t, uint8_t*, allocator_type, allocation_flags>;
-            using free_stack_type = vector<pointer, allocator_type, allocation_flags>;
+            using memory_vector_type = paged_vector<uint8_t, allocation_flags, uint8_t*, allocator_type>;
+            using free_stack_type = vector<pointer, allocation_flags, allocator_type>;
 
             static_assert(sizeof(T) <= memory_vector_type::page_size, "Object type too large.");
 

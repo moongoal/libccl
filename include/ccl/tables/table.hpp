@@ -35,9 +35,9 @@ namespace ccl {
 
             using value_type = T;
             using allocator_type = Allocator;
-            using value_collection_type = vector<value_type, allocator_type, allocation_flags>;
-            using reference_collection_type = vector<value_type, allocator_type, allocation_flags>&;
-            using const_reference_collection_type = const vector<value_type, allocator_type, allocation_flags>&;
+            using value_collection_type = vector<value_type, allocation_flags, allocator_type>;
+            using reference_collection_type = vector<value_type, allocation_flags, allocator_type>&;
+            using const_reference_collection_type = const vector<value_type, allocation_flags, allocator_type>&;
 
             constexpr reference_collection_type get() noexcept { return data; }
             constexpr const_reference_collection_type get() const noexcept { return data; }
