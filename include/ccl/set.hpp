@@ -158,7 +158,7 @@ namespace ccl {
         typename K,
         allocation_flags AllocationFlags = 0,
         typename HashFunction = hash<K>,
-        typename Allocator = allocator
+        typed_allocator<K> Allocator = allocator
     >
     requires typed_allocator<Allocator, K> && std::equality_comparable<K>
     class set : private internal::with_optional_allocator<Allocator> {
@@ -210,7 +210,7 @@ namespace ccl {
                 InputRange&& input,
                 allocator_type * const allocator = nullptr
             ) : set{allocator} {
-                insert(input);
+                insert_range(input);
             }
 
             ~set() {
@@ -236,7 +236,7 @@ namespace ccl {
                 destroy();
                 alloc::operator =(other);
                 reserve(other._capacity);
-                insert(other);
+                insert_range(other);
 
                 return *this;
             }
@@ -377,7 +377,7 @@ namespace ccl {
             }
 
             template<std::ranges::range InputRange>
-            constexpr void insert(InputRange&& input) {
+            constexpr void insert_range(InputRange&& input) {
                 for(auto it = input.begin(); it != input.end(); ++it) {
                     insert(*it);
                 }
