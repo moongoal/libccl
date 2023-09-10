@@ -8,7 +8,7 @@
 using namespace ccl;
 
 template<typename T, typename Ptr = T*>
-using test_vector = paged_vector<T, 0, Ptr, counting_test_allocator>;
+using test_vector = paged_vector<T, Ptr, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 

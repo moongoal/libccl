@@ -8,7 +8,7 @@
 using namespace ccl;
 
 template<typename T>
-using test_vector = vector<T, 0, counting_test_allocator>;
+using test_vector = vector<T, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 

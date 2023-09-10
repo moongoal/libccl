@@ -15,15 +15,13 @@
 #include <ccl/memory/allocator.hpp>
 
 namespace ccl::ecs {
-    template<basic_allocator Allocator, allocation_flags AllocationFlags>
+    template<basic_allocator Allocator>
     class component {
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using allocator_type = Allocator;
 
             template<typename T>
-            using item_collection = paged_vector<T, allocation_flags, T*, allocator_type>;
+            using item_collection = paged_vector<T, T*, allocator_type>;
 
         private:
             struct iface {

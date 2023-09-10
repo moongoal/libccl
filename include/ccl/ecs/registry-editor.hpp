@@ -11,10 +11,10 @@
 #include <ccl/ecs/registry.hpp>
 
 namespace ccl::ecs::internal {
-    template<basic_allocator Allocator, allocation_flags AllocationFlags>
+    template<basic_allocator Allocator>
     class registry_editor {
         public:
-            using registry_type = registry<Allocator, AllocationFlags>;
+            using registry_type = registry<Allocator>;
             using allocator_type = Allocator;
 
         private:

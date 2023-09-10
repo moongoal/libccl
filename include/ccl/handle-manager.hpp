@@ -63,23 +63,19 @@ namespace ccl {
      * @tparam ExpiryPolicy Policy to deal with expired handles.
      * @tparam Handle The handle type.
      * @tparam Allocator The allocator.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename ObjectType,
         handle_expiry_policy ExpiryPolicy = default_handle_manager_expiry_policy,
-        allocation_flags AllocationFlags = 0,
         typename Handle = versioned_handle<ObjectType>,
         handle_manager_slot_allocator<Handle> Allocator = allocator
     > class handle_manager {
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using object_type = ObjectType;
             using handle_type = Handle;
             using allocator_type = Allocator;
             using value_type = typename handle_type::value_type;
-            using vector_type = paged_vector<value_type, allocation_flags, value_type*, allocator_type>;
+            using vector_type = paged_vector<value_type, value_type*, allocator_type>;
             using handle_callback = std::function<void(const handle_type&)>;
 
             static constexpr value_type value_unused_mask = handle_type::max_generation + 1;

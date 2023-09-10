@@ -39,7 +39,6 @@ namespace ccl {
     template<
         typename T,
         deque_reset_policy ResetPolicy = deque_reset_policy::center,
-        allocation_flags AllocationFlags = 0,
         typed_allocator<T> Allocator = allocator
     > class deque : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
@@ -60,7 +59,6 @@ namespace ccl {
             static constexpr size_type minimum_capacity = CCL_DEQUE_MIN_CAPACITY;
             static constexpr deque_reset_policy reset_policy = ResetPolicy;
             static constexpr bool reserve_center_default = reset_policy == deque_reset_policy::center;
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
         private:
             size_type first = 0;
@@ -184,7 +182,7 @@ namespace ccl {
                         minimum_capacity
                     );
 
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity, allocation_flags);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
                     const size_type old_size = size();
                     const size_type new_first = choose(
                         (max(actual_new_capacity, 1ULL) >> 1) - old_size / 2,

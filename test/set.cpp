@@ -6,7 +6,7 @@
 using namespace ccl;
 
 template<typename K, typename H = hash<K>>
-using test_set = set<K, 0, H, counting_test_allocator>;
+using test_set = set<K, H, counting_test_allocator>;
 
 int main(int argc, char **argv) {
     test_suite suite;

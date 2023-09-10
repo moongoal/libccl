@@ -152,11 +152,9 @@ namespace ccl {
      * @tparam K Key type.
      * @tparam HashFunction The function used to compute the key hashes.
      * @tparam Allocator The allocator type.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename K,
-        allocation_flags AllocationFlags = 0,
         typename HashFunction = hash<K>,
         typed_allocator<K> Allocator = allocator
     >
@@ -184,7 +182,6 @@ namespace ccl {
             using const_iterator = set_iterator<const set>;
 
             static constexpr size_type minimum_capacity = CCL_SET_MINIMUM_CAPACITY;
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
             explicit constexpr set(
                 allocator_type * const allocator = nullptr
@@ -261,14 +258,14 @@ namespace ccl {
 
                 bool done;
                 new_capacity = increase_capacity(_capacity, new_capacity);
-                bitset<allocation_flags, allocator_type> new_slot_map;
+                bitset<allocator_type> new_slot_map;
                 const auto finish = end();
                 key_pointer new_keys;
 
                 do {
                     bool keep_iterating = true;
                     done = true;
-                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, allocation_flags);
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
 
                     new_slot_map.resize(new_capacity);
                     new_slot_map.zero();
@@ -466,7 +463,7 @@ namespace ccl {
             }
 
             size_type _capacity = 0;
-            bitset<allocation_flags, allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
+            bitset<allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
             key_pointer keys = nullptr;
 
             static constexpr size_type invalid_size = ~static_cast<size_type>(0);

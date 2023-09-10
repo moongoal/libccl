@@ -6,8 +6,8 @@
 using namespace ccl;
 using namespace ccl::ecs;
 
-using test_registry = registry<counting_test_allocator, 0>;
-using test_registry_editor = ccl::ecs::internal::registry_editor<test_registry::allocator_type, test_registry::allocation_flags>;
+using test_registry = registry<counting_test_allocator>;
+using test_registry_editor = ccl::ecs::internal::registry_editor<test_registry::allocator_type>;
 
 int main(int argc, char **argv) {
     test_suite suite;

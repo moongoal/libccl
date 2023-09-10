@@ -160,12 +160,10 @@ namespace ccl {
      * @tparam V Value type.
      * @tparam HashFunction The function used to compute the key hashes.
      * @tparam Allocator The allocator type.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         std::equality_comparable K,
         typename V,
-        allocation_flags AllocationFlags = 0,
         typed_hash_function<K> HashFunction = hash<K>,
         typename Allocator = allocator
     >
@@ -199,7 +197,6 @@ namespace ccl {
             using const_iterator = hashtable_iterator<const hashtable>;
 
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr
@@ -329,7 +326,7 @@ namespace ccl {
 
                 bool done;
                 new_capacity = increase_capacity(_capacity, new_capacity);
-                bitset<AllocationFlags, allocator_type> new_slot_map;
+                bitset<allocator_type> new_slot_map;
                 const auto finish = end();
                 key_pointer new_keys;
                 value_pointer new_values;
@@ -337,8 +334,8 @@ namespace ccl {
                 do {
                     bool keep_iterating = true;
                     done = true;
-                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, allocation_flags);
-                    new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity, allocation_flags);
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
+                    new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity);
 
                     new_slot_map.resize(new_capacity);
                     new_slot_map.zero();
@@ -576,7 +573,7 @@ namespace ccl {
             }
 
             size_type _capacity = 0;
-            bitset<AllocationFlags, allocator_type> slot_map; // Slot availability bit map
+            bitset<allocator_type> slot_map; // Slot availability bit map
             key_pointer keys = nullptr;
             value_pointer values = nullptr;
 
