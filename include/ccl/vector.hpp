@@ -33,7 +33,7 @@ namespace ccl {
         static constexpr value_init_tag_t value_init_tag{};
 
         public:
-            using size_type = std::size_t;
+            using size_type = count_t;
             using value_type = T;
             using pointer = T*;
             using reference = T&;
@@ -48,6 +48,7 @@ namespace ccl {
             size_type _size = 0;
             size_type _capacity = 0;
             value_type * _data = nullptr;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             /**
              * Make room for insertion by displacing existing items forward.
@@ -80,11 +81,13 @@ namespace ccl {
 
         public:
             explicit constexpr vector(
-                allocator_type * const allocator = nullptr
-            ) : alloc{allocator}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : alloc{allocator}, alloc_flags{alloc_flags}
             {}
 
-            constexpr vector(const vector &other) : vector{other.get_allocator()} {
+            constexpr vector(const vector &other) : vector{other.get_allocator(), other.alloc_flags} {
+                alloc_flags = other.alloc_flags;
                 reserve(other._size);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
                 _size = other._size;
@@ -94,7 +97,8 @@ namespace ccl {
                 : alloc{other.get_allocator()},
                 _size{other._size},
                 _capacity{other._capacity},
-                _data{other._data}
+                _data{other._data},
+                alloc_flags{other.alloc_flags}
             {
                 other._data = nullptr;
                 other._size = 0;
@@ -103,16 +107,22 @@ namespace ccl {
 
             constexpr vector(
                 std::initializer_list<T> values,
-                allocator_type * const allocator = nullptr
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             ) : alloc{allocator} {
+                this->alloc_flags = alloc_flags;
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
                 _size = values.size();
             }
 
             template<std::ranges::input_range InputRange>
-            constexpr vector(const InputRange& input, allocator_type * const allocator = nullptr)
-            : vector{allocator} {
+            constexpr vector(
+                const InputRange& input,
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            )
+            : vector{allocator, alloc_flags} {
                 const size_type input_size = std::abs(std::ranges::distance(input));
 
                 if(input_size > 0) {
@@ -141,6 +151,7 @@ namespace ccl {
                 if(other._size > _size || !alloc::is_allocator_stateless()) {
                     destroy();
                     alloc::operator=(other);
+                    alloc_flags = other.alloc_flags;
                     reserve(other._size);
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
@@ -159,6 +170,7 @@ namespace ccl {
                 ccl::swap(_size, other._size);
                 ccl::swap(_capacity, other._capacity);
                 ccl::swap(_data, other._data);
+                ccl::swap(alloc_flags, other.alloc_flags);
 
                 return *this;
             }
@@ -170,7 +182,11 @@ namespace ccl {
             constexpr void reserve(const size_type new_capacity) {
                 if(new_capacity > _capacity) {
                     const size_type actual_new_capacity = increase_capacity(_capacity, new_capacity);
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
+
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
+                        actual_new_capacity,
+                        alloc_flags
+                    );
 
                     if(_data) {
                         std::uninitialized_move(begin(), end(), new_data);
@@ -185,7 +201,10 @@ namespace ccl {
             constexpr void shrink_to_fit() {
                 if(_size > 0) {
                     const size_type new_capacity = increase_capacity<decltype(_capacity)>(1, _size);
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(new_capacity);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
+                        new_capacity,
+                        alloc_flags
+                    );
 
                     if(_data) {
                         std::uninitialized_move(begin(), end(), new_data);

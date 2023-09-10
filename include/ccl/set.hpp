@@ -166,7 +166,7 @@ namespace ccl {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            using size_type = std::size_t;
+            using size_type = count_t;
 
             using key_type = K;
             using key_pointer = K*;
@@ -184,8 +184,13 @@ namespace ccl {
             static constexpr size_type minimum_capacity = CCL_SET_MINIMUM_CAPACITY;
 
             explicit constexpr set(
-                allocator_type * const allocator = nullptr
-            ) : alloc{allocator}, _capacity{0}, keys{nullptr}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : alloc{allocator},
+                _capacity{0},
+                slot_map{allocator, alloc_flags},
+                keys{nullptr},
+                alloc_flags{alloc_flags}
             {
                 reserve(minimum_capacity);
             }
@@ -205,8 +210,9 @@ namespace ccl {
             requires std::ranges::input_range<InputRange>
             constexpr set(
                 InputRange&& input,
-                allocator_type * const allocator = nullptr
-            ) : set{allocator} {
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : set{allocator, alloc_flags} {
                 insert_range(input);
             }
 
@@ -232,6 +238,9 @@ namespace ccl {
             constexpr set& operator =(const set &other) {
                 destroy();
                 alloc::operator =(other);
+
+                alloc_flags = other.alloc_flags;
+
                 reserve(other._capacity);
                 insert_range(other);
 
@@ -245,6 +254,7 @@ namespace ccl {
                 slot_map = std::move(other.slot_map);
                 keys = std::move(other.keys);
                 _capacity = other._capacity;
+                alloc_flags = other.alloc_flags;
 
                 other.keys = nullptr;
 
@@ -265,7 +275,7 @@ namespace ccl {
                 do {
                     bool keep_iterating = true;
                     done = true;
-                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, alloc_flags);
 
                     new_slot_map.resize(new_capacity);
                     new_slot_map.zero();
@@ -465,6 +475,7 @@ namespace ccl {
             size_type _capacity = 0;
             bitset<allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
             key_pointer keys = nullptr;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             static constexpr size_type invalid_size = ~static_cast<size_type>(0);
     };

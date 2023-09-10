@@ -164,8 +164,9 @@ namespace ccl {
 
         public:
             explicit constexpr handle_manager(
-                allocator_type * const allocator = nullptr
-            ) noexcept : handle_slots{allocator} {}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) noexcept : handle_slots{allocator, alloc_flags} {}
 
             constexpr handle_manager(const handle_manager &other) = default;
             constexpr handle_manager(handle_manager &&other) noexcept = default;

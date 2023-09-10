@@ -46,8 +46,9 @@ namespace ccl {
             dependent_pool(
                 const primary_pool_type &primary_pool,
                 const_reference default_value = T{},
-                allocator_type * const allocator = nullptr
-            ) : data{allocator},
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : data{allocator, alloc_flags},
                 default_value{default_value},
                 primary_pool{&primary_pool}
             {}

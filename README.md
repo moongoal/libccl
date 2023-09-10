@@ -114,7 +114,7 @@ Several pre-processor definitions configure behaviour:
 |CCL_ALLOCATOR_IMPL|Enable compiling the default implementations of `ccl::get_default_allocator()` and `ccl::set_default_allocator()`
 |CCL_ALLOCATOR_EXPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-exported
 |CCL_ALLOCATOR_IMPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-imported
-|CCL_DEFAULT_ALLOCATION_FLAGS|Set default allocation flags
+|CCL_ALLOCATOR_DEFAULT_FLAGS|Set default allocation flags
 
 Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
 

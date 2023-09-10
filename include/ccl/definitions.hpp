@@ -45,9 +45,9 @@
 #endif // CCL_PAGE_SIZE
 
 #ifdef CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS
-    #ifndef CCL_DEFAULT_ALLOCATION_FLAGS
-        #define CCL_DEFAULT_ALLOCATION_FLAGS 0u
-    #endif // CCL_DEFAULT_ALLOCATION_FLAGS
+    #ifndef CCL_ALLOCATOR_DEFAULT_FLAGS
+        #define CCL_ALLOCATOR_DEFAULT_FLAGS 0u
+    #endif // CCL_ALLOCATOR_DEFAULT_FLAGS
 #else
     #error Default allocation flags not defined.
 #endif // CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS

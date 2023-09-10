@@ -50,7 +50,7 @@ namespace ccl {
             using pointer = T*;
             using const_pointer = const T*;
             using allocator_type = Allocator;
-            using size_type = std::size_t;
+            using size_type = count_t;
             using iterator = contiguous_iterator<T>;
             using const_iterator = contiguous_iterator<const T>;
             using reverse_iterator = std::reverse_iterator<iterator>;
@@ -65,6 +65,8 @@ namespace ccl {
             size_type last = 0;
             pointer _data = nullptr;
             size_type _capacity = 0;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
+
 
             /**
              * Recenter first and last indices.
@@ -78,8 +80,12 @@ namespace ccl {
             }
 
         public:
-            constexpr deque(allocator_type * const allocator = nullptr)
-                : alloc{allocator}
+            constexpr deque(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            )
+                : alloc{allocator},
+                alloc_flags{alloc_flags}
             {}
 
             constexpr deque(const deque& other)
@@ -182,7 +188,11 @@ namespace ccl {
                         minimum_capacity
                     );
 
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
+                        actual_new_capacity,
+                        alloc_flags
+                    );
+
                     const size_type old_size = size();
                     const size_type new_first = choose(
                         (max(actual_new_capacity, 1ULL) >> 1) - old_size / 2,

@@ -54,7 +54,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags CCLUNUSED = CCL_DEFAULT_ALLOCATION_FLAGS) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags CCLUNUSED = CCL_ALLOCATOR_DEFAULT_FLAGS) {
                 uint8_t * const aligned_memory = align_address(memory, alignment);
                 const std::size_t padding = aligned_memory - memory;
                 const std::size_t allocation_size = n_bytes + padding;
@@ -82,7 +82,7 @@ namespace ccl {
              * @return A pointer to the newly allocated memory.
              */
             template<typename T>
-            CCLNODISCARD T* allocate(const std::size_t n, const allocation_flags flags = CCL_DEFAULT_ALLOCATION_FLAGS) {
+            CCLNODISCARD T* allocate(const std::size_t n, const allocation_flags flags = CCL_ALLOCATOR_DEFAULT_FLAGS) {
                 return reinterpret_cast<T*>(allocate(size_of<T>(n), alignof(T), flags));
             }
 

@@ -64,7 +64,11 @@ namespace ccl {
             static constexpr std::size_t bits_per_cluster = sizeof(cluster_type) * 8;
             static constexpr std::size_t cluster_size_bitcount = bitcount(bits_per_cluster) - 1;
 
-            explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
+            explicit constexpr bitset(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : clusters{allocator, alloc_flags}, _size_bits{0} {}
+
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}
             constexpr bitset(bitset &&other) : clusters{std::move(other.clusters)}, _size_bits{std::move(other._size_bits)} {
                 other._size_bits = 0;

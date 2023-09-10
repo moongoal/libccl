@@ -57,7 +57,7 @@ namespace ccl {
              *
              * @return A pointer to the newly allocated memory.
              */
-            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags = CCL_DEFAULT_ALLOCATION_FLAGS) {
+            CCLNODISCARD void* allocate(const std::size_t n_bytes, const std::size_t alignment, const allocation_flags flags = CCL_ALLOCATOR_DEFAULT_FLAGS) {
                 void * const ptr1 = allocators.first()->allocate(n_bytes, alignment, flags);
 
                 if(!ptr1) {

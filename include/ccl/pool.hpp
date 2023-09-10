@@ -52,10 +52,11 @@ namespace ccl {
         public:
             explicit constexpr pool(
                 const_reference default_value = T{},
-                allocator_type * const allocator = nullptr
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             ) noexcept :
-                handle_manager{allocator},
-                data{allocator},
+                handle_manager{allocator, alloc_flags},
+                data{allocator, alloc_flags},
                 default_value{default_value}
             {}
 

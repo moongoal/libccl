@@ -78,7 +78,10 @@ namespace ccl {
             }
 
         public:
-            explicit constexpr memory_pool(allocator_type * const allocator = nullptr) : data{allocator} {}
+            explicit constexpr memory_pool(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : data{allocator, alloc_flags} {}
 
             constexpr memory_pool(const memory_pool& other) = default;
             constexpr memory_pool(memory_pool&& other) noexcept = default;

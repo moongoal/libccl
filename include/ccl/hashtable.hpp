@@ -175,7 +175,7 @@ namespace ccl {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            using size_type = std::size_t;
+            using size_type = count_t;
 
             using key_type = K;
             using value_type = V;
@@ -199,8 +199,9 @@ namespace ccl {
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
 
             explicit constexpr hashtable(
-                allocator_type * const allocator = nullptr
-            ) : alloc{allocator}, _capacity{0}, keys{nullptr}, values{nullptr}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : alloc{allocator}, _capacity{0}, keys{nullptr}, values{nullptr}, alloc_flags{alloc_flags}
             {
                 reserve(minimum_capacity);
             }
@@ -334,8 +335,8 @@ namespace ccl {
                 do {
                     bool keep_iterating = true;
                     done = true;
-                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity);
-                    new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity);
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, alloc_flags);
+                    new_values = alloc::get_allocator()->template allocate<value_type>(new_capacity, alloc_flags);
 
                     new_slot_map.resize(new_capacity);
                     new_slot_map.zero();
@@ -576,6 +577,7 @@ namespace ccl {
             bitset<allocator_type> slot_map; // Slot availability bit map
             key_pointer keys = nullptr;
             value_pointer values = nullptr;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             static constexpr size_type invalid_size = ~static_cast<size_type>(0);
     };

@@ -214,9 +214,12 @@ template<typename Map>
             }
 
         public:
-            constexpr dense_map(allocator_type * const allocator = nullptr)
-                : data{allocator},
-                index_map{allocator}
+            constexpr dense_map(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            )
+                : data{allocator, alloc_flags},
+                index_map{allocator, alloc_flags}
             {}
 
             constexpr dense_map(const dense_map &other)
