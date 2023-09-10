@@ -6,6 +6,8 @@
 #ifndef CCL_DEFINITIONS_HPP
 #define CCL_DEFINITIONS_HPP
 
+#include <ccl/features.hpp>
+
 #ifndef CCL_HANDLE_VALUE_WIDTH
     #define CCL_HANDLE_VALUE_WIDTH 24
 #endif // CCL_HANDLE_VALUE_WIDTH
@@ -41,5 +43,13 @@
 #ifndef CCL_DEQUE_MIN_CAPACITY
     #define CCL_DEQUE_MIN_CAPACITY 16
 #endif // CCL_PAGE_SIZE
+
+#ifdef CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS
+    #ifndef CCL_DEFAULT_ALLOCATION_FLAGS
+        #define CCL_DEFAULT_ALLOCATION_FLAGS 0u
+    #endif // CCL_DEFAULT_ALLOCATION_FLAGS
+#else
+    #error Default allocation flags not defined.
+#endif // CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS
 
 #endif // CCL_DEFINITIONS_HPP
