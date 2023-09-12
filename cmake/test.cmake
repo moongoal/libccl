@@ -342,6 +342,11 @@ add_ccl_test(
     TEST test_i18n_language test/i18n/language.cpp
 )
 
+add_ccl_test(
+    TEST test_string_basic_string test/string/basic_string.cpp
+    COVERAGE include/ccl/string/basic_string.hpp
+)
+
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}

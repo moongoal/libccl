@@ -52,4 +52,8 @@
     #error Default allocation flags not defined.
 #endif // CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS
 
+#ifndef CCL_CHAR_TRAITS_DEFAULT_POS_TYPE
+    #define CCL_CHAR_TRAITS_DEFAULT_POS_TYPE uint32_t
+#endif // CCL_CHAR_TRAITS_DEFAULT_POS_TYPE
+
 #endif // CCL_DEFINITIONS_HPP

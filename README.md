@@ -115,6 +115,7 @@ Several pre-processor definitions configure behaviour:
 |CCL_ALLOCATOR_EXPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-exported
 |CCL_ALLOCATOR_IMPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-imported
 |CCL_ALLOCATOR_DEFAULT_FLAGS|Set default allocation flags
+|CCL_CHAR_TRAITS_DEFAULT_POS_TYPE|The default position type for `char_traits<char>`
 
 Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
 
