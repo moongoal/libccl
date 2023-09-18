@@ -121,8 +121,7 @@ namespace ccl {
                 const InputRange& input,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            )
-            : vector{allocator, alloc_flags} {
+            ) : vector{allocator, alloc_flags} {
                 const size_type input_size = std::abs(std::ranges::distance(input));
 
                 if(input_size > 0) {
