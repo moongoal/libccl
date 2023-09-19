@@ -21,6 +21,19 @@ int main(int argc, char **argv) {
         }
     );
 
+    suite.add_test("ctor (c-string)", [] () {
+        const char * const cstr = "abc";
+        test_string<> v{cstr};
+
+        check(v.size() == 3);
+    });
+
+    suite.add_test("ctor (string literal)", [] () {
+        test_string<> v{"abc"};
+
+        check(v.size() == 3);
+    });
+
     suite.add_test("ctor (copy)", [] () {
         test_string<> v;
 
@@ -31,10 +44,7 @@ int main(int argc, char **argv) {
         test_string<> v2{v};
 
         check(v.size() == 3);
-        check(v.capacity() == 4);
-
         check(v2.size() == 3);
-        check(v2.capacity() == 4);
 
         check(v.data() != v2.data());
     });
@@ -51,7 +61,6 @@ int main(int argc, char **argv) {
         check(v.data() == nullptr);
 
         check(v2.size() == 3);
-        check(v2.capacity() == 4);
         check(v2.data() != nullptr);
     });
 

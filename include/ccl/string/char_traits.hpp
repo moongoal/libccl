@@ -27,6 +27,10 @@ namespace ccl {
         using int_type = IntType;
         using pos_type = PosType;
 
+        static constexpr int_type nul() noexcept {
+            return '\0';
+        }
+
         static constexpr void assign(char_type& r, const char_type &a) noexcept {
             r = a;
         }
@@ -91,7 +95,7 @@ namespace ccl {
         static constexpr std::size_t length(const char_type* s) {
             pos_type i = 0;
 
-            for(; compare(s[i], char_type{}); ++i);
+            for(; !eq(s[i], char_type{}); ++i);
 
             return i;
         }
@@ -100,7 +104,7 @@ namespace ccl {
             for(pos_type i = 0; i < count; ++i) {
                 const char_type &cur = &ptr[count];
 
-                if(compare(cur, ch) == 0) {
+                if(eq(cur, ch) == 0) {
                     return &cur;
                 }
             }
