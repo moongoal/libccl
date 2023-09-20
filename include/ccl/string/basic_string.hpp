@@ -100,7 +100,7 @@ namespace ccl {
                 _data.push_back(char_traits::to_char_type(char_traits::nul()));
             }
 
-            bool operator==(const basic_string& rhs) const {
+            constexpr bool operator==(const basic_string& rhs) const {
                 if(_data.size() != rhs._data.size()) {
                     return false;
                 }
@@ -114,11 +114,11 @@ namespace ccl {
                 return true;
             }
 
-            bool operator!=(const basic_string& rhs) const {
+            constexpr bool operator!=(const basic_string& rhs) const {
                 return !basic_string::operator==(rhs);
             }
 
-            bool operator<(const basic_string& rhs)  const {
+            constexpr bool operator<(const basic_string& rhs) const {
                 const size_type sz = min(_data.size(), rhs._data.size());
 
                 for(size_type i = 0; i < sz; ++i) {
@@ -130,7 +130,7 @@ namespace ccl {
                 return false;
             }
 
-            bool operator<=(const basic_string& rhs) const {
+            constexpr bool operator<=(const basic_string& rhs) const {
                 const size_type sz = min(_data.size(), rhs._data.size());
 
                 for(size_type i = 0; i < sz; ++i) {
@@ -142,7 +142,7 @@ namespace ccl {
                 return true;
             }
 
-            bool operator>(const basic_string& rhs)  const {
+            constexpr bool operator>(const basic_string& rhs) const {
                 const size_type sz = min(_data.size(), rhs._data.size());
 
                 for(size_type i = 0; i < sz; ++i) {
@@ -154,7 +154,7 @@ namespace ccl {
                 return false;
             }
 
-            bool operator>=(const basic_string& rhs) const {
+            constexpr bool operator>=(const basic_string& rhs) const {
                 const size_type sz = min(_data.size(), rhs._data.size());
 
                 for(size_type i = 0; i < sz; ++i) {
@@ -164,6 +164,14 @@ namespace ccl {
                 }
 
                 return true;
+            }
+
+            constexpr decltype(auto) operator[](const size_type index) {
+                return _data[index];
+            }
+
+            constexpr decltype(auto) operator[](const size_type index) const {
+                return _data[index];
             }
     };
 }

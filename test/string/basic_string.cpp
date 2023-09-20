@@ -132,5 +132,16 @@ int main(int argc, char **argv) {
         check(s1 <= s1);
     });
 
+    suite.add_test("operator []", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"abd"};
+
+        differs(s1[2], s2[2]);
+
+        s2[2] = 'c';
+
+        equals(s1[2], s2[2]);
+    });
+
     return suite.main(argc, argv);
 }
