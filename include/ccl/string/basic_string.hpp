@@ -119,19 +119,51 @@ namespace ccl {
             }
 
             bool operator<(const basic_string& rhs)  const {
-                return char_traits::
+                const size_type sz = min(_data.size(), rhs._data.size());
+
+                for(size_type i = 0; i < sz; ++i) {
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(_data[i], rhs._data[i]);
+                    }
+                }
+
+                return false;
             }
 
             bool operator<=(const basic_string& rhs) const {
-                return char_traits::
+                const size_type sz = min(_data.size(), rhs._data.size());
+
+                for(size_type i = 0; i < sz; ++i) {
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(_data[i], rhs._data[i]);
+                    }
+                }
+
+                return true;
             }
 
             bool operator>(const basic_string& rhs)  const {
-                return char_traits::
+                const size_type sz = min(_data.size(), rhs._data.size());
+
+                for(size_type i = 0; i < sz; ++i) {
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(rhs._data[i], _data[i]);
+                    }
+                }
+
+                return false;
             }
 
             bool operator>=(const basic_string& rhs) const {
-                return char_traits::
+                const size_type sz = min(_data.size(), rhs._data.size());
+
+                for(size_type i = 0; i < sz; ++i) {
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(rhs._data[i], _data[i]);
+                    }
+                }
+
+                return true;
             }
     };
 }

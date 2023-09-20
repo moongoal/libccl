@@ -70,5 +70,67 @@ int main(int argc, char **argv) {
         check(v.size() == 7);
     });
 
+    suite.add_test("operator ==", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"cde"};
+        test_string<> s3{"abc"};
+
+        check(s1 == s3);
+        check(!(s1 == s2));
+        check(s1 == s1);
+    });
+
+    suite.add_test("operator !=", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"cde"};
+        test_string<> s3{"abc"};
+
+        check(!(s1 != s3));
+        check(s1 != s2);
+        check(!(s1 != s1));
+    });
+
+    suite.add_test("operator >", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"cde"};
+        test_string<> s3{"abc"};
+
+        check(!(s1 > s3));
+        check(s2 > s1);
+        check(!(s1 > s1));
+    });
+
+    suite.add_test("operator <", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"cde"};
+        test_string<> s3{"abc"};
+
+        check(!(s1 < s3));
+        check(s1 < s2);
+        check(!(s1 < s1));
+    });
+
+    suite.add_test("operator >=", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"cde"};
+        test_string<> s3{"abc"};
+
+        check(s1 >= s3);
+        check(s2 >= s1);
+        check(!(s1 >= s2));
+        check(s1 >= s1);
+    });
+
+    suite.add_test("operator <=", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"cde"};
+        test_string<> s3{"abc"};
+
+        check(s3 <= s1);
+        check(s1 <= s2);
+        check(s1 <= s2);
+        check(s1 <= s1);
+    });
+
     return suite.main(argc, argv);
 }
