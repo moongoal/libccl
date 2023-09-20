@@ -64,5 +64,11 @@ int main(int argc, char **argv) {
         check(v2.data() != nullptr);
     });
 
+    suite.add_test("ctor (initializer list)", [] () {
+        test_string<> v{'a', 'b', 'c', 'd', 'e', 'f', 'g'};
+
+        check(v.size() == 7);
+    });
+
     return suite.main(argc, argv);
 }

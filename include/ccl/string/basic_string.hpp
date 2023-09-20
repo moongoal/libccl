@@ -51,13 +51,6 @@ namespace ccl {
             constexpr basic_string(const basic_string &other) : _data{other._data} {}
             constexpr basic_string(basic_string &&other) : _data{std::move(other._data)} {}
 
-            template<size_type N>
-            constexpr basic_string(
-                const CharType (&values)[N],
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{values, allocator, alloc_flags} {}
-
             constexpr basic_string(
                 const const_pointer cstr,
                 allocator_type * const allocator = nullptr,
@@ -74,14 +67,11 @@ namespace ccl {
                 std::initializer_list<CharType> values,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{values, allocator, alloc_flags} {}
-
-            template<std::ranges::input_range InputRange>
-            constexpr basic_string(
-                const InputRange& input,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{input, allocator, alloc_flags} {}
+            ) : _data{allocator, alloc_flags} {
+                _data.resize(values.size() + 1);
+                char_traits::copy(_data.data(), values.begin(), values.size());
+                _data[values.size()] = char_traits::to_char_type(char_traits::nul());
+            }
 
             constexpr auto capacity() const noexcept {
                 return _data.capacity();
@@ -95,6 +85,10 @@ namespace ccl {
                 return _data.data();
             }
 
+            constexpr const_pointer c_str() const noexcept {
+                return _data.data();
+            }
+
             constexpr void push_back(const value_type c) {
                 if(_data.is_empty()) {
                     _data.reserve(2);
@@ -104,6 +98,40 @@ namespace ccl {
                 }
 
                 _data.push_back(char_traits::to_char_type(char_traits::nul()));
+            }
+
+            bool operator==(const basic_string& rhs) const {
+                if(_data.size() != rhs._data.size()) {
+                    return false;
+                }
+
+                for(size_type i = 0; i < _data.size(); ++i) {
+                    if(_data[i] != rhs._data[i]) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            bool operator!=(const basic_string& rhs) const {
+                return !basic_string::operator==(rhs);
+            }
+
+            bool operator<(const basic_string& rhs)  const {
+                return char_traits::
+            }
+
+            bool operator<=(const basic_string& rhs) const {
+                return char_traits::
+            }
+
+            bool operator>(const basic_string& rhs)  const {
+                return char_traits::
+            }
+
+            bool operator>=(const basic_string& rhs) const {
+                return char_traits::
             }
     };
 }
