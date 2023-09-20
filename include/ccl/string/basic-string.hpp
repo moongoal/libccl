@@ -14,7 +14,7 @@
 #include <ccl/contiguous-iterator.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/internal/optional-allocator.hpp>
-#include <ccl/string/char_traits.hpp>
+#include <ccl/string/char-traits.hpp>
 
 namespace ccl {
     template<

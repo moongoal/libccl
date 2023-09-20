@@ -343,8 +343,8 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    TEST test_string_basic_string test/string/basic_string.cpp
-    COVERAGE include/ccl/string/basic_string.hpp
+    TEST test_string_basic_string test/string/basic-string.cpp
+    COVERAGE include/ccl/string/basic-string.hpp
 )
 
 add_custom_command(
