@@ -38,6 +38,7 @@ Unstable: 🔴
 |Memory Pool|🔴
 |Dependent Pool|🔴
 |Shared Pointer|🔴
+|String|🔴
 |Internationalization Support|🔴
 
 ## Building
