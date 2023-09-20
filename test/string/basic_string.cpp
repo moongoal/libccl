@@ -143,5 +143,26 @@ int main(int argc, char **argv) {
         equals(s1[2], s2[2]);
     });
 
+    suite.add_test("hash", [] () {
+        test_string<> s1{"abc"};
+        test_string<> s2{"abd"};
+        test_string<> s3{"abc"};
+
+        const hash_t h1 = hash<test_string<>>{}(s1);
+        const hash_t h2 = hash<test_string<>>{}(s2);
+        const hash_t h3 = hash<test_string<>>{}(s3);
+
+        equals(h1, h3);
+        differs(h1, h2);
+    });
+
+    suite.add_test("hash (empty)", [] () {
+        test_string<> s1;
+
+        const hash_t h1 = hash<test_string<>>{}(s1);
+
+        differs(h1, 0);
+    });
+
     return suite.main(argc, argv);
 }

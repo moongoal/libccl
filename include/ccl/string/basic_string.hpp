@@ -9,11 +9,12 @@
 #include <iterator>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
+#include <ccl/hash.hpp>
 #include <ccl/vector.hpp>
+#include <ccl/contiguous-iterator.hpp>
 #include <ccl/memory/allocator.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/string/char_traits.hpp>
-#include <ccl/contiguous-iterator.hpp>
 
 namespace ccl {
     template<
@@ -172,6 +173,17 @@ namespace ccl {
 
             constexpr decltype(auto) operator[](const size_type index) const {
                 return _data[index];
+            }
+
+            constexpr hash_t hash() const {
+                return fnv1a_hash(
+                    size_of<value_type>(_data.size()),
+                    reinterpret_cast<const uint8_t*>(_data.data())
+                );
+            }
+
+            constexpr bool empty() const {
+                return _data.size() == 0;
             }
     };
 }
