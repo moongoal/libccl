@@ -185,6 +185,54 @@ namespace ccl {
             constexpr bool empty() const {
                 return _data.size() == 0;
             }
+
+            constexpr decltype(auto) begin() noexcept { return _data.begin(); }
+
+            constexpr decltype(auto) end() noexcept {
+                auto it = _data.end();
+
+                // Account for trailing '\0'
+                if(it != _data.begin()) {
+                    --it;
+                }
+
+                return it;
+            }
+
+            constexpr decltype(auto) begin() const noexcept { return _data.begin(); }
+
+            constexpr decltype(auto) end() const noexcept {
+                auto it = _data.end();
+
+                // Account for trailing '\0'
+                if(it != _data.begin()) {
+                    --it;
+                }
+
+                return it;
+            }
+
+            constexpr decltype(auto) cbegin() const noexcept { return _data.begin(); }
+
+            constexpr decltype(auto) cend() const noexcept {
+                auto it = _data.end();
+
+                // Account for trailing '\0'
+                if(it != _data.begin()) {
+                    --it;
+                }
+
+                return it;
+            }
+
+            constexpr decltype(auto) rbegin() noexcept { return reverse_iterator{end()}; }
+            constexpr decltype(auto) rend() noexcept { return reverse_iterator{begin()}; }
+
+            constexpr decltype(auto) rbegin() const noexcept { return const_reverse_iterator{cend()}; }
+            constexpr decltype(auto) rend() const noexcept { return const_reverse_iterator{cbegin()}; }
+
+            constexpr decltype(auto) crbegin() const noexcept { return const_reverse_iterator{cend()}; }
+            constexpr decltype(auto) crend() const noexcept { return const_reverse_iterator{cbegin()}; }
     };
 }
 

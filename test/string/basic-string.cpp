@@ -164,5 +164,61 @@ int main(int argc, char **argv) {
         differs(h1, 0);
     });
 
+    suite.add_test("iterators (non-const)", [] () {
+        test_string<> s1{"abc"};
+        int count = 0;
+
+        for(auto it = s1.begin(); it < s1.end(); ++it) {
+            ++count;
+            *it = 'x';
+        }
+
+        equals(count, 3);
+        equals(s1[0], 'x');
+    });
+
+    suite.add_test("iterators (const)", [] () {
+        const test_string<> s1{"abc"};
+        int count = 0;
+
+        for(auto it = s1.begin(); it < s1.end(); ++it) {
+            ++count;
+        }
+
+        equals(count, 3);
+    });
+
+    suite.add_test("const iterators", [] () {
+        test_string<> s1{"abc"};
+        int count = 0;
+
+        for(auto it = s1.cbegin(); it < s1.cend(); ++it) {
+            ++count;
+        }
+
+        equals(count, 3);
+    });
+
+    suite.add_test("reverse iterators", [] () {
+        test_string<> s1{"abc"};
+
+        equals(*s1.rbegin(), 'c');
+        equals(s1.rend() - s1.rbegin(), 3);
+    });
+
+    suite.add_test("reverse iterators (const)", [] () {
+        const test_string<> s1{"abc"};
+
+        equals(*s1.rbegin(), 'c');
+        equals(s1.rend() - s1.rbegin(), 3);
+    });
+
+    suite.add_test("const reverse iterators", [] () {
+        test_string<> s1{"abc"};
+
+        equals(*s1.crbegin(), 'c');
+        equals(s1.rend() - s1.rbegin(), 3);
+    });
+
     return suite.main(argc, argv);
 }
