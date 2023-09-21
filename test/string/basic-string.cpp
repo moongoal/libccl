@@ -220,5 +220,12 @@ int main(int argc, char **argv) {
         equals(s1.rend() - s1.rbegin(), 3);
     });
 
+    suite.add_test("clear", [] () {
+        test_string<> s1{"abcdegdfosgosugosgfdogod"};
+
+        s1.clear();
+        equals(s1.size(), 0);
+    });
+
     return suite.main(argc, argv);
 }

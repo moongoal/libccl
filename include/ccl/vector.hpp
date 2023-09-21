@@ -277,7 +277,7 @@ namespace ccl {
             constexpr reference emplace_back(Args&& ...args) { return emplace_at(end(), std::forward<Args>(args)...); }
 
             template<typename ...Args>
-            constexpr reference  prepend_emplace(Args&& ...args) { return emplace_at(begin(), std::forward<Args>(args)...); }
+            constexpr reference prepend_emplace(Args&& ...args) { return emplace_at(begin(), std::forward<Args>(args)...); }
 
             constexpr reference operator[](const size_type index) {
                 CCL_THROW_IF(index >= _size, std::out_of_range{"Index out of range."});

@@ -75,7 +75,7 @@ namespace ccl {
             }
 
             constexpr auto capacity() const noexcept {
-                return _data.capacity();
+                return choose(0, _data.capacity() - 1, _data.is_empty());
             }
 
             constexpr auto size() const noexcept {
@@ -233,6 +233,9 @@ namespace ccl {
 
             constexpr decltype(auto) crbegin() const noexcept { return const_reverse_iterator{cend()}; }
             constexpr decltype(auto) crend() const noexcept { return const_reverse_iterator{cbegin()}; }
+
+            constexpr void shrink_to_fit() { _data.shrink_to_fit(); }
+            constexpr void clear() noexcept { _data.clear(); }
     };
 }
 
