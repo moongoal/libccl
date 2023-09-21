@@ -49,6 +49,11 @@ namespace ccl {
             ) : _data{allocator, alloc_flags}
             {}
 
+            explicit constexpr basic_string(
+                const allocation_flags alloc_flags
+            ) : _data{nullptr, alloc_flags}
+            {}
+
             constexpr basic_string(const basic_string &other) : _data{other._data} {}
             constexpr basic_string(basic_string &&other) : _data{std::move(other._data)} {}
 
@@ -62,6 +67,12 @@ namespace ccl {
                 _data.resize(sz + 1);
                 char_traits::copy(_data.data(), cstr, sz);
                 _data[sz] = char_traits::to_char_type(char_traits::nul());
+            }
+
+            constexpr basic_string(
+                const const_pointer cstr,
+                const allocation_flags alloc_flags
+            ) : basic_string{cstr, nullptr, alloc_flags} {
             }
 
             constexpr basic_string(
