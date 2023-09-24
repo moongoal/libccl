@@ -7,6 +7,7 @@
 #define CCL_STRING_BASE_STRING_HPP
 
 #include <iterator>
+#include <ranges>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hash.hpp>
@@ -247,6 +248,26 @@ namespace ccl {
 
             constexpr void shrink_to_fit() { _data.shrink_to_fit(); }
             constexpr void clear() noexcept { _data.clear(); }
+
+            constexpr void insert(iterator where, const_reference item) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                _data.insert(where, item);
+            }
+
+            template <std::ranges::input_range InputRange>
+            constexpr void insert_range(iterator where, const InputRange& input) {
+                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
+
+                _data.insert_range(where, input);
+            }
+
+            constexpr void erase(const iterator start, const iterator finish) {
+                CCL_THROW_IF(std::to_address(start) < _data.data() || std::to_address(start) > _data.data() + size(), std::out_of_range{"Invalid start iterator."});
+                CCL_THROW_IF(std::to_address(finish) < _data.data() || std::to_address(finish) > _data.data() + size(), std::out_of_range{"Invalid finish iterator."});
+
+                _data.erase(start, finish);
+            }
     };
 }
 

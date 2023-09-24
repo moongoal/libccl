@@ -227,5 +227,30 @@ int main(int argc, char **argv) {
         equals(s1.size(), 0);
     });
 
+    suite.add_test("insert", [] () {
+        test_string<> actual{"abd"};
+        test_string<> expected{"abcd"};
+
+        actual.insert(actual.begin() + 2, 'c');
+        equals(actual, expected);
+    });
+
+    suite.add_test("insert_range", [] () {
+        test_string<> actual{"abe"};
+        test_string<> other{"cd"};
+        test_string<> expected{"abcde"};
+
+        actual.insert_range(actual.begin() + 2, other);
+        equals(actual, expected);
+    });
+
+    suite.add_test("erase", [] () {
+        test_string<> actual{"abcd"};
+        test_string<> expected{"abd"};
+
+        actual.erase(actual.begin() + 2, actual.begin() + 3);
+        equals(actual, expected);
+    });
+
     return suite.main(argc, argv);
 }
