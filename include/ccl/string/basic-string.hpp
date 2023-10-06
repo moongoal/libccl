@@ -22,7 +22,15 @@ namespace ccl {
         typename CharType,
         char_traits_impl<CharType> CharTraits,
         typed_allocator<CharType> Allocator
+    > class basic_sstream;
+
+    template<
+        typename CharType,
+        char_traits_impl<CharType> CharTraits,
+        typed_allocator<CharType> Allocator
     > class basic_string {
+        friend class basic_sstream<CharType, CharTraits, Allocator>;
+
         using vec = vector<CharType, Allocator>;
 
         public:
@@ -84,6 +92,10 @@ namespace ccl {
                 _data.resize(values.size() + 1);
                 char_traits::copy(_data.data(), values.begin(), values.size());
                 _data[values.size()] = char_traits::to_char_type(char_traits::nul());
+            }
+
+            constexpr auto swap(basic_string &other) noexcept {
+                _data.swap(other._data);
             }
 
             constexpr auto capacity() const noexcept {

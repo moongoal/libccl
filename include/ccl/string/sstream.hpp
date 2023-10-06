@@ -23,10 +23,10 @@ namespace ccl {
             using char_traits = CharTraits;
             using allocator_type = Allocator;
             using string_type = basic_string<value_type, char_traits, allocator_type>;
-            using char_vector_type = vector<CharType, Allocator>;
+            using vec_type = vector<value_type, allocator>;
 
         private:
-            char_vector_type _data;
+            vec_type _data;
 
         public:
             explicit constexpr basic_sstream(
@@ -42,6 +42,12 @@ namespace ccl {
 
             constexpr basic_sstream(const basic_sstream &other) : _data{other._data} {}
             constexpr basic_sstream(basic_sstream &&other) : _data{std::move(other._data)} {}
+
+            constexpr auto swap(basic_sstream &other) noexcept {
+                _data.swap(other._data);
+            }
+
+
     };
 }
 
