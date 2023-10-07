@@ -22,14 +22,14 @@ namespace ccl {
         typename CharType,
         char_traits_impl<CharType> CharTraits,
         typed_allocator<CharType> Allocator
-    > class basic_sstream;
+    > class basic_string_builder;
 
     template<
         typename CharType,
         char_traits_impl<CharType> CharTraits,
         typed_allocator<CharType> Allocator
     > class basic_string {
-        friend class basic_sstream<CharType, CharTraits, Allocator>;
+        friend class basic_string_builder<CharType, CharTraits, Allocator>;
 
         using vec = vector<CharType, Allocator>;
 
