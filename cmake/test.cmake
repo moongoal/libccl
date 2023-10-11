@@ -347,6 +347,11 @@ add_ccl_test(
     COVERAGE include/ccl/string/basic-string.hpp
 )
 
+add_ccl_test(
+    TEST test_string_builder test/string/builder.cpp
+    COVERAGE include/ccl/string/builder.hpp
+)
+
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}
