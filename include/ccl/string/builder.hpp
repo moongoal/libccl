@@ -7,6 +7,7 @@
 #define CCL_STRING_BUILDER_HPP
 
 #include <cstring>
+#include <cstdlib>
 #include <ccl/api.hpp>
 #include <ccl/vector.hpp>
 #include <ccl/concepts.hpp>
