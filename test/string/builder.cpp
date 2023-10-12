@@ -118,5 +118,36 @@ int main(int argc, char **argv) {
         equals(b.to_string(), test_string{"ab123.500000"});
     });
 
+    suite.add_test("operator << (int)", [] () {
+        test_builder b{"ab"};
+
+        b << -123;
+
+        equals(b.to_string(), test_string{"ab-123"});
+    });
+
+    suite.add_test("operator << (unsigned int)", [] () {
+        test_builder b{"ab"};
+
+        b << 123u;
+
+        equals(b.to_string(), test_string{"ab123"});
+    });
+
+    suite.add_test("operator << (string literal)", [] () {
+        test_builder b{"ab"};
+
+        b << "cd";
+
+        equals(b.to_string(), test_string{"abcd"});
+    });
+
+    suite.add_test("append(c-string)", [] () {
+        test_builder b{"ab"};
+
+        b.append("cd", 2);
+        equals(b.to_string(), test_string{"abcd"});
+    });
+
     return suite.main(argc, argv);
 }

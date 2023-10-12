@@ -154,11 +154,52 @@ namespace ccl {
                 return *this;
             }
 
+            constexpr basic_string_builder& operator <<(const int value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%d", value);
+
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const unsigned value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%u", value);
+
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
             constexpr basic_string_builder& operator <<(const string_type &value) {
                 const auto dest_begin = _data.size();
 
                 _data.resize(_data.size() + value.length());
                 char_traits::copy(_data.data() + dest_begin, &value[0], value.length());
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& append(const CharType * const value, const size_type length) {
+                const auto dest_begin = _data.size();
+
+                _data.resize(_data.size() + length);
+                char_traits::copy(_data.data() + dest_begin, value, length);
+
+                return *this;
+            }
+
+            template<size_type N>
+            constexpr basic_string_builder& operator <<(const CharType (&value)[N]) {
+                const auto dest_begin = _data.size();
+
+                _data.resize(_data.size() + N - 1);
+                char_traits::copy(_data.data() + dest_begin, value, N - 1);
 
                 return *this;
             }
