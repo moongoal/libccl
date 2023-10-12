@@ -89,7 +89,7 @@ namespace ccl {
                 const_pointer raw,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ): basic_string{raw, static_cast<size_type>(char_traits::length(raw)), allocator, alloc_flags}
+            ): basic_string{raw, char_traits::length(raw), allocator, alloc_flags}
             {}
 
             constexpr basic_string(basic_string &&other) {

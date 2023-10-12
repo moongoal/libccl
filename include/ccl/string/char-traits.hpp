@@ -92,7 +92,7 @@ namespace ccl {
             return 1 - static_cast<int>(full_equality);
         }
 
-        static constexpr std::size_t length(const char_type* s) {
+        static constexpr pos_type length(const char_type* s) {
             pos_type i = 0;
 
             for(; !eq(s[i], char_type{}); ++i);
