@@ -50,8 +50,15 @@ namespace ccl {
             explicit constexpr basic_string_builder(
                 const string_type &s
             ) : _data{s, s.get_allocator(), s.get_allocation_flags()}
-            {
-            }
+            {}
+
+            template<size_type N>
+            explicit constexpr basic_string_builder(
+                const CharType (&raw)[N],
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : _data{std::span{raw, N - 1}, allocator, alloc_flags}
+            {}
 
             constexpr basic_string_builder(const basic_string_builder &other) : _data{other._data} {}
 
@@ -71,21 +78,89 @@ namespace ccl {
 
             constexpr basic_string_builder& operator <<(const short value) {
                 value_type buff[default_int_buffer_size];
-
                 buff[0] = char_traits::nul();
 
-                ::snprintf(buff, default_int_buffer_size, "%i", value);
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%i", value);
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
 
-                _data.insert_range(_data.end(), buff);
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const long value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%li", value);
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const unsigned long value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%lu", value);
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const long long value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%lli", value);
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const unsigned long long value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%llu", value);
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const double value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = min<int, int>(
+                    ::snprintf(buff, default_int_buffer_size, "%lf", value),
+                    default_int_buffer_size
+                );
+
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const long double value) {
+                value_type buff[default_int_buffer_size];
+                buff[0] = char_traits::nul();
+
+                const size_type written_chars = min<int, int>(
+                    ::snprintf(buff, default_int_buffer_size, "%Lf", value),
+                    default_int_buffer_size
+                );
+
+                _data.insert_range(_data.end(), std::span{buff, written_chars});
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const string_type &value) {
-                const auto dest_begin = _data.begin();
+                const auto dest_begin = _data.size();
 
-                _data.resize(_data.size() + value.size());
-                char_traits::copy(dest_begin, value.begin(), value.size());
+                _data.resize(_data.size() + value.length());
+                char_traits::copy(_data.data() + dest_begin, &value[0], value.length());
+
+                return *this;
             }
 
             constexpr allocator_type* get_allocator() const noexcept { return _data.get_allocator(); }

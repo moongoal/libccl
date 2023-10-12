@@ -27,5 +27,96 @@ int main(int argc, char **argv) {
         equals(b.to_string(), s);
     });
 
+    suite.add_test("ctor (raw)", [] () {
+        test_builder b{"abcd"};
+
+        equals(b.to_string(), test_string{"abcd"});
+    });
+
+    suite.add_test("ctor (copy)", [] () {
+        test_builder b{"abcd"}, b2{b};
+
+        equals(b.to_string(), b2.to_string());
+    });
+
+    suite.add_test("ctor (move)", [] () {
+        test_builder b{"abcd"}, b2{std::move(b)};
+
+        equals(test_string{"abcd"}, b2.to_string());
+    });
+
+    suite.add_test("operator << (bool)", [] () {
+        test_builder b{"ab"};
+
+        b << true;
+        b << false;
+
+        equals(b.to_string(), test_string{"ab10"});
+    });
+
+    suite.add_test("operator << (short)", [] () {
+        test_builder b{"ab"};
+
+        b << static_cast<short>(123);
+
+        equals(b.to_string(), test_string{"ab123"});
+    });
+
+    suite.add_test("operator << (string)", [] () {
+        test_builder b{"ab"};
+
+        b << test_string{"cd"};
+
+        equals(b.to_string(), test_string{"abcd"});
+    });
+
+    suite.add_test("operator << (long)", [] () {
+        test_builder b{"ab"};
+
+        b << 123l;
+
+        equals(b.to_string(), test_string{"ab123"});
+    });
+
+    suite.add_test("operator << (unsigned long)", [] () {
+        test_builder b{"ab"};
+
+        b << 123ul;
+
+        equals(b.to_string(), test_string{"ab123"});
+    });
+
+    suite.add_test("operator << (long long)", [] () {
+        test_builder b{"ab"};
+
+        b << 123L;
+
+        equals(b.to_string(), test_string{"ab123"});
+    });
+
+    suite.add_test("operator << (unsigned long long)", [] () {
+        test_builder b{"ab"};
+
+        b << 123UL;
+
+        equals(b.to_string(), test_string{"ab123"});
+    });
+
+    suite.add_test("operator << (double)", [] () {
+        test_builder b{"ab"};
+
+        b << 123.5;
+
+        equals(b.to_string(), test_string{"ab123.500000"});
+    });
+
+    suite.add_test("operator << (long double)", [] () {
+        test_builder b{"ab"};
+
+        b << static_cast<long double>(123.5);
+
+        equals(b.to_string(), test_string{"ab123.500000"});
+    });
+
     return suite.main(argc, argv);
 }

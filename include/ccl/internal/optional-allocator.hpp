@@ -83,6 +83,8 @@ namespace ccl::internal {
                 return static_cast<allocator_type*>(this);
             }
 
+            constexpr void swap(with_optional_allocator &other CCLUNUSED) noexcept {}
+
             static constexpr bool is_allocator_stateless() noexcept { return true; }
     };
 }

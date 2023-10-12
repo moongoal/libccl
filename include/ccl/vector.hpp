@@ -164,14 +164,18 @@ namespace ccl {
             }
 
             constexpr vector& operator =(vector &&other) {
-                alloc::operator =(std::move(other));
+                swap(other);
+
+                return *this;
+            }
+
+            constexpr void swap(vector &other) {
+                alloc::swap(other);
 
                 ccl::swap(_size, other._size);
                 ccl::swap(_capacity, other._capacity);
                 ccl::swap(_data, other._data);
                 ccl::swap(alloc_flags, other.alloc_flags);
-
-                return *this;
             }
 
             constexpr size_type size() const noexcept { return _size; }

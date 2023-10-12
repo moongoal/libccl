@@ -20,17 +20,9 @@
 namespace ccl {
     template<
         typename CharType,
-        char_traits_impl<CharType> CharTraits,
-        typed_allocator<CharType> Allocator
-    > class basic_string_builder;
-
-    template<
-        typename CharType,
         char_traits_impl<CharType> CharTraits = char_traits<CharType>,
         typed_allocator<CharType> Allocator = allocator
     > class basic_string : internal::with_optional_allocator<Allocator> {
-        friend class basic_string_builder<CharType, CharTraits, Allocator>;
-
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
