@@ -149,6 +149,7 @@ namespace ccl {
              */
             bool is_valid(const handle_type &handle) const { return primary_pool->is_valid(handle); }
 
+            constexpr allocator_type* get_allocator() const noexcept { return data.get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }

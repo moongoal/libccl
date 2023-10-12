@@ -30,11 +30,9 @@ namespace ccl {
             using vector_type = vector<value_type, Allocator>;
             using size_type = typename vector_type::size_type;
 
-            static constexpr int default_int_radix = 10;
             static constexpr unsigned default_int_buffer_size = 128;
 
         private:
-            int int_radix = default_int_radix;
             vector_type _data;
 
         public:
@@ -49,18 +47,20 @@ namespace ccl {
             ) : basic_string_builder{nullptr, alloc_flags}
             {}
 
+            explicit constexpr basic_string_builder(
+                const string_type &s
+            ) : _data{s, s.get_allocator(), s.get_allocation_flags()}
+            {
+            }
+
             constexpr basic_string_builder(const basic_string_builder &other) : _data{other._data} {}
+
             constexpr basic_string_builder(basic_string_builder &&other) {
                 swap(other);
             }
 
             constexpr auto swap(basic_string_builder &other) noexcept {
-                std::swap(int_radix, other.int_radix);
                 _data.swap(other._data);
-            }
-
-            constexpr void set_int_radix(const int radix) {
-                int_radix = radix;
             }
 
             constexpr basic_string_builder& operator <<(const bool value) {
@@ -74,11 +74,7 @@ namespace ccl {
 
                 buff[0] = char_traits::nul();
 
-                #ifdef _WIN32
-                    ::_itoa_s(value, buff, int_radix);
-                #else // defined(_WIN32)
-                    ::itoa(value, buff, int_radix);
-                #endif // defined(_WIN32)
+                ::snprintf(buff, default_int_buffer_size, "%i", value);
 
                 _data.insert_range(_data.end(), buff);
 
@@ -92,9 +88,14 @@ namespace ccl {
                 char_traits::copy(dest_begin, value.begin(), value.size());
             }
 
+            constexpr allocator_type* get_allocator() const noexcept { return _data.get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return _data.get_allocation_flags(); }
 
             string_type to_string() const {
+                if(_data.is_empty()) {
+                    return string_type{_data.get_allocator(), _data.get_allocation_flags()};
+                }
+
                 return string_type{_data.data(), _data.size(), _data.get_allocator(), _data.get_allocation_flags()};
             }
     };

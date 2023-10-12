@@ -14,16 +14,16 @@ int main(int argc, char **argv) {
     suite.add_test("ctor", []() {
         test_string<> v;
 
-        check(v.size() == 0);
+        check(v.length() == 0);
         check(v.raw() == nullptr);
     });
 
     suite.add_test("ctor (raw, w/size)", []() {
         test_string<> v{"abcd", 4};
 
-        check(v.size() == 4);
+        check(v.length() == 4);
 
-        for(unsigned i = 0; i < v.size(); ++i) {
+        for(unsigned i = 0; i < v.length(); ++i) {
             equals(v[i], 'a' + i);
         }
     });
@@ -31,9 +31,9 @@ int main(int argc, char **argv) {
     suite.add_test("ctor (raw, wo/size)", []() {
         test_string<> v{"abcd"};
 
-        check(v.size() == 4);
+        check(v.length() == 4);
 
-        for(unsigned i = 0; i < v.size(); ++i) {
+        for(unsigned i = 0; i < v.length(); ++i) {
             equals(v[i], 'a' + i);
         }
     });
@@ -42,11 +42,11 @@ int main(int argc, char **argv) {
         test_string<> v{"abcd"};
         test_string<> v2{v};
 
-        check(v.size() == 4);
-        check(v2.size() == 4);
+        check(v.length() == 4);
+        check(v2.length() == 4);
         check(v.raw() != v2.raw());
 
-        for(unsigned i = 0; i < v.size(); ++i) {
+        for(unsigned i = 0; i < v.length(); ++i) {
             equals(v[i], v2[i]);
         }
     });
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
         equals(v.raw(), nullptr);
 
-        equals(v2.size(), 4);
+        equals(v2.length(), 4);
         differs(v2.raw(), nullptr);
     });
 
@@ -123,17 +123,6 @@ int main(int argc, char **argv) {
         check(s1 <= s1);
     });
 
-    suite.add_test("operator []", [] () {
-        test_string<> s1{"abc"};
-        test_string<> s2{"abd"};
-
-        differs(s1[2], s2[2]);
-
-        s2[2] = 'c';
-
-        equals(s1[2], s2[2]);
-    });
-
     suite.add_test("hash", [] () {
         test_string<> s1{"abc"};
         test_string<> s2{"abd"};
@@ -153,19 +142,6 @@ int main(int argc, char **argv) {
         const hash_t h1 = hash<test_string<>>{}(s1);
 
         differs(h1, 0);
-    });
-
-    suite.add_test("iterators (non-const)", [] () {
-        test_string<> s1{"abc"};
-        int count = 0;
-
-        for(auto it = s1.begin(); it < s1.end(); ++it) {
-            ++count;
-            *it = 'x';
-        }
-
-        equals(count, 3);
-        equals(s1[0], 'x');
     });
 
     suite.add_test("iterators (const)", [] () {

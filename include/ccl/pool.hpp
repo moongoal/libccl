@@ -177,6 +177,7 @@ namespace ccl {
                 });
             }
 
+            constexpr allocator_type* get_allocator() const noexcept { return handle_manager.get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return handle_manager.get_allocation_flags(); }
     };
 }

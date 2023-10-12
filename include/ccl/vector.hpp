@@ -370,6 +370,7 @@ namespace ccl {
             constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{_data + _size}; }
             constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
 
+            constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
     };
 }
