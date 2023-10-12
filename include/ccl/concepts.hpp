@@ -87,6 +87,20 @@ namespace ccl {
     concept singleton = requires() {
         { T::instance() } -> std::convertible_to<T&>;
     };
+
+    template<typename CharTraitsType, typename CharType>
+    concept char_traits_impl = requires(const CharType c, CharType &ref, const CharType &const_ref, CharType * const str, int str_sz) {
+        std::integral<typename CharTraitsType::char_type>;
+        std::integral<typename CharTraitsType::int_type>;
+
+        std::is_same_v<CharType, typename CharTraitsType::char_type>;
+
+        std::convertible_to<typename CharTraitsType::char_type, typename CharTraitsType::int_type>;
+        std::convertible_to<typename CharTraitsType::int_type, typename CharTraitsType::char_type>;
+
+        { CharTraitsType::assign(ref, const_ref) };
+        { CharTraitsType::assign(str, str_sz, c) };
+    };
 }
 
 #endif // CCL_CONCEPTS_HPP

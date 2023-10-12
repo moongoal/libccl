@@ -27,6 +27,11 @@ namespace ccl {
      * A raw, numeric handle type.
      */
     using handle_t = uint32_t;
+
+    /**
+     * Type for counting collection items.
+     */
+    using count_t = uint32_t;
 }
 
 #endif // CCL_API_HPP

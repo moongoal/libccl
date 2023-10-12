@@ -164,7 +164,6 @@ template<typename Map>
     template<
         typename K,
         typename V,
-        allocation_flags AllocationFlags = 0,
         typed_hash_function<K> Hash = hash<K>,
         typed_allocator<K> Allocator = allocator
     > class dense_map {
@@ -172,8 +171,6 @@ template<typename Map>
         friend struct dense_map_iterator<const dense_map>;
 
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using key_type = K;
             using value_type = V;
             using value_reference = V&;
@@ -183,8 +180,8 @@ template<typename Map>
             using hash_function_type = Hash;
             using hash_type = hash_t;
             using size_type = uint32_t;
-            using data_vector_type = paged_vector<V, allocation_flags, V*, allocator_type>;
-            using index_map_type = hashtable<K, size_type, allocation_flags, hash_function_type, allocator_type>;
+            using data_vector_type = paged_vector<V, V*, allocator_type>;
+            using index_map_type = hashtable<K, size_type, hash_function_type, allocator_type>;
             using value_iterator = typename data_vector_type::iterator;
             using const_value_iterator = typename data_vector_type::const_iterator;
             using iterator = dense_map_iterator<dense_map>;
@@ -217,9 +214,12 @@ template<typename Map>
             }
 
         public:
-            constexpr dense_map(allocator_type * const allocator = nullptr)
-                : data{allocator},
-                index_map{allocator}
+            constexpr dense_map(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            )
+                : data{allocator, alloc_flags},
+                index_map{allocator, alloc_flags}
             {}
 
             constexpr dense_map(const dense_map &other)
@@ -397,6 +397,9 @@ template<typename Map>
                 data.clear();
                 index_map.clear();
             }
+
+            constexpr allocator_type* get_allocator() const noexcept { return data.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

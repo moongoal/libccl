@@ -26,13 +26,11 @@ namespace ccl {
      */
     template<
         typename T,
-        allocation_flags AllocationFlags = 0,
         basic_allocator Allocator = allocator
     > class memory_pool {
         public:
             static constexpr size_t object_size = sizeof(T);
             static constexpr size_t object_alignment = alignof(T);
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
             using value_type = T;
             using pointer = T*;
@@ -40,8 +38,8 @@ namespace ccl {
             using const_reference = const T&;
             using const_pointer = const T*;
             using allocator_type = Allocator;
-            using memory_vector_type = paged_vector<uint8_t, allocation_flags, uint8_t*, allocator_type>;
-            using free_stack_type = vector<pointer, allocation_flags, allocator_type>;
+            using memory_vector_type = paged_vector<uint8_t, uint8_t*, allocator_type>;
+            using free_stack_type = vector<pointer, allocator_type>;
 
             static_assert(sizeof(T) <= memory_vector_type::page_size, "Object type too large.");
 
@@ -80,7 +78,10 @@ namespace ccl {
             }
 
         public:
-            explicit constexpr memory_pool(allocator_type * const allocator = nullptr) : data{allocator} {}
+            explicit constexpr memory_pool(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : data{allocator, alloc_flags} {}
 
             constexpr memory_pool(const memory_pool& other) = default;
             constexpr memory_pool(memory_pool&& other) noexcept = default;
@@ -122,6 +123,9 @@ namespace ccl {
 
                 free_items.push_back(ptr);
             }
+
+            constexpr allocator_type* get_allocator() const noexcept { return data.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

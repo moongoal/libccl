@@ -5,7 +5,7 @@
 using namespace ccl;
 
 template<typename K, typename H = hash<K>>
-using test_set = sparse_set<K, 0, H, counting_test_allocator>;
+using test_set = sparse_set<K, H, counting_test_allocator>;
 
 struct S {
     int a;

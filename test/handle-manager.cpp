@@ -6,7 +6,7 @@
 using namespace ccl;
 
 template<handle_expiry_policy ExpiryPolicy>
-using test_handle_manager = handle_manager<int, ExpiryPolicy, 0, versioned_handle<int>, counting_test_allocator>;
+using test_handle_manager = handle_manager<int, ExpiryPolicy, versioned_handle<int>, counting_test_allocator>;
 
 using test_recycle_handle_manager = test_handle_manager<handle_expiry_policy::recycle>;
 using test_discard_handle_manager = test_handle_manager<handle_expiry_policy::discard>;

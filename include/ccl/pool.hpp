@@ -28,13 +28,10 @@ namespace ccl {
     template<
         typename T,
         handle_expiry_policy HandleExpiryPolicy,
-        allocation_flags AllocationFlags = 0,
         typename Handle = versioned_handle<T>,
         typed_allocator<T> Allocator = allocator
     > class pool {
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using value_type = T;
             using pointer = T*;
             using reference = T&;
@@ -42,10 +39,9 @@ namespace ccl {
             using const_pointer = const T*;
             using handle_type = Handle;
             using allocator_type = Allocator;
-            using object_vector_type = paged_vector<value_type, allocation_flags, pointer, allocator_type>;
-            using handle_manager_type = handle_manager<T, HandleExpiryPolicy, allocation_flags, handle_type, allocator_type>;
+            using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
+            using handle_manager_type = handle_manager<T, HandleExpiryPolicy, handle_type, allocator_type>;
             using handle_object_callback = std::function<void(const handle_type, reference)>;
-
 
         private:
             handle_manager_type handle_manager;
@@ -55,10 +51,11 @@ namespace ccl {
         public:
             explicit constexpr pool(
                 const_reference default_value = T{},
-                allocator_type * const allocator = nullptr
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             ) noexcept :
-                handle_manager{allocator},
-                data{allocator},
+                handle_manager{allocator, alloc_flags},
+                data{allocator, alloc_flags},
                 default_value{default_value}
             {}
 
@@ -179,6 +176,9 @@ namespace ccl {
                     callback(handle, get(handle));
                 });
             }
+
+            constexpr allocator_type* get_allocator() const noexcept { return handle_manager.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return handle_manager.get_allocation_flags(); }
     };
 }
 

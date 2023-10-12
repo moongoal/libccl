@@ -16,15 +16,12 @@ namespace ccl {
      * A variable sequence of bits.
      */
     template<
-        allocation_flags AllocationFlags = 0,
         typed_allocator<uint64_t> Allocator = allocator
     > class bitset {
         public:
             using cluster_type = uint64_t;
             using size_type = std::size_t;
             using allocator_type = Allocator;
-
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
             class bit_proxy {
                 bitset *set;
@@ -67,7 +64,11 @@ namespace ccl {
             static constexpr std::size_t bits_per_cluster = sizeof(cluster_type) * 8;
             static constexpr std::size_t cluster_size_bitcount = bitcount(bits_per_cluster) - 1;
 
-            explicit constexpr bitset(allocator_type * const allocator = nullptr) : clusters{allocator}, _size_bits{0} {}
+            explicit constexpr bitset(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : clusters{allocator, alloc_flags}, _size_bits{0} {}
+
             constexpr bitset(const bitset &other) : clusters{other.clusters}, _size_bits{other._size_bits} {}
             constexpr bitset(bitset &&other) : clusters{std::move(other.clusters)}, _size_bits{std::move(other._size_bits)} {
                 other._size_bits = 0;
@@ -323,7 +324,7 @@ namespace ccl {
                 /**
                  * The sequence of clusters containing the bits.
                  */
-                vector<cluster_type, allocation_flags, allocator_type> clusters;
+                vector<cluster_type, allocator_type> clusters;
 
                 /**
                  * Bit count.
@@ -359,6 +360,9 @@ namespace ccl {
                         index & (bits_per_cluster - 1)
                     };
                 }
+
+                constexpr allocator_type* get_allocator() const noexcept { return clusters.get_allocator(); }
+                constexpr allocation_flags get_allocation_flags() const noexcept { return clusters.get_allocation_flags(); }
     };
 }
 

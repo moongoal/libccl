@@ -19,18 +19,16 @@
 #include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl::ecs {
-    template<basic_allocator Allocator, allocation_flags AllocationFlags>
+    template<basic_allocator Allocator>
     class archetype : internal::with_optional_allocator<Allocator> {
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using entity_type = entity_t;
             using entity_id = entity_id_t;
             using allocator_type = Allocator;
             using size_type = uint32_t;
-            using entity_index_collection = dense_map<entity_type, size_type, allocation_flags, hash<entity_type>, allocator_type>;
-            using component = ccl::ecs::component<allocator_type, allocation_flags>;
-            using component_collection = hashtable<std::size_t, component, allocation_flags, hash<std::size_t>, allocator_type>;
+            using entity_index_collection = dense_map<entity_type, size_type, hash<entity_type>, allocator_type>;
+            using component = ccl::ecs::component<allocator_type>;
+            using component_collection = hashtable<std::size_t, component, hash<std::size_t>, allocator_type>;
 
             static constexpr hash_t invalid_id = ~static_cast<hash_t>(0);
 
@@ -394,7 +392,7 @@ namespace ccl::ecs {
              * @param entity The entity.
              * @param source The source component.
              */
-            constexpr void copy_entity_components_from(const entity_type entity, const archetype<Allocator, allocation_flags>& source) {
+            constexpr void copy_entity_components_from(const entity_type entity, const archetype<Allocator>& source) {
                 const size_type index_to = entity_index_map.at(entity);
 
                 for(const auto& c : source.components) {

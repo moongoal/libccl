@@ -5,7 +5,7 @@
 using namespace ccl;
 
 template<typename K, typename V>
-using test_map = dense_map<K, V, 0, hash<K>, counting_test_allocator>;
+using test_map = dense_map<K, V, hash<K>, counting_test_allocator>;
 
 struct S {
     int a;

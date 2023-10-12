@@ -38,6 +38,7 @@ Unstable: 🔴
 |Memory Pool|🔴
 |Dependent Pool|🔴
 |Shared Pointer|🔴
+|String|🔴
 |Internationalization Support|🔴
 
 ## Building
@@ -114,6 +115,8 @@ Several pre-processor definitions configure behaviour:
 |CCL_ALLOCATOR_IMPL|Enable compiling the default implementations of `ccl::get_default_allocator()` and `ccl::set_default_allocator()`
 |CCL_ALLOCATOR_EXPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-exported
 |CCL_ALLOCATOR_IMPORTER|Mark `ccl::get_default_allocator()` and `ccl::set_default_allocator()` as dll-imported
+|CCL_ALLOCATOR_DEFAULT_FLAGS|Set default allocation flags
+|CCL_CHAR_TRAITS_DEFAULT_POS_TYPE|The default position type for `char_traits<char>`
 
 Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
 
@@ -128,9 +131,10 @@ Certain features can be enabled or disabled as needed. The following pre-process
 |CCL_FEATURE_ASSERTIONS|Enable assertions
 |CCL_FEATURE_EXCEPTIONS|Enable exceptions
 |CCL_FEATURE_TYPECHECK_CASTS|Enable use of `dynamic_cast` where appropriate
-|CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS|Control whether the ECS registry checks for existing components before adding/removing new ones. Disabling this feature may yield unexpected results if adding already existing components or removing non-existent ones.
-|CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY|Assert the presence of the entity when calling `unsafe_remove_entity()`.
+|CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS|Control whether the ECS registry checks for existing components before adding/removing new ones. Disabling this feature may yield unexpected results if adding already existing components or removing non-existent ones
+|CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY|Assert the presence of the entity when calling `unsafe_remove_entity()`
 |CCL_FEATURE_STL_COMPAT|Include the STL compatibility header
+|CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS|Enable default allocation flags. Disabling this flag will result in a compilation error whenever default allocation flags are not manually defined
 
 Default values are availble in [features.hpp](include/ccl/features.hpp).
 

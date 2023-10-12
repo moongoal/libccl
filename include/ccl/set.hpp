@@ -152,11 +152,9 @@ namespace ccl {
      * @tparam K Key type.
      * @tparam HashFunction The function used to compute the key hashes.
      * @tparam Allocator The allocator type.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename K,
-        allocation_flags AllocationFlags = 0,
         typename HashFunction = hash<K>,
         typed_allocator<K> Allocator = allocator
     >
@@ -168,7 +166,7 @@ namespace ccl {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            using size_type = std::size_t;
+            using size_type = count_t;
 
             using key_type = K;
             using key_pointer = K*;
@@ -184,11 +182,15 @@ namespace ccl {
             using const_iterator = set_iterator<const set>;
 
             static constexpr size_type minimum_capacity = CCL_SET_MINIMUM_CAPACITY;
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
             explicit constexpr set(
-                allocator_type * const allocator = nullptr
-            ) : alloc{allocator}, _capacity{0}, keys{nullptr}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : alloc{allocator},
+                _capacity{0},
+                slot_map{allocator, alloc_flags},
+                keys{nullptr},
+                alloc_flags{alloc_flags}
             {
                 reserve(minimum_capacity);
             }
@@ -208,8 +210,9 @@ namespace ccl {
             requires std::ranges::input_range<InputRange>
             constexpr set(
                 InputRange&& input,
-                allocator_type * const allocator = nullptr
-            ) : set{allocator} {
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : set{allocator, alloc_flags} {
                 insert_range(input);
             }
 
@@ -235,6 +238,9 @@ namespace ccl {
             constexpr set& operator =(const set &other) {
                 destroy();
                 alloc::operator =(other);
+
+                alloc_flags = other.alloc_flags;
+
                 reserve(other._capacity);
                 insert_range(other);
 
@@ -248,6 +254,7 @@ namespace ccl {
                 slot_map = std::move(other.slot_map);
                 keys = std::move(other.keys);
                 _capacity = other._capacity;
+                alloc_flags = other.alloc_flags;
 
                 other.keys = nullptr;
 
@@ -261,14 +268,14 @@ namespace ccl {
 
                 bool done;
                 new_capacity = increase_capacity(_capacity, new_capacity);
-                bitset<allocation_flags, allocator_type> new_slot_map;
+                bitset<allocator_type> new_slot_map;
                 const auto finish = end();
                 key_pointer new_keys;
 
                 do {
                     bool keep_iterating = true;
                     done = true;
-                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, allocation_flags);
+                    new_keys = alloc::get_allocator()->template allocate<key_type>(new_capacity, alloc_flags);
 
                     new_slot_map.resize(new_capacity);
                     new_slot_map.zero();
@@ -449,6 +456,9 @@ namespace ccl {
             constexpr const_iterator cbegin() const { return const_iterator{ *this, 0 }; }
             constexpr const_iterator cend() const { return const_iterator{ *this, _capacity }; }
 
+            constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+
         private:
             static hash_type hash(const_key_reference x) {
                 return hash_function_type{}(x);
@@ -466,8 +476,9 @@ namespace ccl {
             }
 
             size_type _capacity = 0;
-            bitset<allocation_flags, allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
+            bitset<allocator_type> slot_map; // Slot availability bit map. true is filled, false is empty
             key_pointer keys = nullptr;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             static constexpr size_type invalid_size = ~static_cast<size_type>(0);
     };

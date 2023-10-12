@@ -18,7 +18,6 @@
 namespace ccl {
     template<
         typename T,
-        allocation_flags AllocationFlags = 0,
         typed_hash_function<T> Hash = hash<T>,
         typed_allocator<T> Allocator = allocator
     > class sparse_set : internal::with_optional_allocator<Allocator> {
@@ -31,12 +30,10 @@ namespace ccl {
             using hash_type = hash_t;
             using size_type = uint32_t;
 
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
         private:
             using alloc = internal::with_optional_allocator<Allocator>;
-            using data_vector_type = vector<T, allocation_flags, allocator_type>;
-            using index_map_type = hashtable<T, size_type, allocation_flags, hash_function_type, allocator_type>;
+            using data_vector_type = vector<T, allocator_type>;
+            using index_map_type = hashtable<T, size_type, hash_function_type, allocator_type>;
 
             data_vector_type data;
             index_map_type index_map;
@@ -58,8 +55,9 @@ namespace ccl {
 
         public:
             constexpr sparse_set(
-                allocator_type * const allocator = nullptr
-            ) : alloc{allocator}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : alloc{allocator}, data{allocator, alloc_flags}, index_map{allocator, alloc_flags}
             {}
 
             constexpr sparse_set(const sparse_set &other)
@@ -109,6 +107,9 @@ namespace ccl {
             constexpr size_type size() const noexcept {
                 return static_cast<size_type>(data.size());
             }
+
+            constexpr allocator_type* get_allocator() const noexcept { return data.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

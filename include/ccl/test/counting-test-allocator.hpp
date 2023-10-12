@@ -58,7 +58,9 @@ namespace ccl {
                 return get_default_allocator()->get_features();
             }
 
-            static counting_test_allocator* get_default();
+            std::size_t get_bytes_allocated_count() const noexcept {
+                return count;
+            }
     };
 
     #ifdef CCL_ALLOCATOR_IMPL

@@ -113,19 +113,106 @@ int main(int argc, char **argv) {
         fail();
     });
 
-    suite.add_test(
-        "skip",
-        []() {
-            test_suite my_test_suite{nullptr}; // Test subject.
-            int exec_count = 0;
+    suite.add_test("skip", []() {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
 
-            my_test_suite.add_test("skip", [&exec_count] () { exec_count += 1; }, []() { return true; });
-            my_test_suite.add_test("no skip", [&exec_count] () { exec_count += 1; });
-            my_test_suite.execute();
+        my_test_suite.add_test("skip", [&exec_count] () { exec_count += 1; }, []() { return true; });
+        my_test_suite.add_test("no skip", [&exec_count] () { exec_count += 1; });
+        my_test_suite.execute();
 
-            check(exec_count == 1);
-        }
-    );
+        equals(exec_count, 1);
+    });
+
+    suite.add_test("before all hooks", [] () {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
+
+        my_test_suite.exec_before_all([&exec_count] () {
+            exec_count += 1;
+        });
+
+        my_test_suite.add_test("one", [&exec_count] () { equals(exec_count, 1); });
+        my_test_suite.add_test("two", [&exec_count] () { equals(exec_count, 1); });
+        my_test_suite.execute();
+
+        equals(exec_count, 1);
+    });
+
+    suite.add_test("before each hooks", [] () {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
+
+        my_test_suite.exec_before_each([&exec_count] () {
+            exec_count += 1;
+        });
+
+        my_test_suite.add_test("one", [&exec_count] () { equals(exec_count, 1); });
+        my_test_suite.add_test("two", [&exec_count] () { equals(exec_count, 2); });
+        my_test_suite.execute();
+
+        equals(exec_count, 2);
+    });
+
+    suite.add_test("after all hooks", [] () {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
+
+        my_test_suite.exec_after_all([&exec_count] () {
+            exec_count += 1;
+        });
+
+        my_test_suite.add_test("one", [&exec_count] () { equals(exec_count, 0); });
+        my_test_suite.add_test("two", [&exec_count] () { equals(exec_count, 0); });
+        my_test_suite.execute();
+
+        equals(exec_count, 1);
+    });
+
+    suite.add_test("after each hooks", [] () {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
+
+        my_test_suite.exec_after_each([&exec_count] () {
+            exec_count += 1;
+        });
+
+        my_test_suite.add_test("one", [&exec_count] () { equals(exec_count, 0); });
+        my_test_suite.add_test("two", [&exec_count] () { equals(exec_count, 1); });
+        my_test_suite.execute();
+
+        equals(exec_count, 2);
+    });
+
+    suite.add_test("before each hooks (skip)", [] () {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
+
+        my_test_suite.exec_before_each([&exec_count] () {
+            exec_count += 1;
+        });
+
+        my_test_suite.add_test("one", [&exec_count] () { equals(exec_count, 1); });
+        my_test_suite.add_test("skip", [] () {}, [] () { return true; });
+        my_test_suite.execute();
+
+        equals(exec_count, 1);
+    });
+
+    suite.add_test("after each hooks (skip)", [] () {
+        test_suite my_test_suite{nullptr}; // Test subject.
+        int exec_count = 0;
+
+        my_test_suite.exec_after_each([&exec_count] () {
+            exec_count += 1;
+        });
+
+        my_test_suite.add_test("one", [&exec_count] () { equals(exec_count, 0); });
+        my_test_suite.add_test("skip", [] () {}, [] () { return true; });
+        my_test_suite.execute();
+
+        equals(exec_count, 1);
+    });
 
     return suite.main(argc, argv);
 }

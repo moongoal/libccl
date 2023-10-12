@@ -21,24 +21,20 @@ namespace ccl {
      * @tparam T The value type to store in this pool.
      * @tparam PrimaryPool The primary pool type.
      * @tparam Allocator The allocator to use for data storage.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename T,
         typename PrimaryPool,
-        allocation_flags AllocationFlags = 0,
         typed_allocator<T> Allocator = allocator
     > class dependent_pool {
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using value_type = T;
             using pointer = T*;
             using reference = T&;
             using const_reference = const T&;
             using handle_type = typename PrimaryPool::handle_type;
             using allocator_type = Allocator;
-            using object_vector_type = paged_vector<value_type, allocation_flags, pointer, allocator_type>;
+            using object_vector_type = paged_vector<value_type, pointer, allocator_type>;
             using primary_pool_type = PrimaryPool;
 
         private:
@@ -50,8 +46,9 @@ namespace ccl {
             dependent_pool(
                 const primary_pool_type &primary_pool,
                 const_reference default_value = T{},
-                allocator_type * const allocator = nullptr
-            ) : data{allocator},
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) : data{allocator, alloc_flags},
                 default_value{default_value},
                 primary_pool{&primary_pool}
             {}
@@ -151,6 +148,9 @@ namespace ccl {
              * @see pool::is_valid()
              */
             bool is_valid(const handle_type &handle) const { return primary_pool->is_valid(handle); }
+
+            constexpr allocator_type* get_allocator() const noexcept { return data.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

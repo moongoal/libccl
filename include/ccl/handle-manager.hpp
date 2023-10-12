@@ -63,23 +63,19 @@ namespace ccl {
      * @tparam ExpiryPolicy Policy to deal with expired handles.
      * @tparam Handle The handle type.
      * @tparam Allocator The allocator.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      */
     template<
         typename ObjectType,
         handle_expiry_policy ExpiryPolicy = default_handle_manager_expiry_policy,
-        allocation_flags AllocationFlags = 0,
         typename Handle = versioned_handle<ObjectType>,
         handle_manager_slot_allocator<Handle> Allocator = allocator
     > class handle_manager {
         public:
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
-
             using object_type = ObjectType;
             using handle_type = Handle;
             using allocator_type = Allocator;
             using value_type = typename handle_type::value_type;
-            using vector_type = paged_vector<value_type, allocation_flags, value_type*, allocator_type>;
+            using vector_type = paged_vector<value_type, value_type*, allocator_type>;
             using handle_callback = std::function<void(const handle_type&)>;
 
             static constexpr value_type value_unused_mask = handle_type::max_generation + 1;
@@ -168,8 +164,9 @@ namespace ccl {
 
         public:
             explicit constexpr handle_manager(
-                allocator_type * const allocator = nullptr
-            ) noexcept : handle_slots{allocator} {}
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) noexcept : handle_slots{allocator, alloc_flags} {}
 
             constexpr handle_manager(const handle_manager &other) = default;
             constexpr handle_manager(handle_manager &&other) noexcept = default;
@@ -301,6 +298,9 @@ namespace ccl {
                     }
                 }
             }
+
+            constexpr allocator_type* get_allocator() const noexcept { return handle_slots.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return handle_slots.get_allocation_flags(); }
     };
 }
 

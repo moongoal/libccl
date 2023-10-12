@@ -20,14 +20,13 @@ namespace ccl::ecs {
      * for iterating.
      *
      * @tparam Allocator The allocator class of the archetype.
-     * @tparam AllocationFlags The optional flags to pass to the allocator.
      * @tparam Components The components to add to the view.
      */
-    template<typename Allocator, allocation_flags AllocationFlags, typename ...Components>
+    template<typename Allocator, typename ...Components>
     class view {
         public:
-            using archetype = ccl::ecs::archetype<Allocator,AllocationFlags>;
-            using component = ccl::ecs::component<Allocator,AllocationFlags>;
+            using archetype = ccl::ecs::archetype<Allocator>;
+            using component = ccl::ecs::component<Allocator>;
             using archetype_iterator = std::function<void(const Components& ...components)>;
             using archetype_paged_iterator = std::function<void(const typename component::template item_collection<Components>& ...components)>;
 

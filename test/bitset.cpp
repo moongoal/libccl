@@ -5,7 +5,7 @@
 
 using namespace ccl;
 
-using test_bitset = bitset<0, counting_test_allocator>;
+using test_bitset = bitset<counting_test_allocator>;
 
 int main(int argc, char **argv) {
     test_suite suite;

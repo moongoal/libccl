@@ -39,7 +39,6 @@ namespace ccl {
     template<
         typename T,
         deque_reset_policy ResetPolicy = deque_reset_policy::center,
-        allocation_flags AllocationFlags = 0,
         typed_allocator<T> Allocator = allocator
     > class deque : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
@@ -51,7 +50,7 @@ namespace ccl {
             using pointer = T*;
             using const_pointer = const T*;
             using allocator_type = Allocator;
-            using size_type = std::size_t;
+            using size_type = count_t;
             using iterator = contiguous_iterator<T>;
             using const_iterator = contiguous_iterator<const T>;
             using reverse_iterator = std::reverse_iterator<iterator>;
@@ -60,13 +59,14 @@ namespace ccl {
             static constexpr size_type minimum_capacity = CCL_DEQUE_MIN_CAPACITY;
             static constexpr deque_reset_policy reset_policy = ResetPolicy;
             static constexpr bool reserve_center_default = reset_policy == deque_reset_policy::center;
-            static constexpr allocation_flags allocation_flags = AllocationFlags;
 
         private:
             size_type first = 0;
             size_type last = 0;
             pointer _data = nullptr;
             size_type _capacity = 0;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
+
 
             /**
              * Recenter first and last indices.
@@ -80,8 +80,12 @@ namespace ccl {
             }
 
         public:
-            constexpr deque(allocator_type * const allocator = nullptr)
-                : alloc{allocator}
+            constexpr deque(
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            )
+                : alloc{allocator},
+                alloc_flags{alloc_flags}
             {}
 
             constexpr deque(const deque& other)
@@ -184,7 +188,11 @@ namespace ccl {
                         minimum_capacity
                     );
 
-                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(actual_new_capacity, allocation_flags);
+                    value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
+                        actual_new_capacity,
+                        alloc_flags
+                    );
+
                     const size_type old_size = size();
                     const size_type new_first = choose(
                         (max(actual_new_capacity, 1ULL) >> 1) - old_size / 2,
@@ -318,6 +326,9 @@ namespace ccl {
 
                 reset();
             }
+
+            constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
     };
 }
 
