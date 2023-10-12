@@ -240,6 +240,21 @@ namespace ccl {
             constexpr bool is_empty() const noexcept { return _length == 0; }
             constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+
+            /**
+             * Copy the contents of this string to a NUL-terminated output.
+             *
+             * @param out The output value. If too short, the string will be truncated.
+             */
+            constexpr void to_nul_terminated(std::span<value_type> out) const {
+                const size_type end = min(_length, out.size() - 1);
+
+                for(size_type i = 0; i < end; ++i) {
+                    char_traits::copy(out.data(), data, end);
+                }
+
+                out[end] = char_traits::nul();
+            }
     };
 }
 

@@ -194,5 +194,57 @@ int main(int argc, char **argv) {
         equals(s2.is_empty(), true);
     });
 
+    suite.add_test("to_nul_terminated", [] () {
+        test_string<> s{"abcd"};
+        char out[5];
+
+        // Set to non-zero
+        for(int i = 0; i < 5; ++i) {
+            out[i] = 'Z';
+        }
+
+        s.to_nul_terminated(std::span<char, 5>(out));
+
+        for(int i = 0; i < 4; ++i) {
+            equals(out[i], s[i]);
+        }
+
+        equals(out[4], '\0');
+    });
+
+    suite.add_test("to_nul_terminated (truncate)", [] () {
+        test_string<> s{"abcd"};
+        char out[3];
+
+        // Set to non-zero
+        for(int i = 0; i < 2; ++i) {
+            out[i] = 'Z';
+        }
+
+        s.to_nul_terminated(std::span<char, 3>(out));
+
+        equals(out[0], s[0]);
+        equals(out[1], s[1]);
+        equals(out[2], '\0');
+    });
+
+    suite.add_test("to_nul_terminated (long buffer)", [] () {
+        test_string<> s{"abcd"};
+        char out[128];
+
+        // Set to non-zero
+        for(int i = 0; i < 128; ++i) {
+            out[i] = 'Z';
+        }
+
+        s.to_nul_terminated(std::span<char, 128>(out));
+
+        for(int i = 0; i < 4; ++i) {
+            equals(out[i], s[i]);
+        }
+
+        equals(out[4], '\0');
+    });
+
     return suite.main(argc, argv);
 }
