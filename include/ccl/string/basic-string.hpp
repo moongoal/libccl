@@ -28,110 +28,101 @@ namespace ccl {
         typename CharType,
         char_traits_impl<CharType> CharTraits,
         typed_allocator<CharType> Allocator
-    > class basic_string {
+    > class basic_string : internal::with_optional_allocator<Allocator> {
         friend class basic_string_builder<CharType, CharTraits, Allocator>;
 
-        using vec = vector<CharType, Allocator>;
+        using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
-            using value_type = typename vec::value_type;
-            using reference = typename vec::reference;
-            using const_reference = typename vec::const_reference;
-            using pointer = typename vec::pointer;
-            using const_pointer = const value_type*;
-            using size_type = typename vec::size_type;
-            using allocator_type = typename vec::allocator_type;
-            using iterator = typename vec::iterator;
-            using const_iterator = typename vec::const_iterator;
-            using reverse_iterator = typename vec::reverse_iterator;
-            using const_reverse_iterator = typename vec::const_reverse_iterator;
+            using value_type = CharType;
+            using reference = CharType&;
+            using const_reference = const CharType&;
+            using pointer = CharType*;
+            using const_pointer = const CharType*;
+            using size_type = count_t;
+            using allocator_type = Allocator;
+            using iterator = contiguous_iterator<CharType>;
+            using const_iterator = contiguous_iterator<const CharType>;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
             using char_traits = CharTraits;
 
         private:
-            vec _data;
+            pointer data = nullptr;
+            size_type _size = 0;
+            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
         public:
              explicit constexpr basic_string(
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{allocator, alloc_flags}
+            ) : alloc{allocator}, alloc_flags{alloc_flags}
             {}
-
-            explicit constexpr basic_string(
-                const allocation_flags alloc_flags
-            ) : _data{nullptr, alloc_flags}
-            {}
-
-            constexpr basic_string(const basic_string &other) : _data{other._data} {}
-            constexpr basic_string(basic_string &&other) : _data{std::move(other._data)} {}
 
             constexpr basic_string(
-                const const_pointer cstr,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{allocator, alloc_flags} {
-                const size_type sz = char_traits::length(cstr);
-
-                _data.resize(sz + 1);
-                char_traits::copy(_data.data(), cstr, sz);
-                _data[sz] = char_traits::to_char_type(char_traits::nul());
+                const basic_string &other
+            ) :
+                alloc{other.get_allocator()},
+                data{alloc::get_allocator()->template allocate<value_type>(other._size, other.alloc_flags)},
+                _size{other._size},
+                alloc_flags{other.alloc_flags}
+            {
+                char_traits::copy(data, other.data, _size);
             }
 
             constexpr basic_string(
-                const const_pointer cstr,
-                const allocation_flags alloc_flags
-            ) : basic_string{cstr, nullptr, alloc_flags} {
+                const_pointer raw,
+                const size_type size,
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) :
+                alloc{allocator},
+                data{alloc::get_allocator()->template allocate<value_type>(size, alloc_flags)},
+                _size{size},
+                alloc_flags{alloc_flags}
+            {
+                char_traits::copy(data, raw, _size);
             }
 
             constexpr basic_string(
-                std::initializer_list<CharType> values,
+                const_pointer raw,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{allocator, alloc_flags} {
-                _data.resize(values.size() + 1);
-                char_traits::copy(_data.data(), values.begin(), values.size());
-                _data[values.size()] = char_traits::to_char_type(char_traits::nul());
+            ): basic_string{raw, static_cast<size_type>(char_traits::length(raw)), allocator, alloc_flags}
+            {}
+
+            constexpr basic_string(basic_string &&other) {
+                swap(other);
+            }
+
+            ~basic_string() {
+                destroy();
             }
 
             constexpr auto swap(basic_string &other) noexcept {
-                _data.swap(other._data);
-            }
+                alloc::swap(other);
 
-            constexpr auto capacity() const noexcept {
-                return choose(0, _data.capacity() - 1, _data.is_empty());
+                std::swap(data, other.data);
+                std::swap(_size, other._size);
+                std::swap(alloc_flags, other.alloc_flags);
             }
 
             constexpr auto size() const noexcept {
-                return choose(0, _data.size() - 1, _data.is_empty());
+                return _size;
             }
 
-            constexpr auto data() const noexcept {
-                return _data.data();
-            }
-
-            constexpr const_pointer c_str() const noexcept {
-                return _data.data();
-            }
-
-            constexpr void push_back(const value_type c) {
-                if(_data.is_empty()) {
-                    _data.reserve(2);
-                    _data.push_back(c);
-                } else {
-                    _data[_data.size() - 1] = c;
-                }
-
-                _data.push_back(char_traits::to_char_type(char_traits::nul()));
+            constexpr const_pointer raw() const noexcept {
+                return data;
             }
 
             constexpr bool operator==(const basic_string& rhs) const {
-                if(_data.size() != rhs._data.size()) {
+                if(_size != rhs._size) {
                     return false;
                 }
 
-                for(size_type i = 0; i < _data.size(); ++i) {
-                    if(_data[i] != rhs._data[i]) {
+                for(size_type i = 0; i < _size; ++i) {
+                    if(data[i] != rhs.data[i]) {
                         return false;
                     }
                 }
@@ -144,11 +135,11 @@ namespace ccl {
             }
 
             constexpr bool operator<(const basic_string& rhs) const {
-                const size_type sz = min(_data.size(), rhs._data.size());
+                const size_type sz = min(_size, rhs._size);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(_data[i], rhs._data[i])) {
-                        return char_traits::lt(_data[i], rhs._data[i]);
+                    if(!char_traits::eq(data[i], rhs.data[i])) {
+                        return char_traits::lt(data[i], rhs.data[i]);
                     }
                 }
 
@@ -156,11 +147,11 @@ namespace ccl {
             }
 
             constexpr bool operator<=(const basic_string& rhs) const {
-                const size_type sz = min(_data.size(), rhs._data.size());
+                const size_type sz = min(_size, rhs._size);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(_data[i], rhs._data[i])) {
-                        return char_traits::lt(_data[i], rhs._data[i]);
+                    if(!char_traits::eq(data[i], rhs.data[i])) {
+                        return char_traits::lt(data[i], rhs.data[i]);
                     }
                 }
 
@@ -168,11 +159,11 @@ namespace ccl {
             }
 
             constexpr bool operator>(const basic_string& rhs) const {
-                const size_type sz = min(_data.size(), rhs._data.size());
+                const size_type sz = min(_size, rhs._size);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(_data[i], rhs._data[i])) {
-                        return char_traits::lt(rhs._data[i], _data[i]);
+                    if(!char_traits::eq(data[i], rhs.data[i])) {
+                        return char_traits::lt(rhs.data[i], data[i]);
                     }
                 }
 
@@ -180,106 +171,55 @@ namespace ccl {
             }
 
             constexpr bool operator>=(const basic_string& rhs) const {
-                const size_type sz = min(_data.size(), rhs._data.size());
+                const size_type sz = min(_size, rhs._size);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(_data[i], rhs._data[i])) {
-                        return char_traits::lt(rhs._data[i], _data[i]);
+                    if(!char_traits::eq(data[i], rhs.data[i])) {
+                        return char_traits::lt(rhs.data[i], data[i]);
                     }
                 }
 
                 return true;
             }
 
-            constexpr decltype(auto) operator[](const size_type index) {
-                return _data[index];
-            }
-
             constexpr decltype(auto) operator[](const size_type index) const {
-                return _data[index];
+                return data[index];
             }
 
             constexpr hash_t hash() const {
                 return fnv1a_hash(
-                    size_of<value_type>(_data.size()),
-                    reinterpret_cast<const uint8_t*>(_data.data())
+                    size_of<value_type>(_size),
+                    reinterpret_cast<const uint8_t*>(data)
                 );
             }
 
-            constexpr bool empty() const {
-                return _data.size() == 0;
-            }
+            constexpr iterator begin() noexcept { return data; }
+            constexpr iterator end() noexcept { return data + _size; }
 
-            constexpr decltype(auto) begin() noexcept { return _data.begin(); }
+            constexpr const_iterator begin() const noexcept { return data; }
+            constexpr const_iterator end() const noexcept { return data + _size; }
 
-            constexpr decltype(auto) end() noexcept {
-                auto it = _data.end();
+            constexpr const_iterator cbegin() const noexcept { return data; }
+            constexpr const_iterator cend() const noexcept { return data + _size; }
 
-                // Account for trailing '\0'
-                if(it != _data.begin()) {
-                    --it;
+            constexpr reverse_iterator rbegin() noexcept { return reverse_iterator{data + _size}; }
+            constexpr reverse_iterator rend() noexcept { return reverse_iterator{data}; }
+
+            constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{data + _size}; }
+            constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{data}; }
+
+            constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{data + _size}; }
+            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{data}; }
+
+            void destroy() {
+                if(data) {
+                    alloc::get_allocator()->deallocate(data);
+                    data = nullptr;
+                    _size = 0;
                 }
-
-                return it;
             }
 
-            constexpr decltype(auto) begin() const noexcept { return _data.begin(); }
-
-            constexpr decltype(auto) end() const noexcept {
-                auto it = _data.end();
-
-                // Account for trailing '\0'
-                if(it != _data.begin()) {
-                    --it;
-                }
-
-                return it;
-            }
-
-            constexpr decltype(auto) cbegin() const noexcept { return _data.begin(); }
-
-            constexpr decltype(auto) cend() const noexcept {
-                auto it = _data.end();
-
-                // Account for trailing '\0'
-                if(it != _data.begin()) {
-                    --it;
-                }
-
-                return it;
-            }
-
-            constexpr decltype(auto) rbegin() noexcept { return reverse_iterator{end()}; }
-            constexpr decltype(auto) rend() noexcept { return reverse_iterator{begin()}; }
-
-            constexpr decltype(auto) rbegin() const noexcept { return const_reverse_iterator{cend()}; }
-            constexpr decltype(auto) rend() const noexcept { return const_reverse_iterator{cbegin()}; }
-
-            constexpr decltype(auto) crbegin() const noexcept { return const_reverse_iterator{cend()}; }
-            constexpr decltype(auto) crend() const noexcept { return const_reverse_iterator{cbegin()}; }
-
-            constexpr void shrink_to_fit() { _data.shrink_to_fit(); }
-            constexpr void clear() noexcept { _data.clear(); }
-
-            constexpr void insert(iterator where, const_reference item) {
-                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
-
-                _data.insert(where, item);
-            }
-
-            template <std::ranges::input_range InputRange>
-            constexpr void insert_range(iterator where, const InputRange& input) {
-                CCL_THROW_IF(where < begin() || where > end(), std::out_of_range{"Iterator out of range."});
-
-                _data.insert_range(where, input);
-            }
-
-            constexpr void erase(const iterator start, const iterator finish) {
-                CCL_THROW_IF(std::to_address(start) < _data.data() || std::to_address(start) > _data.data() + size(), std::out_of_range{"Invalid start iterator."});
-                CCL_THROW_IF(std::to_address(finish) < _data.data() || std::to_address(finish) > _data.data() + size(), std::out_of_range{"Invalid finish iterator."});
-
-                _data.erase(start, finish);
-            }
+            constexpr bool is_empty() const noexcept { return _size == 0; }
     };
 }
 

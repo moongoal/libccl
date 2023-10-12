@@ -1,3 +1,4 @@
+#include <cstring>
 #include <ccl/test/test.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 #include <ccl/string/basic-string.hpp>
@@ -10,64 +11,54 @@ using test_string = basic_string<CharType, char_traits<CharType>, counting_test_
 int main(int argc, char **argv) {
     test_suite suite;
 
-    suite.add_test(
-        "ctor",
-        []() {
-            test_string<> v;
+    suite.add_test("ctor", []() {
+        test_string<> v;
 
-            check(v.capacity() == 0);
-            check(v.size() == 0);
-            check(v.data() == nullptr);
-        }
-    );
-
-    suite.add_test("ctor (c-string)", [] () {
-        const char * const cstr = "abc";
-        test_string<> v{cstr};
-
-        check(v.size() == 3);
+        check(v.size() == 0);
+        check(v.raw() == nullptr);
     });
 
-    suite.add_test("ctor (string literal)", [] () {
-        test_string<> v{"abc"};
+    suite.add_test("ctor (raw, w/size)", []() {
+        test_string<> v{"abcd", 4};
 
-        check(v.size() == 3);
+        check(v.size() == 4);
+
+        for(unsigned i = 0; i < v.size(); ++i) {
+            equals(v[i], 'a' + i);
+        }
+    });
+
+    suite.add_test("ctor (raw, wo/size)", []() {
+        test_string<> v{"abcd"};
+
+        check(v.size() == 4);
+
+        for(unsigned i = 0; i < v.size(); ++i) {
+            equals(v[i], 'a' + i);
+        }
     });
 
     suite.add_test("ctor (copy)", [] () {
-        test_string<> v;
-
-        v.push_back('a');
-        v.push_back('a');
-        v.push_back('a');
-
+        test_string<> v{"abcd"};
         test_string<> v2{v};
 
-        check(v.size() == 3);
-        check(v2.size() == 3);
+        check(v.size() == 4);
+        check(v2.size() == 4);
+        check(v.raw() != v2.raw());
 
-        check(v.data() != v2.data());
+        for(unsigned i = 0; i < v.size(); ++i) {
+            equals(v[i], v2[i]);
+        }
     });
 
     suite.add_test("ctor (move)", [] () {
-        test_string<> v;
-
-        v.push_back('a');
-        v.push_back('a');
-        v.push_back('a');
-
+        test_string<> v{"abcd"};
         test_string<> v2{std::move(v)};
 
-        check(v.data() == nullptr);
+        equals(v.raw(), nullptr);
 
-        check(v2.size() == 3);
-        check(v2.data() != nullptr);
-    });
-
-    suite.add_test("ctor (initializer list)", [] () {
-        test_string<> v{'a', 'b', 'c', 'd', 'e', 'f', 'g'};
-
-        check(v.size() == 7);
+        equals(v2.size(), 4);
+        differs(v2.raw(), nullptr);
     });
 
     suite.add_test("operator ==", [] () {
@@ -220,36 +211,11 @@ int main(int argc, char **argv) {
         equals(s1.rend() - s1.rbegin(), 3);
     });
 
-    suite.add_test("clear", [] () {
-        test_string<> s1{"abcdegdfosgosugosgfdogod"};
+    suite.add_test("is_empty", [] () {
+        test_string<> s1{"abc"}, s2;
 
-        s1.clear();
-        equals(s1.size(), 0);
-    });
-
-    suite.add_test("insert", [] () {
-        test_string<> actual{"abd"};
-        test_string<> expected{"abcd"};
-
-        actual.insert(actual.begin() + 2, 'c');
-        equals(actual, expected);
-    });
-
-    suite.add_test("insert_range", [] () {
-        test_string<> actual{"abe"};
-        test_string<> other{"cd"};
-        test_string<> expected{"abcde"};
-
-        actual.insert_range(actual.begin() + 2, other);
-        equals(actual, expected);
-    });
-
-    suite.add_test("erase", [] () {
-        test_string<> actual{"abcd"};
-        test_string<> expected{"abd"};
-
-        actual.erase(actual.begin() + 2, actual.begin() + 3);
-        equals(actual, expected);
+        equals(s1.is_empty(), false);
+        equals(s2.is_empty(), true);
     });
 
     return suite.main(argc, argv);

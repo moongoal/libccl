@@ -51,7 +51,7 @@ namespace ccl {
 
         static constexpr char_type* move(char_type* const dest, const char_type* const src, const pos_type count) {
             if constexpr(std::is_trivial_v<char_type>) {
-                ::memmove(dest, src, count);
+                ::memmove(dest, src, size_of<char_type>(count));
             } else {
                 for(pos_type i = count; i > 0; --i) {
                     assign(dest[i], src[i]);
@@ -65,7 +65,7 @@ namespace ccl {
 
         static constexpr char_type* copy(char_type* const dest, const char_type* const src, const pos_type count) {
             if constexpr(std::is_trivial_v<char_type>) {
-                ::memcpy(dest, src, count);
+                ::memcpy(dest, src, size_of<char_type>(count));
             } else {
                 for(pos_type i = 0; i < count; ++i) {
                     assign(dest[i], src[i]);
