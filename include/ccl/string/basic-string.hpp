@@ -258,6 +258,23 @@ namespace ccl {
                 return 0 == char_traits::compare(data, other.data, other._length);
             }
 
+            constexpr bool starts_with(const const_pointer other, const size_type other_length) const {
+                if(_length < other_length) {
+                    return false;
+                }
+
+                return 0 == char_traits::compare(data, other, other_length);
+            }
+
+            template<size_type N>
+            constexpr bool starts_with(const CharType (&other)[N]) const {
+                if(_length < N - 1) {
+                    return false;
+                }
+
+                return 0 == char_traits::compare(data, other, N - 1);
+            }
+
             template<
                 typename OtherAllocator
             > constexpr bool ends_with(const basic_string<value_type, char_traits, OtherAllocator> &other) const {
@@ -268,6 +285,29 @@ namespace ccl {
                 const size_type delta = _length - other._length;
 
                 return 0 == char_traits::compare(data + delta, other.data, other._length);
+            }
+
+            constexpr bool ends_with(const const_pointer other, const size_type other_length) const {
+                if(_length < other_length) {
+                    return false;
+                }
+
+                const size_type delta = _length - other_length;
+
+                return 0 == char_traits::compare(data + delta, other, other_length);
+            }
+
+            template<size_type N>
+            constexpr bool ends_with(const value_type (&other)[N]) const {
+                constexpr size_type other_length = N - 1;
+
+                if(_length < other_length) {
+                    return false;
+                }
+
+                const size_type delta = _length - other_length;
+
+                return 0 == char_traits::compare(data + delta, other, other_length);
             }
 
             template<

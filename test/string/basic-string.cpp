@@ -255,6 +255,25 @@ int main(int argc, char **argv) {
         equals(s1.starts_with(s5), false);
     });
 
+    suite.add_test("starts_with (c-string)", [] () {
+        test_string<> s1{"abcd"};
+        const char *s2{"ab"}, *s3{"ac"}, *s4{"abcd"}, *s5{"abcde"};
+
+        equals(s1.starts_with(s2, 2), true);
+        equals(s1.starts_with(s3, 2), false);
+        equals(s1.starts_with(s4, 4), true);
+        equals(s1.starts_with(s5, 5), false);
+    });
+
+    suite.add_test("starts_with (c-string literal)", [] () {
+        test_string<> s1{"abcd"};
+
+        equals(s1.starts_with("ab"), true);
+        equals(s1.starts_with("ac"), false);
+        equals(s1.starts_with("abcd"), true);
+        equals(s1.starts_with("abcde"), false);
+    });
+
     suite.add_test("ends_with", [] () {
         test_string<> s1{"abcd"}, s2{"cd"}, s3{"ac"}, s4{"abcd"}, s5{"abcde"};
 
@@ -262,6 +281,25 @@ int main(int argc, char **argv) {
         equals(s1.ends_with(s3), false);
         equals(s1.ends_with(s4), true);
         equals(s1.ends_with(s5), false);
+    });
+
+    suite.add_test("ends_with (c-string)", [] () {
+        test_string<> s1{"abcd"};
+        const char *s2{"cd"}, *s3{"ac"}, *s4{"abcd"}, *s5{"abcde"};
+
+        equals(s1.ends_with(s2, 2), true);
+        equals(s1.ends_with(s3, 2), false);
+        equals(s1.ends_with(s4, 4), true);
+        equals(s1.ends_with(s5, 5), false);
+    });
+
+    suite.add_test("ends_with (c-string literal)", [] () {
+        test_string<> s1{"abcd"};
+
+        equals(s1.ends_with("cd"), true);
+        equals(s1.ends_with("ac"), false);
+        equals(s1.ends_with("abcd"), true);
+        equals(s1.ends_with("abcde"), false);
     });
 
     suite.add_test("compare", [] () {
