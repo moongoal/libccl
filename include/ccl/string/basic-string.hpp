@@ -247,6 +247,44 @@ namespace ccl {
 
                 out[end] = char_traits::nul();
             }
+
+            template<
+                typename OtherAllocator
+            > constexpr bool starts_with(const basic_string<value_type, char_traits, OtherAllocator> &other) const {
+                if(_length < other._length) {
+                    return false;
+                }
+
+                return 0 == char_traits::compare(data, other.data, other._length);
+            }
+
+            template<
+                typename OtherAllocator
+            > constexpr bool ends_with(const basic_string<value_type, char_traits, OtherAllocator> &other) const {
+                if(_length < other._length) {
+                    return false;
+                }
+
+                const size_type delta = _length - other._length;
+
+                return 0 == char_traits::compare(data + delta, other.data, other._length);
+            }
+
+            template<
+                typename OtherAllocator
+            > constexpr int compare(const basic_string<value_type, char_traits, OtherAllocator> &other) const {
+                const int result = char_traits::compare(
+                    data,
+                    other.data,
+                    min(_length, other._length)
+                );
+
+                return choose(
+                    result,
+                    choose(1, -1, _length > other._length),
+                    or_(_length == other._length, result != 0)
+                );
+            }
     };
 }
 

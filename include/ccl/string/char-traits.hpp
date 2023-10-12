@@ -76,7 +76,7 @@ namespace ccl {
         }
 
         static constexpr int compare(const char_type* const s1, const char_type* const s2, const pos_type count) {
-            bool full_equality = false;
+            bool full_equality = true;
 
             for(pos_type i = 0; i < count; ++i) {
                 const char_type &c1 = s1[i];

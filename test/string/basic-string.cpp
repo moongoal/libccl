@@ -246,5 +246,32 @@ int main(int argc, char **argv) {
         equals(out[4], '\0');
     });
 
+    suite.add_test("starts_with", [] () {
+        test_string<> s1{"abcd"}, s2{"ab"}, s3{"ac"}, s4{"abcd"}, s5{"abcde"};
+
+        equals(s1.starts_with(s2), true);
+        equals(s1.starts_with(s3), false);
+        equals(s1.starts_with(s4), true);
+        equals(s1.starts_with(s5), false);
+    });
+
+    suite.add_test("ends_with", [] () {
+        test_string<> s1{"abcd"}, s2{"cd"}, s3{"ac"}, s4{"abcd"}, s5{"abcde"};
+
+        equals(s1.ends_with(s2), true);
+        equals(s1.ends_with(s3), false);
+        equals(s1.ends_with(s4), true);
+        equals(s1.ends_with(s5), false);
+    });
+
+    suite.add_test("compare", [] () {
+        test_string<> s1{"abcd"}, s2{"cd"}, s3{"ac"}, s4{"abcd"}, s5{"abcde"};
+
+        equals(s1.compare(s2), -1);
+        equals(s1.compare(s3), -1);
+        equals(s1.compare(s4), 0);
+        equals(s1.compare(s5), -1);
+    });
+
     return suite.main(argc, argv);
 }
