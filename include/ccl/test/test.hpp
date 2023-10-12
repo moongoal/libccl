@@ -18,6 +18,7 @@
 namespace ccl {
     using test_function = std::function<void()>;
     using skip_predicate = std::function<bool()>;
+    using hook_function = std::function<void()>;
 
     constexpr const auto default_skip_predicate = [] () -> bool {
         return false;
@@ -52,7 +53,35 @@ namespace ccl {
 
         private:
             std::vector<test_ptr> tests;
+            std::vector<hook_function> before_all_hooks;
+            std::vector<hook_function> after_all_hooks;
+            std::vector<hook_function> before_each_hooks;
+            std::vector<hook_function> after_each_hooks;
             std::ostream *ostream;
+
+            constexpr void invoke_before_all_hooks() const {
+                for(const auto& hook: before_all_hooks) {
+                    hook();
+                }
+            }
+
+            constexpr void invoke_after_all_hooks() const {
+                for(const auto& hook: after_all_hooks) {
+                    hook();
+                }
+            }
+
+            constexpr void invoke_before_each_hooks() const {
+                for(const auto& hook: before_each_hooks) {
+                    hook();
+                }
+            }
+
+            constexpr void invoke_after_each_hooks() const {
+                for(const auto& hook: after_each_hooks) {
+                    hook();
+                }
+            }
 
         public:
             explicit test_suite(std::ostream * const ostream = &std::cout) : ostream{ostream} {
@@ -63,10 +92,14 @@ namespace ccl {
                 bool all_success = true;
                 int passed = 0, failed = 0, skipped = 0;
 
+                invoke_before_all_hooks();
+
                 for(const auto &t : tests) {
                     std::string state_tag = "[ PASS ]";
 
                     if(!t->should_skip()) {
+                        invoke_before_each_hooks();
+
                         try {
                             t->execute();
                             passed += 1;
@@ -75,6 +108,8 @@ namespace ccl {
                             all_success = false;
                             failed += 1;
                         }
+
+                        invoke_after_each_hooks();
                     } else {
                         state_tag = "[ SKIP ]";
                         skipped += 1;
@@ -84,6 +119,8 @@ namespace ccl {
                         *ostream << state_tag << ' ' << t->get_name() << std::endl;
                     }
                 }
+
+                invoke_after_all_hooks();
 
                 if(ostream) {
                     const int non_skipped = passed + failed;
@@ -105,6 +142,22 @@ namespace ccl {
                 const skip_predicate skip_if = default_skip_predicate
             ) {
                 return tests.emplace_back(std::make_shared<test>(name, test_func, skip_if));
+            }
+
+            void exec_before_all(const hook_function hook) {
+                before_all_hooks.push_back(hook);
+            }
+
+            void exec_after_all(const hook_function hook) {
+                after_all_hooks.push_back(hook);
+            }
+
+            void exec_before_each(const hook_function hook) {
+                before_each_hooks.push_back(hook);
+            }
+
+            void exec_after_each(const hook_function hook) {
+                after_each_hooks.push_back(hook);
             }
 
             int main(int argc CCLUNUSED, char **argv CCLUNUSED) {
