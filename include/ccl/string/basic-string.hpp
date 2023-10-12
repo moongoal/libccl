@@ -220,6 +220,7 @@ namespace ccl {
             }
 
             constexpr bool is_empty() const noexcept { return _size == 0; }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
     };
 }
 

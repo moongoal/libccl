@@ -298,6 +298,8 @@ namespace ccl {
                     }
                 }
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return handle_slots.get_allocation_flags(); }
     };
 }
 

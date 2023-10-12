@@ -148,6 +148,8 @@ namespace ccl {
              * @see pool::is_valid()
              */
             bool is_valid(const handle_type &handle) const { return primary_pool->is_valid(handle); }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

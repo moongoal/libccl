@@ -107,6 +107,8 @@ namespace ccl {
             constexpr size_type size() const noexcept {
                 return static_cast<size_type>(data.size());
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

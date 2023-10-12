@@ -397,6 +397,8 @@ template<typename Map>
                 data.clear();
                 index_map.clear();
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

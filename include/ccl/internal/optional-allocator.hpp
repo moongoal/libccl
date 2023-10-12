@@ -43,7 +43,7 @@ namespace ccl::internal {
                 return *this;
             }
 
-            allocator_type *get_allocator() const noexcept { return allocator; }
+            constexpr allocator_type *get_allocator() const noexcept { return allocator; }
             static constexpr bool is_allocator_stateless() noexcept { return false; }
 
             constexpr void swap(with_optional_allocator & other) noexcept {
@@ -73,13 +73,13 @@ namespace ccl::internal {
                 return *this;
             }
 
-            allocator_type *get_allocator() const noexcept {
+            constexpr allocator_type *get_allocator() const noexcept {
                 return const_cast<allocator_type*>(
                     static_cast<const allocator_type*>(this)
                 );
             }
 
-            allocator_type *get_allocator() noexcept {
+            constexpr allocator_type *get_allocator() noexcept {
                 return static_cast<allocator_type*>(this);
             }
 

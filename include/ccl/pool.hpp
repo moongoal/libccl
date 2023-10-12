@@ -43,7 +43,6 @@ namespace ccl {
             using handle_manager_type = handle_manager<T, HandleExpiryPolicy, handle_type, allocator_type>;
             using handle_object_callback = std::function<void(const handle_type, reference)>;
 
-
         private:
             handle_manager_type handle_manager;
             object_vector_type data;
@@ -177,6 +176,8 @@ namespace ccl {
                     callback(handle, get(handle));
                 });
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return handle_manager.get_allocation_flags(); }
     };
 }
 

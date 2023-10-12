@@ -27,13 +27,15 @@ namespace ccl {
             using char_traits = CharTraits;
             using allocator_type = Allocator;
             using string_type = basic_string<value_type, char_traits, allocator_type>;
+            using vector_type = vector<value_type, Allocator>;
+            using size_type = typename vector_type::size_type;
 
             static constexpr int default_int_radix = 10;
             static constexpr unsigned default_int_buffer_size = 128;
 
         private:
             int int_radix = default_int_radix;
-            string_type _data;
+            vector_type _data;
 
         public:
             explicit constexpr basic_string_builder(
@@ -48,9 +50,12 @@ namespace ccl {
             {}
 
             constexpr basic_string_builder(const basic_string_builder &other) : _data{other._data} {}
-            constexpr basic_string_builder(basic_string_builder &&other) : _data{std::move(other._data)} {}
+            constexpr basic_string_builder(basic_string_builder &&other) {
+                swap(other);
+            }
 
             constexpr auto swap(basic_string_builder &other) noexcept {
+                std::swap(int_radix, other.int_radix);
                 _data.swap(other._data);
             }
 
@@ -78,6 +83,19 @@ namespace ccl {
                 _data.insert_range(_data.end(), buff);
 
                 return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const string_type &value) {
+                const auto dest_begin = _data.begin();
+
+                _data.resize(_data.size() + value.size());
+                char_traits::copy(dest_begin, value.begin(), value.size());
+            }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return _data.get_allocation_flags(); }
+
+            string_type to_string() const {
+                return string_type{_data.data(), _data.size(), _data.get_allocator(), _data.get_allocation_flags()};
             }
     };
 }

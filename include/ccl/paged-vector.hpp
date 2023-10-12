@@ -692,6 +692,8 @@ namespace ccl {
             constexpr void erase(const iterator it) {
                 erase(it, it + 1);
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
     };
 }
 

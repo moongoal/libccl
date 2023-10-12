@@ -123,6 +123,8 @@ namespace ccl {
 
                 free_items.push_back(ptr);
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
     };
 }
 

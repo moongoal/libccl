@@ -326,6 +326,8 @@ namespace ccl {
 
                 reset();
             }
+
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
     };
 }
 

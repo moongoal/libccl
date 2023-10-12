@@ -553,6 +553,8 @@ namespace ccl {
             constexpr const_iterator cbegin() const { return const_iterator{ *this, 0 }; }
             constexpr const_iterator cend() const { return const_iterator{ *this, _capacity }; }
 
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+
         private:
             static hash_type hash(const_key_reference x) {
                 return hash_function_type{}(x);

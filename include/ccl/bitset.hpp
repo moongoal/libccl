@@ -360,6 +360,8 @@ namespace ccl {
                         index & (bits_per_cluster - 1)
                     };
                 }
+
+                constexpr allocation_flags get_allocation_flags() const noexcept { return clusters.get_allocation_flags(); }
     };
 }
 
