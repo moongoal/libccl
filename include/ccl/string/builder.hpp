@@ -240,6 +240,10 @@ namespace ccl {
 
                 return string_type{_data.data(), _data.size(), _data.get_allocator(), _data.get_allocation_flags()};
             }
+
+            constexpr void reserve(const size_type length) {
+                _data.reserve(length);
+            }
     };
 }
 
