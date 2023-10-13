@@ -353,7 +353,7 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    TEST test_string_nul_terminated_string test/string/nul-terminated-string.cpp
+    TEST test_string_nul_terminated test/string/nul-terminated.cpp
     COVERAGE include/ccl/string/nul-terminated.hpp
 )
 

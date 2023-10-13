@@ -64,15 +64,15 @@ namespace ccl {
                 typed_allocator<CharType> Allocator2
             > dynamic_nul_terminated_string(
                 const basic_string<CharType, CharTraits, Allocator2> &str,
-                allocator_type * const allocator,
-                const allocation_flags alloc_flags
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             ) :
                 alloc{allocator},
-                data{allocator->template allocate<value_type>(size_of<value_type>(str.length()), alloc_flags)},
+                data{alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(str.length() + 1), alloc_flags)},
                 _length{str.length()},
                 alloc_flags{alloc_flags}
             {
-                str.to_nul_terminated(data);
+                str.to_nul_terminated(std::span{data, _length + 1});
             }
 
             dynamic_nul_terminated_string(
@@ -85,7 +85,10 @@ namespace ccl {
             }
 
             constexpr count_t length() const noexcept { return _length; }
-            constexpr const CharType *value() const noexcept { return data; }
+
+            constexpr const CharType *value() const noexcept {
+                return choose(data, "", data);
+            }
 
             constexpr void destroy() {
                 if(data) {
@@ -103,7 +106,7 @@ namespace ccl {
         typed_allocator<char> Allocator = allocator
     > using ansi_dynamic_nul_terminated_string = dynamic_nul_terminated_string<
         typename ansi_string<Allocator>::value_type,
-        typename ansi_string<Allocator>::char_Traits,
+        typename ansi_string<Allocator>::char_traits,
         Allocator
     >;
 }
