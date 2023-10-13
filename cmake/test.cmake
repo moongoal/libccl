@@ -352,6 +352,12 @@ add_ccl_test(
     COVERAGE include/ccl/string/builder.hpp
 )
 
+add_ccl_test(
+    TEST test_string_nul_terminated_string test/string/nul-terminated-string.cpp
+    COVERAGE include/ccl/string/nul-terminated.hpp
+)
+
+
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}
