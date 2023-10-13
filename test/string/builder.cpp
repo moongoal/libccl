@@ -149,5 +149,15 @@ int main(int argc, char **argv) {
         equals(b.to_string(), test_string{"abcd"});
     });
 
+    suite.add_test("append(char)", [] () {
+        test_builder b;
+
+        b << 'a';
+        b << 'b';
+        b << 'c';
+
+        equals(b.to_string(), test_string{"abc"});
+    });
+
     return suite.main(argc, argv);
 }

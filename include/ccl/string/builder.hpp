@@ -78,100 +78,118 @@ namespace ccl {
 
             constexpr basic_string_builder& operator <<(const short value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%i", value);
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const long value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%li", value);
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const unsigned long value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%lu", value);
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const long long value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%lli", value);
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const unsigned long long value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%llu", value);
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const double value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = min<int, int>(
                     ::snprintf(buff, default_int_buffer_size, "%lf", value),
                     default_int_buffer_size
                 );
 
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const long double value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = min<int, int>(
                     ::snprintf(buff, default_int_buffer_size, "%Lf", value),
                     default_int_buffer_size
                 );
 
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const int value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%d", value);
 
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
 
             constexpr basic_string_builder& operator <<(const unsigned value) {
                 value_type buff[default_int_buffer_size];
-                buff[0] = char_traits::nul();
+                char_traits::assign(buff[0], char_traits::nul());
 
+                const size_type data_start = _data.size();
                 const size_type written_chars = ::snprintf(buff, default_int_buffer_size, "%u", value);
 
-                _data.insert_range(_data.end(), std::span{buff, written_chars});
+                _data.resize(_data.size() + written_chars);
+                char_traits::move(_data.data() + data_start, buff, written_chars);
 
                 return *this;
             }
@@ -200,6 +218,14 @@ namespace ccl {
 
                 _data.resize(_data.size() + N - 1);
                 char_traits::copy(_data.data() + dest_begin, value, N - 1);
+
+                return *this;
+            }
+
+            constexpr basic_string_builder& operator <<(const CharType c) {
+                const auto dest_begin = _data.size();
+                _data.resize(_data.size() + 1);
+                char_traits::assign(*(_data.data() + dest_begin), c);
 
                 return *this;
             }
