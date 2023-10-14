@@ -311,5 +311,23 @@ int main(int argc, char **argv) {
         equals(s1.compare(s5), -1);
     });
 
+    suite.add_test("operator = (copy)", [] () {
+        test_string<> s1{"abc"}, s2{"cde"};
+
+        s1 = s2;
+
+        equals(s1, s2);
+        differs(s1.raw(), s2.raw());
+        equals(s1.length(), s2.length());
+    });
+
+    suite.add_test("operator = (move)", [] () {
+        test_string<> s1{"abc"}, s2{"cde"};
+
+        s1 = std::move(s2);
+
+        equals(s1, test_string<>{"cde"});
+    });
+
     return suite.main(argc, argv);
 }

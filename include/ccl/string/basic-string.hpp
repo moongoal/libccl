@@ -198,6 +198,32 @@ namespace ccl {
                 return true;
             }
 
+            constexpr basic_string& operator=(const basic_string& rhs) {
+                destroy();
+
+                alloc::operator=(rhs.get_allocator());
+                alloc_flags = rhs.get_allocation_flags();
+
+                if(rhs.data) {
+                    data = alloc::get_allocator()->template allocate<value_type>(
+                        size_of<value_type>(rhs.length()),
+                        alloc_flags
+                    );
+
+                    _length = rhs._length;
+
+                    char_traits::copy(data, rhs.data, _length);
+                }
+
+                return *this;
+            }
+
+            constexpr basic_string& operator=(basic_string&& rhs) {
+                swap(rhs);
+
+                return *this;
+            }
+
             constexpr const_reference operator[](const size_type index) const {
                 return data[index];
             }
