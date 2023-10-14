@@ -16,95 +16,104 @@
 #include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl {
-    constexpr count_t CCL_DEFAULT_NUL_TERMINATED_STRING_MAX_LENGTH = 256;
-
-    template<
-        typename CharType,
-        count_t MaxLength = CCL_DEFAULT_NUL_TERMINATED_STRING_MAX_LENGTH
-    > class nul_terminated_string {
-        private:
-            CharType data[MaxLength];
-            count_t _length;
-
-        public:
-            constexpr count_t length() const noexcept { return _length; }
-
-            nul_terminated_string(): _length{0} { data[0] = 0; }
-
-            template<
-                char_traits_impl<CharType> CharTraits,
-                typed_allocator<CharType> Allocator
-            > nul_terminated_string(const basic_string<CharType, CharTraits, Allocator> &str) : _length{str.length()} {
-                str.to_nul_terminated(data);
-            }
-
-            constexpr const CharType *value() const noexcept { return data; }
-    };
-
     template<
         typename CharType,
         char_traits_impl<CharType> CharTraits = char_traits<CharType>,
         typed_allocator<CharType> Allocator = allocator
-    > class dynamic_nul_terminated_string : private internal::with_optional_allocator<Allocator> {
+    > class nul_terminated_string : private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
             using allocator_type = Allocator;
             using value_type = CharType;
+            using char_traits = CharTraits;
+
+            static constexpr count_t max_local_storage_length = 16;
 
         private:
             CharType *data = nullptr;
             count_t _length = 0;
             allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
+            CharType local_storage[max_local_storage_length];
 
         public:
-            dynamic_nul_terminated_string() : alloc{nullptr} {}
+            nul_terminated_string() : alloc{nullptr}, data{local_storage} { char_traits::assign(local_storage[0], char_traits::nul()); }
 
             template<
                 typed_allocator<CharType> Allocator2
-            > dynamic_nul_terminated_string(
+            > nul_terminated_string(
                 const basic_string<CharType, CharTraits, Allocator2> &str,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             ) :
                 alloc{allocator},
-                data{alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(str.length() + 1), alloc_flags)},
+                data{
+                    str.length() < max_local_storage_length
+                    ? data = local_storage
+                    : alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(str.length() + 1), alloc_flags)
+                },
                 _length{str.length()},
                 alloc_flags{alloc_flags}
             {
                 str.to_nul_terminated(std::span{data, _length + 1});
             }
 
-            dynamic_nul_terminated_string(
+            nul_terminated_string(
                 const basic_string<CharType, CharTraits, Allocator> &str
-            ) : dynamic_nul_terminated_string{str, str.get_allocator(), str.get_allocation_flags()}
+            ) : nul_terminated_string{str, str.get_allocator(), str.get_allocation_flags()}
             {}
 
-            ~dynamic_nul_terminated_string() {
+            ~nul_terminated_string() {
                 destroy();
             }
 
             constexpr count_t length() const noexcept { return _length; }
 
             constexpr const CharType *value() const noexcept {
-                return choose(data, "", data);
+                return data;
             }
 
             constexpr void destroy() {
-                if(data) {
+                if(and_(data != nullptr, data != local_storage)) {
                     alloc::get_allocator()->deallocate(data);
-                    data = nullptr;
+                    data = local_storage;
                     _length = 0;
+                    char_traits::assign(local_storage[0], char_traits::nul());
                 }
             }
-    };
 
-    template<count_t MaxLength = CCL_DEFAULT_NUL_TERMINATED_STRING_MAX_LENGTH>
-    using ansi_nul_terminated_string = nul_terminated_string<char, MaxLength>;
+            constexpr nul_terminated_string& operator =(const nul_terminated_string &rhs) {
+                destroy();
+
+                alloc::operator=(rhs.get_allocator());
+                alloc_flags = rhs.get_allocation_flags();
+
+                if(rhs.data) {
+                    data = (
+                        rhs._length < max_local_storage_length
+                        ? data = local_storage
+                        : alloc::get_allocator()->template allocate<value_type>(
+                            size_of<value_type>(rhs.length()),
+                            alloc_flags
+                        )
+                    );
+
+                    _length = rhs._length;
+
+                    char_traits::copy(data, rhs.data, _length);
+                }
+
+                return *this;
+            }
+
+            constexpr bool is_empty() const noexcept { return _length == 0; }
+            constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+    };
 
     template<
         typed_allocator<char> Allocator = allocator
-    > using ansi_dynamic_nul_terminated_string = dynamic_nul_terminated_string<
+    > using ansi_nul_terminated_string = nul_terminated_string<
         typename ansi_string<Allocator>::value_type,
         typename ansi_string<Allocator>::char_traits,
         Allocator

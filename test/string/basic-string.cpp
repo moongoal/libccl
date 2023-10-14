@@ -71,6 +71,16 @@ int main(int argc, char **argv) {
         check(s1 == s1);
     });
 
+    suite.add_test("operator == (c-str)", [] () {
+        test_string<> s1{"abc"}, s2;
+
+        check(!(s1 == ""));
+        check(s1 == "abc");
+        check(!(s1 == "abcd"));
+        check(!(s1 == "ab"));
+        check(s2 == "");
+    });
+
     suite.add_test("operator !=", [] () {
         test_string<> s1{"abc"};
         test_string<> s2{"cde"};
@@ -327,6 +337,14 @@ int main(int argc, char **argv) {
         s1 = std::move(s2);
 
         equals(s1, test_string<>{"cde"});
+    });
+
+    suite.add_test("from_nul_terminated", [] () {
+        const char * const x = "abc";
+
+        test_string<> s = test_string<>::from_nul_terminated(x);
+
+        check(s == x);
     });
 
     return suite.main(argc, argv);

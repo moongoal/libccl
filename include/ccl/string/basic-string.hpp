@@ -56,7 +56,7 @@ namespace ccl {
                 const basic_string &other
             ) :
                 alloc{other.get_allocator()},
-                data{alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(other._length), other.alloc_flags)},
+                data{other._length ? alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(other._length), other.alloc_flags) : nullptr},
                 _length{other._length},
                 alloc_flags{other.alloc_flags}
             {
@@ -78,7 +78,7 @@ namespace ccl {
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             ) :
                 alloc{allocator},
-                data{alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(length), alloc_flags)},
+                data{length ? alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(length), alloc_flags) : nullptr},
                 _length{length},
                 alloc_flags{alloc_flags}
             {
@@ -144,6 +144,30 @@ namespace ccl {
                 }
 
                 return true;
+            }
+
+            /**
+             * Compares this string with a NUL-terminated string.
+             */
+            constexpr bool operator==(const_pointer rhs) const {
+                if(!data) {
+                    return char_traits::eq(rhs[0], char_traits::nul());
+                }
+
+                const size_t rhs_len = ::strlen(rhs);
+
+                if(rhs_len == _length) {
+                    return char_traits::compare(rhs, data, _length) == 0;
+                }
+
+                return false;
+            }
+
+            /**
+             * Compares this string with a NUL-terminated string.
+             */
+            constexpr bool operator!=(const_pointer rhs) const {
+                return !operator==(rhs);
             }
 
             constexpr bool operator!=(const basic_string& rhs) const {
@@ -350,6 +374,16 @@ namespace ccl {
                     choose(1, -1, _length > other._length),
                     or_(_length == other._length, result != 0)
                 );
+            }
+
+            static basic_string from_nul_terminated(
+                const const_pointer str,
+                allocator_type * const allocator = nullptr,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+            ) {
+                const count_t len = static_cast<count_t>(::strlen(str));
+
+                return basic_string{str, len, allocator, alloc_flags};
             }
     };
 }
