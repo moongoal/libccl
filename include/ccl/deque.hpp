@@ -9,6 +9,7 @@
 #ifndef CCL_DEQUE_HPP
 #define CCL_DEQUE_HPP
 
+#include <memory>
 #include <ccl/api.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 #include <ccl/memory/allocator.hpp>
