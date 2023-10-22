@@ -24,6 +24,8 @@ namespace ccl {
         public:
             using value_type = T;
             using reference_type = T&;
+            using pointer = T*;
+            using const_pointer = const T*;
             using const_reference_type = const T&;
             using allocator_type = Allocator;
             using hash_function_type = Hash;
@@ -35,7 +37,7 @@ namespace ccl {
             using data_vector_type = vector<T, allocator_type>;
             using index_map_type = hashtable<T, size_type, hash_function_type, allocator_type>;
 
-            data_vector_type data;
+            data_vector_type _data;
             index_map_type index_map;
 
             static hash_type hash(const_reference_type x) {
@@ -57,26 +59,26 @@ namespace ccl {
             constexpr sparse_set(
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator}, data{allocator, alloc_flags}, index_map{allocator, alloc_flags}
+            ) : alloc{allocator}, _data{allocator, alloc_flags}, index_map{allocator, alloc_flags}
             {}
 
             constexpr sparse_set(const sparse_set &other)
                 : alloc{other.get_allocator()},
-                data{other.data},
+                _data{other._data},
                 index_map{other.index_map}
             {}
 
             constexpr sparse_set(sparse_set &&other)
                 : alloc{other.get_allocator()},
-                data{std::move(other.data)},
+                _data{std::move(other._data)},
                 index_map{std::move(other.index_map)}
             {}
 
             constexpr void insert(const_reference_type item) {
                 if(!index_map.contains(item)) {
-                    const size_type item_index = static_cast<size_type>(data.size());
+                    const size_type item_index = static_cast<size_type>(_data.size());
 
-                    data.push_back(item);
+                    _data.push_back(item);
                     index_map.insert(item, item_index);
                 }
             }
@@ -87,7 +89,7 @@ namespace ccl {
                 if(it != index_map.end()) {
                     const size_type index = static_cast<size_type>(*it->second);
 
-                    data.erase(data.begin() + index);
+                    _data.erase(_data.begin() + index);
                     index_map.erase(item);
                 }
             }
@@ -96,20 +98,28 @@ namespace ccl {
                 return index_map.contains(item);
             }
 
-            constexpr decltype(auto) begin() { return data.begin(); }
-            constexpr decltype(auto) begin() const { return data.begin(); }
-            constexpr decltype(auto) end() { return data.end(); }
-            constexpr decltype(auto) end() const { return data.end(); }
+            constexpr decltype(auto) begin() { return _data.begin(); }
+            constexpr decltype(auto) begin() const { return _data.begin(); }
+            constexpr decltype(auto) end() { return _data.end(); }
+            constexpr decltype(auto) end() const { return _data.end(); }
 
-            constexpr decltype(auto) cbegin() const { return data.cbegin(); }
-            constexpr decltype(auto) cend() const { return data.cend(); }
+            constexpr decltype(auto) cbegin() const { return _data.cbegin(); }
+            constexpr decltype(auto) cend() const { return _data.cend(); }
 
             constexpr size_type size() const noexcept {
-                return static_cast<size_type>(data.size());
+                return static_cast<size_type>(_data.size());
             }
 
-            constexpr allocator_type* get_allocator() const noexcept { return data.get_allocator(); }
-            constexpr allocation_flags get_allocation_flags() const noexcept { return data.get_allocation_flags(); }
+            constexpr pointer data() noexcept {
+                return _data.data();
+            }
+
+            constexpr const_pointer data() const noexcept {
+                return _data.data();
+            }
+
+            constexpr allocator_type* get_allocator() const noexcept { return _data.get_allocator(); }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return _data.get_allocation_flags(); }
     };
 }
 
