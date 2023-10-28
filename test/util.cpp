@@ -187,5 +187,29 @@ int main(int argc, char ** argv) {
         equals(or_(true, true), true);
     });
 
+    suite.add_test("test_all", [] () {
+        const uint32_t target_matching = 0b11111101;
+        const uint32_t target_non_matching1 = 0b11111100;
+        const uint32_t target_non_matching2 = 0b11111010;
+        const uint32_t mask = 0b101;
+
+        equals(test_all(target_matching, mask), true);
+        equals(test_all(target_non_matching1, mask), false);
+        equals(test_all(target_non_matching2, mask), false);
+    });
+
+    suite.add_test("test_any", [] () {
+        const uint32_t target_matching1 = 0b11111101;
+        const uint32_t target_matching2 = 0b11111100;
+        const uint32_t target_matching3 = 0b11111010;
+        const uint32_t target_non_matching = 0b11111000;
+        const uint32_t mask = 0b111;
+
+        equals(test_any(target_matching1, mask), true);
+        equals(test_any(target_matching2, mask), true);
+        equals(test_any(target_matching3, mask), true);
+        equals(test_any(target_non_matching, mask), false);
+    });
+
     return suite.main(argc, argv);
 }

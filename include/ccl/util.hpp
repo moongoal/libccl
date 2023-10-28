@@ -394,6 +394,34 @@ namespace ccl {
     constexpr bool or_(Args&& ...args) noexcept {
         return ((uint64_t)(args) | ...);
     }
+
+    /**
+     * Test whether a bit mask is entirely active.
+     *
+     * @param target The target value to test.
+     * @param mask The mask to test.
+     *
+     * @return True if all bits of `mask` are set in `target`, false otherwise.
+     */
+    template<typename T>
+    requires std::unsigned_integral<T>
+    constexpr bool test_all(const T target, const T mask) noexcept {
+        return (target & mask) == mask;
+    }
+
+    /**
+     * Test whether any bit in a mask is active.
+     *
+     * @param target The target value to test.
+     * @param mask The mask to test.
+     *
+     * @return True if any of the bits of `mask` are set in `target`, false if all bits are unset.
+     */
+    template<typename T>
+    requires std::unsigned_integral<T>
+    constexpr bool test_any(const T target, const T mask) noexcept {
+        return target & mask;
+    }
 }
 
 #endif // CCL_UTIL_HPP
