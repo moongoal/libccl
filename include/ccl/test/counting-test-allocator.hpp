@@ -67,7 +67,7 @@ namespace ccl {
         static counting_test_allocator s_counting_allocator;
 
         template<>
-        counting_test_allocator* get_default_allocator() {
+        inline counting_test_allocator* get_default_allocator() {
             return &s_counting_allocator;
         }
     #endif // CCL_ALLOCATOR_IMPL

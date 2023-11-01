@@ -7,7 +7,7 @@
 #define CCL_STRING_BASE_STRING_HPP
 
 #include <iterator>
-#include <ranges>
+#include <span>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hash.hpp>

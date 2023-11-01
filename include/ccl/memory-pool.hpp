@@ -6,7 +6,6 @@
 #ifndef CCL_MEMORY_POOL_HPP
 #define CCL_MEMORY_POOL_HPP
 
-#include <functional>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>

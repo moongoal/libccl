@@ -6,10 +6,8 @@
 #ifndef CCL_HASH_HPP
 #define CCL_HASH_HPP
 
-#include <concepts>
-#include <utility>
-#include <span>
 #include <ccl/api.hpp>
+#include <ccl/concepts.hpp>
 
 namespace ccl {
     using hash_t = std::size_t;

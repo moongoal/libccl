@@ -6,7 +6,7 @@
 #ifndef CCL_ATOMIC_HPP
 #define CCL_ATOMIC_HPP
 
-#include <utility>
+#include <type_traits>
 #include <ccl/api.hpp>
 
 namespace ccl {

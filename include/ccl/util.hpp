@@ -6,7 +6,6 @@
 #ifndef CCL_UTIL_HPP
 #define CCL_UTIL_HPP
 
-#include <cmath>
 #include <utility>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
