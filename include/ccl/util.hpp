@@ -422,6 +422,16 @@ namespace ccl {
     constexpr bool test_any(const T target, const T mask) noexcept {
         return target & mask;
     }
+
+    /**
+     * Prevents compiler re-ordering of instructions beyond
+     * this point and forces the provided value to exist.
+     *
+     * @param value The value to disable optimisation for.
+     */
+    CCLINLINE void do_not_optimize(auto& value) noexcept {
+        asm volatile("" : "+r,m"(value) : : "memory");
+    }
 }
 
 #endif // CCL_UTIL_HPP

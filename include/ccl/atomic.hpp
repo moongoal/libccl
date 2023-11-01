@@ -352,7 +352,7 @@ namespace ccl {
              * @param value The second operand.
              * @param order The memory ordering constraint.
              *
-             * @return The result of the addition.
+             * @return The value before the addition.
              */
             value_type fetch_add(
                 const value_type value,
