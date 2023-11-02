@@ -26,12 +26,12 @@ jobs:
 
     steps:
     - name: Setup C/C++ Compiler
-      uses: rlalik/setup-cpp-compiler@v1.1
+      uses: rlalik/setup-cpp-compiler@v1.2
       id: install_cc
       with:
-        compiler: clang++-12
+        compiler: clang++-15
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -47,7 +47,7 @@ jobs:
         [settings]
         os=Linux
         compiler=clang
-        compiler.version=12
+        compiler.version=15
         compiler.libcxx=libstdc++11
         build_type=${{env.BUILD_TYPE}}
         EOF
