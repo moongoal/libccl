@@ -49,7 +49,7 @@ jobs:
         os=Linux
         compiler=clang
         compiler.version=16
-        compiler.libcxx=libstdc++16
+        compiler.libcxx=libc++
         build_type=${{env.BUILD_TYPE}}
         EOF
 
