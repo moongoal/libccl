@@ -60,5 +60,5 @@ jobs:
       working-directory: ${{github.workspace}}
       run: conan create -pr:b ./conan-build-profile --build missing .
       env:
-        CC: ${{ steps.install_cc.outputs.cc }}
-        CXX: ${{ steps.install_cc.outputs.cxx }}
+        CC: clang
+        CXX: clang++
