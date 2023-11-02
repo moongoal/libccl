@@ -26,10 +26,11 @@ jobs:
 
     steps:
     - name: Setup C/C++ Compiler
-      uses: rlalik/setup-cpp-compiler@v1.2
-      id: install_cc
-      with:
-        compiler: clang++-15
+    #   uses: rlalik/setup-cpp-compiler@v1.2
+    #   id: install_cc
+    #   with:
+    #     compiler: clang++-15
+      run: wget https://apt.llvm.org/llvm.sh && chmod u+x llvm.sh && sudo ./llvm.sh 16
 
     - uses: actions/checkout@v4
       with:
@@ -47,8 +48,8 @@ jobs:
         [settings]
         os=Linux
         compiler=clang
-        compiler.version=15
-        compiler.libcxx=libstdc++11
+        compiler.version=16
+        compiler.libcxx=libstdc++16
         build_type=${{env.BUILD_TYPE}}
         EOF
 
