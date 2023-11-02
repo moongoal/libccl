@@ -357,6 +357,10 @@ add_ccl_test(
     COVERAGE include/ccl/string/nul-terminated.hpp
 )
 
+add_ccl_test(
+    TEST test_concurrent_channel test/concurrent/channel.cpp
+    COVERAGE include/ccl/concurrent/channel.hpp
+)
 
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}

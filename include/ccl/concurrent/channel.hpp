@@ -19,6 +19,8 @@ namespace ccl::concurrent {
      *
      * The channel is uni-directional, that is one thread must only be
      * allowed to read and one thread must only be allowed to write.
+     *
+     * @tparam T The type of the value to exchange between the two threads.
      */
     template<typename T, typed_allocator<T> Allocator = allocator>
     class channel : private internal::with_optional_allocator<Allocator> {
@@ -63,8 +65,8 @@ namespace ccl::concurrent {
                 : alloc{std::move(other)},
                 _data{other._data},
                 _capacity{other._capacity},
-                read_index{other.read_index},
-                write_index{other.write_index},
+                read_index{std::move(other.read_index)},
+                write_index{std::move(other.write_index)},
                 alloc_flags{other.alloc_flags}
             {
                 other._data = nullptr;
@@ -77,7 +79,7 @@ namespace ccl::concurrent {
              * @param allocator The optional allocator.
              * @param alloc_flags The optional allocator flags.
              */
-            constexpr channel(
+            explicit constexpr channel(
                 const size_type capacity,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
@@ -126,10 +128,12 @@ namespace ccl::concurrent {
                 const size_type cur_write_index = write_index.load(memory_order_relaxed);
                 const size_type cur_read_index = read_index.load(memory_order_relaxed);
 
-                return or_(
-                    cur_write_index == cur_read_index - 1,
-                    _capacity == 0
-                );
+                if(_capacity > 1) {
+                    return cur_write_index % _capacity == (cur_read_index - 1) % _capacity;
+                } else {
+                    [[unlikely]]
+                    return cur_write_index != cur_read_index;
+                }
             }
 
             /**
@@ -141,7 +145,7 @@ namespace ccl::concurrent {
                 const size_type cur_write_index = write_index.load(memory_order_relaxed);
                 const size_type cur_read_index = read_index.load(memory_order_relaxed);
 
-                return or_(cur_read_index == cur_write_index, _capacity == 0);
+                return cur_read_index == cur_write_index;
             }
 
             /**
@@ -160,7 +164,7 @@ namespace ccl::concurrent {
              *
              * @return True if the item was successfully added, false if the buffer is full.
              */
-            bool send(const T& item) {
+            CCLNODISCARD bool send(const T& item) {
                 const size_type cur_write_index = write_index.load(memory_order_relaxed);
 
                 if(is_full()) { CCLUNLIKELY
@@ -169,6 +173,8 @@ namespace ccl::concurrent {
 
                 _data[cur_write_index % _capacity] = item;
                 write_index.store(cur_write_index + 1, memory_order_relaxed);
+
+                return true;
             }
 
             /**
@@ -177,7 +183,7 @@ namespace ccl::concurrent {
              * @return The next available message, if any, or `std::nullopt`
              *  if the channel's buffer is empty.
              */
-            std::optional<T> recv() {
+            CCLNODISCARD std::optional<T> recv() {
                 if(is_empty()) {
                     return std::nullopt;
                 }

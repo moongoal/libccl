@@ -88,6 +88,15 @@ namespace ccl {
             constexpr atomic(const atomic& other) = delete;
 
             /**
+             * Initialise the atomic object. This operation is not atomic.
+             *
+             * @param other The object to initialise this instance with.
+             */
+            constexpr atomic(atomic &&other) {
+                std::swap(value, other.value);
+            }
+
+            /**
              * True if this object is lock-free.
              */
             constexpr bool CCLINLINE is_lock_free() const noexcept {
