@@ -21,6 +21,7 @@ namespace ccl::concurrent {
      * allowed to read and one thread must only be allowed to write.
      *
      * @tparam T The type of the value to exchange between the two threads.
+     * @tparam Allocator The allocator type.
      */
     template<typename T, typed_allocator<T> Allocator = allocator>
     class channel : private internal::with_optional_allocator<Allocator> {
@@ -127,13 +128,11 @@ namespace ccl::concurrent {
             bool is_full() const {
                 const size_type cur_write_index = write_index.load(memory_order_relaxed);
                 const size_type cur_read_index = read_index.load(memory_order_relaxed);
+                const size_type start_index = min(cur_write_index, cur_read_index);
+                const size_type end_index = max(cur_write_index, cur_read_index);
+                const size_type length = end_index - start_index;
 
-                if(_capacity > 1) {
-                    return cur_write_index % _capacity == (cur_read_index - 1) % _capacity;
-                } else {
-                    [[unlikely]]
-                    return cur_write_index != cur_read_index;
-                }
+                return length == _capacity;
             }
 
             /**
