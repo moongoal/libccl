@@ -2,7 +2,7 @@ import os.path as path
 import re
 
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.files import load
 
 
@@ -25,6 +25,10 @@ class LibcclConan(ConanFile):
         "version.cmake",
         "README.md"
     )
+    tool_requires = (
+        "cmake/[>=3.27]",
+        "ninja/[>=1.11.1]"
+    )
 
     exports = "version.cmake", "LICENSE", "README.md"
 
@@ -35,6 +39,9 @@ class LibcclConan(ConanFile):
         cmake.test()
         cmake.install()
 
+    def layout(self):
+        cmake_layout(self)
+
     def package_id(self):
         self.info.clear()
 
@@ -43,6 +50,7 @@ class LibcclConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.user_presets_path = "ConanCMakePresets.json"
         tc.generate()
 
         deps = CMakeDeps(self)
