@@ -37,7 +37,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get -y install python3 python3-pip
 
     - name: Install Python Packages
-      run: pip3 install conan
+      run: pip3 install pipenv && pipenv install -d
 
     - name: Configure Conan Build Profile
       run: |
@@ -51,11 +51,11 @@ jobs:
         EOF
 
     - name: Configure Conan Host Profile
-      run: conan profile detect && conan profile show
+      run: pipenv run conan profile detect && pipenv run conan profile show
 
     - name: Build and Test
       working-directory: ${{github.workspace}}
-      run: conan create -pr:b ./conan-build-profile --build missing .
+      run: pipenv run conan create -pr:b ./conan-build-profile --build missing .
       env:
         CC: clang-${{env.CLANG_VERSION}}
         CXX: clang++-${{env.CLANG_VERSION}}
