@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
         test_channel<int> channel{16};
 
         equals(channel.send(5), true);
-        equals(*channel.recv(), 5);
+        equals(channel.recv(), 5);
     });
 
     suite.add_test("send (full)", [] () {
@@ -92,16 +92,31 @@ int main(int argc, char **argv) {
         test_channel<int> channel{16};
 
         equals(channel.send(5), true);
-        equals(*channel.recv(), 5);
+        equals(channel.recv(), 5);
 
         equals(channel.send(5), true);
-        equals(*channel.recv(), 5);
+        equals(channel.recv(), 5);
 
         equals(channel.send(5), true);
-        equals(*channel.recv(), 5);
+        equals(channel.recv(), 5);
 
         equals(channel.send(5), true);
-        equals(*channel.recv(), 5);
+        equals(channel.recv(), 5);
+    });
+
+    suite.add_test("operator =", [] () {
+        test_channel<int> channel{16};
+        test_channel<int> channel2{1};
+
+        (void)channel.send(1);
+        (void)channel2.send(9);
+
+        channel2 = std::move(channel);
+
+        equals(channel2.get_capacity(), 16);
+        equals(channel2.is_empty(), false);
+        equals(channel2.is_full(), false);
+        equals(channel2.recv(), 1);
     });
 
     return suite.main(argc, argv);

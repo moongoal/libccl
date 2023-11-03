@@ -101,11 +101,20 @@ namespace ccl::concurrent {
             constexpr channel& operator=(channel &&other) {
                 alloc::operator=(std::move(other));
 
-                std::swap(_data, other._data);
-                std::swap(_capacity, other._capacity);
-                std::swap(read_index, other.read_index);
-                std::swap(write_index, other.write_index);
-                std::swap(alloc_flags, other.alloc_flags);
+                ccl::swap(_data, other._data);
+                ccl::swap(_capacity, other._capacity);
+
+                const uint32_t my_read_index = read_index.load(memory_order_relaxed);
+                const uint32_t other_read_index = other.read_index.load(memory_order_relaxed);
+                const uint32_t my_write_index = write_index.load(memory_order_relaxed);
+                const uint32_t other_write_index = other.write_index.load(memory_order_relaxed);
+
+                read_index.store(other_read_index, memory_order_relaxed);
+                write_index.store(other_write_index, memory_order_relaxed);
+                other.read_index.store(my_read_index, memory_order_relaxed);
+                other.write_index.store(my_write_index, memory_order_relaxed);
+
+                ccl::swap(alloc_flags, other.alloc_flags);
 
                 return *this;
             }

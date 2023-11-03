@@ -6,8 +6,9 @@
 #ifndef CCL_ATOMIC_HPP
 #define CCL_ATOMIC_HPP
 
-#include <type_traits>
+#include <ccl/type-traits.hpp>
 #include <ccl/api.hpp>
+#include <ccl/util.hpp>
 
 namespace ccl {
     /**
@@ -93,7 +94,7 @@ namespace ccl {
              * @param other The object to initialise this instance with.
              */
             constexpr atomic(atomic &&other) {
-                std::swap(value, other.value);
+                ccl::swap(value, other.value);
             }
 
             /**
