@@ -21,7 +21,7 @@ namespace ccl {
         }
     };
 
-    template<typename T, deleter<T> Deleter = decl, typed_allocator<T> Allocator = allocator>
+    template<typename T, deleter<T> Deleter = internal::default_unique_ptr_deleter, typed_allocator<T> Allocator = allocator>
     class unique_ptr : public base_ptr<T>, private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
@@ -33,7 +33,6 @@ namespace ccl {
         private:
             pointer ptr;
     };
-
 }
 
 #endif // CCL_POINTER_UNIQUE_HPP

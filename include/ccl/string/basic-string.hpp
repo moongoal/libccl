@@ -7,7 +7,7 @@
 #define CCL_STRING_BASE_STRING_HPP
 
 #include <iterator>
-#include <ranges>
+#include <span>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/hash.hpp>
@@ -111,9 +111,9 @@ namespace ccl {
             constexpr auto swap(basic_string &other) noexcept {
                 alloc::swap(other);
 
-                std::swap(data, other.data);
-                std::swap(_length, other._length);
-                std::swap(alloc_flags, other.alloc_flags);
+                ccl::swap(data, other.data);
+                ccl::swap(_length, other._length);
+                ccl::swap(alloc_flags, other.alloc_flags);
             }
 
             /**

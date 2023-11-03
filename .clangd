@@ -1,5 +1,2 @@
-If:
-    PathMatch: contrib/.*
-
-Diagnostics:
-    Suppress: '*'
+CompileFlags:
+    CompilationDatabase: build/Debug

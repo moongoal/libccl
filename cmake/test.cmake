@@ -107,7 +107,7 @@ function(add_ccl_test)
     while(all_tests)
         list(POP_FRONT all_tests test_name test_file_path)
         set(profraw_file ${CCL_COVERAGE_DIR}/raw/${test_name}.profraw)
-        set(exe_file ${CMAKE_BINARY_DIR}/test/${test_name}.exe)
+        set(exe_file ${CMAKE_CURRENT_BINARY_DIR}/test/${test_name}.exe)
 
         _add_ccl_test(${test_name} ${test_file_path} ${profraw_file} ${exe_file})
 
@@ -140,7 +140,7 @@ function(add_ccl_test)
     endif()
 endfunction(add_ccl_test)
 
-set(CCL_COVERAGE_DIR ${CMAKE_BINARY_DIR}/coverage)
+set(CCL_COVERAGE_DIR ${CMAKE_CURRENT_BINARY_DIR}/coverage)
 set(CCL_COVERAGE_DATA_FILE ${CCL_COVERAGE_DIR}/ccl.profdata)
 
 file(MAKE_DIRECTORY ${CCL_COVERAGE_DIR}/raw)
@@ -357,6 +357,10 @@ add_ccl_test(
     COVERAGE include/ccl/string/nul-terminated.hpp
 )
 
+add_ccl_test(
+    TEST test_concurrent_channel test/concurrent/channel.cpp
+    COVERAGE include/ccl/concurrent/channel.hpp
+)
 
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}

@@ -6,7 +6,6 @@
 #ifndef CCL_LOCAL_ALLOCATOR_HPP
 #define CCL_LOCAL_ALLOCATOR_HPP
 
-#include <stdexcept>
 #include <ccl/api.hpp>
 #include <ccl/definitions.hpp>
 #include <ccl/memory/allocator.hpp>

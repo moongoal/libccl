@@ -4,5 +4,6 @@ build/
 Testing/
 
 CMakeUserPresets.json
+ConanCMakePresets.json
 *.profraw
 *.profdata

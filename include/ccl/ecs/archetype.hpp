@@ -6,8 +6,6 @@
 #ifndef CCL_ARCHETYPE_HPP
 #define CCL_ARCHETYPE_HPP
 
-#include <typeinfo>
-#include <memory>
 #include <algorithm>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>

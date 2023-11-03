@@ -6,7 +6,6 @@
 #ifndef CCL_ECS_REGISTRY_HPP
 #define CCL_ECS_REGISTRY_HPP
 
-#include <array>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/exceptions.hpp>

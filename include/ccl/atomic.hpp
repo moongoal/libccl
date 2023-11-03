@@ -6,8 +6,9 @@
 #ifndef CCL_ATOMIC_HPP
 #define CCL_ATOMIC_HPP
 
-#include <utility>
+#include <ccl/type-traits.hpp>
 #include <ccl/api.hpp>
+#include <ccl/util.hpp>
 
 namespace ccl {
     /**
@@ -86,6 +87,15 @@ namespace ccl {
              */
             constexpr atomic(value_type value) noexcept : value{value} {}
             constexpr atomic(const atomic& other) = delete;
+
+            /**
+             * Initialise the atomic object. This operation is not atomic.
+             *
+             * @param other The object to initialise this instance with.
+             */
+            constexpr atomic(atomic &&other) {
+                ccl::swap(value, other.value);
+            }
 
             /**
              * True if this object is lock-free.
@@ -352,7 +362,7 @@ namespace ccl {
              * @param value The second operand.
              * @param order The memory ordering constraint.
              *
-             * @return The result of the addition.
+             * @return The value before the addition.
              */
             value_type fetch_add(
                 const value_type value,

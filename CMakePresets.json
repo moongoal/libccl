@@ -1,12 +1,15 @@
 {
     "version": 6,
+    "include": [
+        "ConanCMakePresets.json"
+    ],
     "configurePresets": [
         {
             "name": "dev",
+            "inherits": "conan-debug",
             "displayName": "Development",
             "description": "Standard development profile (debug mode).",
             "generator": "Ninja",
-            "binaryDir": "build",
             "installDir": "build/install-debug",
             "warnings": {
                 "dev": true
@@ -25,51 +28,24 @@
                     "value": "ON"
                 }
             }
-        },
-        {
-            "name": "release",
-            "displayName": "Release",
-            "description": "Standard release profile.",
-            "generator": "Ninja",
-            "binaryDir": "build",
-            "installDir": "build/install-release",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": {
-                    "type": "STRING",
-                    "value": "Debug"
-                }
-            }
         }
     ],
     "buildPresets": [
         {
             "name": "dev",
+            "inherits": "conan-debug",
             "displayName": "Development",
             "description": "Standard development profile (debug mode).",
             "configurePreset": "dev"
-        },
-        {
-            "name": "release",
-            "displayName": "Release",
-            "description": "Standard release profile.",
-            "configurePreset": "release"
         }
     ],
     "testPresets": [
         {
             "name": "dev",
+            "inherits": "conan-debug",
             "displayName": "Development Test",
             "description": "Standard development test profile.",
             "configurePreset": "dev",
-            "output": {
-                "outputOnFailure": true
-            }
-        },
-        {
-            "name": "release",
-            "displayName": "Release Test",
-            "description": "Standard release test profile.",
-            "configurePreset": "release",
             "output": {
                 "outputOnFailure": true
             }

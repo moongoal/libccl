@@ -40,6 +40,7 @@ Unstable: 🔴
 |Shared Pointer|🔴
 |String|🔴
 |Internationalization Support|🔴
+|Thread communication primitives|🔴
 
 ## Building
 
@@ -51,6 +52,14 @@ This library is built with cmake `>= 3.24.2`. Lower versions may work but are no
 To initialise the build system for development, run:
 
 ```
+pipenv install -d
+pipenv run conan install --build=missing --deployer=full_deploy -s build_type=Debug .
+```
+
+To configure the build, run:
+
+```
+build/Debug/generators/conanbuild.bat
 cmake --preset dev
 ```
 
@@ -61,22 +70,33 @@ To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON` - 
 Similarly, to build the project:
 
 ```
+build/Debug/generators/conanbuild.bat
 cmake --build --preset dev
 ```
 
 ### Build dependencies
 
+These dependencies must be manually installed on the system:
+
+* Python `>= 3.12`
+* LLVM `>= 17.0.0`
+* Pipenv `>= 2023.10.24`
+
+These dependencies are automatically installed and managed via Pipenv:
+
+* Conan `>= 2.0.13`
+
+These dependencies are automatically installed and managed via Conan:
+
 * Cmake `>= 3.24.2`
-* LLVM `>= 15.0.0`
 * Ninja `>= 1.11.0`
-* Conan `>= 1.55.0`
 
 ## Packaging
 
 This library can be packaged with Conan, by running:
 
 ```
-conan create -pr:b <YOUR_PROFILE> .
+pipenv run conan create -pr:b <YOUR_PROFILE> .
 ```
 
 ## Testing
@@ -84,6 +104,7 @@ conan create -pr:b <YOUR_PROFILE> .
 To run the tests:
 
 ```
+build/Debug/generators/conanbuild.bat
 ctest --preset dev
 ```
 

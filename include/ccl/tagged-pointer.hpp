@@ -6,7 +6,6 @@
 #ifndef CCL_TAGGED_POINTER_HPP
 #define CCL_TAGGED_POINTER_HPP
 
-#include <limits>
 #include <ccl/api.hpp>
 #include <ccl/exceptions.hpp>
 #include <ccl/debug.hpp>
