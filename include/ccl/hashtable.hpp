@@ -7,6 +7,7 @@
 #define CCL_HASHTABLE_HPP
 
 #include <algorithm>
+#include <cstring>
 #include <ccl/api.hpp>
 #include <ccl/definitions.hpp>
 #include <ccl/memory/allocator.hpp>
