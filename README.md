@@ -40,6 +40,7 @@ Unstable: 🔴
 |Shared Pointer|🔴
 |String|🔴
 |Internationalization Support|🔴
+|Thread communication primitives|🔴
 
 ## Building
 
