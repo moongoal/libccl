@@ -8,9 +8,7 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
   CTEST_OUTPUT_ON_FAILURE: ON
-  CLANG_VERSION: 16
 
 jobs:
   build:
@@ -22,12 +20,14 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest]
+        compiler_version: [15, 16, 17]
+        build_type: [Debug, Release]
 
     runs-on: ${{matrix.os}}
 
     steps:
     - name: Setup C/C++ Compiler
-      run: wget https://apt.llvm.org/llvm.sh && chmod u+x llvm.sh && sudo ./llvm.sh ${{env.CLANG_VERSION}}
+      run: wget https://apt.llvm.org/llvm.sh && chmod u+x llvm.sh && sudo ./llvm.sh ${{matrix.compiler_version}}
 
     - uses: actions/checkout@v4
       with:
@@ -46,9 +46,9 @@ jobs:
         arch=x86_64
         os=Linux
         compiler=clang
-        compiler.version=${{env.CLANG_VERSION}}
-        compiler.libcxx=libstdc++11
-        build_type=${{env.BUILD_TYPE}}
+        compiler.version=${{matrix.compiler_version}}
+        compiler.libcxx=libc++
+        build_type=${{matrix.build_type}}
         EOF
 
     - name: Configure Conan Host Profile
@@ -58,5 +58,5 @@ jobs:
       working-directory: ${{github.workspace}}
       run: pipenv run conan create -pr:b ./conan-build-profile --build missing .
       env:
-        CC: clang-${{env.CLANG_VERSION}}
-        CXX: clang++-${{env.CLANG_VERSION}}
+        CC: clang-${{matrix.compiler_version}}
+        CXX: clang++-${{matrix.compiler_version}}
