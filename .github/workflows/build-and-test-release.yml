@@ -10,6 +10,7 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   CTEST_OUTPUT_ON_FAILURE: ON
+  CLANG_VERSION: 16
 
 jobs:
   build:
@@ -26,11 +27,7 @@ jobs:
 
     steps:
     - name: Setup C/C++ Compiler
-    #   uses: rlalik/setup-cpp-compiler@v1.2
-    #   id: install_cc
-    #   with:
-    #     compiler: clang++-15
-      run: wget https://apt.llvm.org/llvm.sh && chmod u+x llvm.sh && sudo ./llvm.sh 16
+      run: wget https://apt.llvm.org/llvm.sh && chmod u+x llvm.sh && sudo ./llvm.sh ${{env.CLANG_VERSION}}
 
     - uses: actions/checkout@v4
       with:
@@ -48,7 +45,7 @@ jobs:
         [settings]
         os=Linux
         compiler=clang
-        compiler.version=16
+        compiler.version=${{env.CLANG_VERSION}}
         compiler.libcxx=libc++
         build_type=${{env.BUILD_TYPE}}
         EOF
@@ -60,5 +57,5 @@ jobs:
       working-directory: ${{github.workspace}}
       run: conan create -pr:b ./conan-build-profile --build missing .
       env:
-        CC: clang-16
-        CXX: clang++-16
+        CC: clang-${{env.CLANG_VERSION}}
+        CXX: clang++-${{env.CLANG_VERSION}}
