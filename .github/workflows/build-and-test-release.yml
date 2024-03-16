@@ -26,8 +26,10 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-    - name: Setup C/C++ Compiler
-      run: wget https://apt.llvm.org/llvm.sh && chmod u+x llvm.sh && sudo ./llvm.sh ${{matrix.compiler_version}}
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: ${{matrix.compiler_version}}
 
     - uses: actions/checkout@v4
       with:
