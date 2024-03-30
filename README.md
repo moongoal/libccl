@@ -12,6 +12,7 @@ Unstable: 🔴
 |-|-
 |Utilities|🔴
 |Vector|🔴
+|Ring|🔴
 |Test Driver|🟡
 |Maybe|🔴
 |Hashtable|🔴
@@ -47,7 +48,7 @@ Unstable: 🔴
 While this is a header-only library, the build process is required to create the *version.hpp* header
 file.
 
-This library is built with cmake `>= 3.24.2`. Lower versions may work but are not supported. The following are example build commands for informational purposes only. The specific commands for your system may differ.
+This library is built with CMake `>= 3.24.2`. Lower versions may work but are not supported. The following are example build commands for informational purposes only. The specific commands for your system may differ.
 
 To initialise the build system for development, run:
 
@@ -65,7 +66,7 @@ cmake --preset dev
 
 Or with `--preset release` to use the release configuration.
 
-To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON` - enabled by default for the *dev* preset. This will enable instrumentation of tests in order to collect coverage data, the `coverage-summary` and `coverage-report` build targets.
+To enable test coverage data to be collected, append `-DCCL_COVERAGE:BOOL=ON` - enabled by default for the *dev* pre-set. This will enable instrumentation of tests in order to collect coverage data, the `coverage-summary` and `coverage-report` build targets.
 
 Similarly, to build the project:
 
@@ -88,7 +89,7 @@ These dependencies are automatically installed and managed via Pipenv:
 
 These dependencies are automatically installed and managed via Conan:
 
-* Cmake `>= 3.24.2`
+* CMake `>= 3.24.2`
 * Ninja `>= 1.11.0`
 
 ## Packaging
@@ -139,7 +140,7 @@ Several pre-processor definitions configure behaviour:
 |CCL_ALLOCATOR_DEFAULT_FLAGS|Set default allocation flags
 |CCL_CHAR_TRAITS_DEFAULT_POS_TYPE|The default position type for `char_traits<char>`
 
-Default values are availble in [definitions.hpp](include/ccl/definitions.hpp).
+Default values are available in [definitions.hpp](include/ccl/definitions.hpp).
 
 Define any of these before including any CCL headers to override the default behaviour. The best
 way to override these is by leveraging your compiler flags (i.e. `g++ -DCCL_HANDLE_VALUE_WIDTH=16 ...`). Default values are meant to be reasonable for most situations. Some values or combinations
@@ -157,7 +158,7 @@ Certain features can be enabled or disabled as needed. The following pre-process
 |CCL_FEATURE_STL_COMPAT|Include the STL compatibility header
 |CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS|Enable default allocation flags. Disabling this flag will result in a compilation error whenever default allocation flags are not manually defined
 
-Default values are availble in [features.hpp](include/ccl/features.hpp).
+Default values are available in [features.hpp](include/ccl/features.hpp).
 
 To override the presence of any feature, define `CCL_OVERRIDE_FEATURE_<FEATURE_NAME>`. This will disable the definition any pre-processor symbols related to the given feature.
 
