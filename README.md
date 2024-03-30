@@ -21,23 +21,14 @@ Unstable: 🔴
 |Compressed Pair|🔴
 |Bitset|🔴
 |Allocators|🔴
-|Tables|🔴
-|ECS|🔴
 |Dense Map|🔴
-|Typed Handle|🔴
-|Versioned Handle|🔴
-|Handle Manager|🔴
 |Packed Integer|🔴
 |Paged Vector|🔴
 |Set|🔴
 |Sparse Set|🔴
 |Tagged pointer|🔴
 |Pair|🔴
-|Atomic|🔴
 |Deque|🔴
-|Pool|🔴
-|Memory Pool|🔴
-|Dependent Pool|🔴
 |Shared Pointer|🔴
 |String|🔴
 |Internationalization Support|🔴
@@ -125,8 +116,6 @@ Several pre-processor definitions configure behaviour:
 
 |Symbol|Meaning
 |-|-
-|CCL_HANDLE_VALUE_WIDTH|Handle value width, in bits
-|CCL_ECS_VIEW_MAX_ARCHETYPE_COUNT|Maximum number of archetypes iterable from a view
 |CCL_HASHTABLE_MINIMUM_CAPACITY|Minimum capacity of a hashtable
 |CCL_HASHTABLE_MINIMUM_CHUNK_SIZE|Minimum number of items storable in a hashtable under the same key
 |CCL_SET_MINIMUM_CAPACITY|Minimum capacity of a set
@@ -143,7 +132,7 @@ Several pre-processor definitions configure behaviour:
 Default values are available in [definitions.hpp](include/ccl/definitions.hpp).
 
 Define any of these before including any CCL headers to override the default behaviour. The best
-way to override these is by leveraging your compiler flags (i.e. `g++ -DCCL_HANDLE_VALUE_WIDTH=16 ...`). Default values are meant to be reasonable for most situations. Some values or combinations
+way to override these is by leveraging your compiler flags (i.e. `g++ -DCCL_PAGE_SIZE=1024 ...`). Default values are meant to be reasonable for most situations. Some values or combinations
 may not make sense and cause undefined behaviour. Be sure to check the source code first.
 
 Certain features can be enabled or disabled as needed. The following pre-processor definitions configure optional features:
@@ -153,8 +142,6 @@ Certain features can be enabled or disabled as needed. The following pre-process
 |CCL_FEATURE_ASSERTIONS|Enable assertions
 |CCL_FEATURE_EXCEPTIONS|Enable exceptions
 |CCL_FEATURE_TYPECHECK_CASTS|Enable use of `dynamic_cast` where appropriate
-|CCL_FEATURE_ECS_CHECK_ARCHETYPE_COMPONENTS|Control whether the ECS registry checks for existing components before adding/removing new ones. Disabling this feature may yield unexpected results if adding already existing components or removing non-existent ones
-|CCL_FEATURE_ECS_CHECK_UNSAFE_REMOVE_ENTITY|Assert the presence of the entity when calling `unsafe_remove_entity()`
 |CCL_FEATURE_STL_COMPAT|Include the STL compatibility header
 |CCL_FEATURE_DEFAULT_ALLOCATION_FLAGS|Enable default allocation flags. Disabling this flag will result in a compilation error whenever default allocation flags are not manually defined
 

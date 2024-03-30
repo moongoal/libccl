@@ -25,22 +25,15 @@
 #include <ccl/vector.hpp>
 #include <ccl/version.hpp>
 #include <ccl/dense-map.hpp>
-#include <ccl/handle/handle.hpp>
-#include <ccl/handle-manager.hpp>
 #include <ccl/packed-integer.hpp>
 #include <ccl/tagged-pointer.hpp>
 #include <ccl/paged-vector.hpp>
 #include <ccl/deque.hpp>
-#include <ccl/atomic.hpp>
 #include <ccl/sparse-set.hpp>
 #include <ccl/type-traits.hpp>
 #include <ccl/either.hpp>
-#include <ccl/pool.hpp>
-#include <ccl/memory-pool.hpp>
 
 #include <ccl/memory/memory.hpp>
-#include <ccl/tables/tables.hpp>
-#include <ccl/ecs/registry.hpp>
 #include <ccl/pointer/pointer.hpp>
 
 #include <ccl/i18n/language.hpp>

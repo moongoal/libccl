@@ -183,16 +183,6 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    TEST test_tables_table test/tables/table.cpp
-    COVERAGE include/ccl/tables/table.hpp
-)
-
-add_ccl_test(
-    TEST test_tables_view test/tables/view.cpp
-    COVERAGE include/ccl/tables/view.hpp
-)
-
-add_ccl_test(
     TEST test_set test/set.cpp
     TEST test_set_iterator test/set-iterator.cpp
     COVERAGE include/ccl/set.hpp
@@ -239,51 +229,6 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    TEST test_versioned_handle test/handle/versioned-handle.cpp
-    COVERAGE include/ccl/handle/versioned-handle.hpp
-)
-
-add_ccl_test(
-    TEST test_typed_handle test/handle/typed-handle.cpp
-    COVERAGE include/ccl/handle/typed-handle.hpp
-)
-
-add_ccl_test(
-    TEST test_handle_manager test/handle-manager.cpp
-    COVERAGE include/ccl/handle-manager.hpp
-)
-
-add_ccl_test(
-    TEST test_pool test/pool.cpp
-    COVERAGE include/ccl/pool.hpp
-)
-
-add_ccl_test(
-    TEST test_dependent_pool test/dependent-pool.cpp
-    COVERAGE include/ccl/dependent-pool.hpp
-)
-
-add_ccl_test(
-    TEST test_ecs_component test/ecs/component.cpp
-    COVERAGE include/ccl/ecs/component.hpp
-)
-
-add_ccl_test(
-    TEST test_ecs_archetype test/ecs/archetype.cpp
-    COVERAGE include/ccl/ecs/archetype.hpp
-)
-
-add_ccl_test(
-    TEST test_ecs_registry test/ecs/registry.cpp
-    COVERAGE include/ccl/ecs/registry.hpp
-)
-
-add_ccl_test(
-    TEST test_ecs_view test/ecs/view.cpp
-    COVERAGE include/ccl/ecs/view.hpp
-)
-
-add_ccl_test(
     TEST test_tagged_pointer test/tagged-pointer.cpp
     COVERAGE include/ccl/tagged-pointer.hpp
 )
@@ -304,12 +249,6 @@ add_ccl_test(
 )
 
 add_ccl_test(
-    TEST test_atomic test/atomic.cpp
-    TEST test_atomic_flag test/atomic-flag.cpp
-    COVERAGE include/ccl/atomic.hpp
-)
-
-add_ccl_test(
     REPORT test_deque
     TEST test_deque_begin_policy test/deque-begin-policy.cpp
     TEST test_deque_center_policy test/deque-center-policy.cpp
@@ -319,11 +258,6 @@ add_ccl_test(
 add_ccl_test(
     TEST test_ring test/ring.cpp
     COVERAGE include/ccl/ring.hpp
-)
-
-add_ccl_test(
-    TEST test_memory_pool test/memory-pool.cpp
-    COVERAGE include/ccl/memory-pool.hpp
 )
 
 add_ccl_test(

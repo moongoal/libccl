@@ -6,10 +6,10 @@
 #ifndef CCL_POINTER_SHARED_HPP
 #define CCL_POINTER_SHARED_HPP
 
+#include <atomic>
 #include <utility>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
-#include <ccl/atomic.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/util.hpp>
 #include <ccl/either.hpp>
@@ -23,7 +23,7 @@ namespace ccl {
         class shared_ptr_ctrl_block_base {
             public:
                 using counter_base_type = uint64_t;
-                using counter_type = atomic<counter_base_type>;
+                using counter_type = std::atomic<counter_base_type>;
 
                 static constexpr counter_base_type shared_ref_count_mask = 0xffffffff;
                 static constexpr counter_base_type weak_ref_count_mask = 0x00000000'ffffffff;
@@ -53,7 +53,7 @@ namespace ccl {
 
             public:
                 shared_ptr_ctrl_block_base(const shared_ptr_ctrl_block_base &other)
-                    : counters{other.counters.load(memory_order_relaxed)}
+                    : counters{other.counters.load(std::memory_order_relaxed)}
                 {}
 
                 explicit shared_ptr_ctrl_block_base(const counter_base_type counters = 1) : counters{counters} {}
@@ -62,23 +62,26 @@ namespace ccl {
                 virtual void invoke_deleter() = 0;
 
                 uint32_t decr_shared_ref_count() {
-                    return counters.sub_fetch(1, memory_order_relaxed);
+                    return counters.fetch_sub(1, std::memory_order_relaxed) - 1;
                 }
 
                 uint32_t incr_shared_ref_count() {
-                    return counters.add_fetch(1, memory_order_relaxed);
+                    return counters.fetch_add(1, std::memory_order_relaxed) + 1;
                 }
 
                 uint32_t decr_weak_ref_count() {
-                    return counters.sub_fetch(0x0000'0001'0000'0000, memory_order_relaxed);
+                    constexpr counter_type value = 0x0000'0001'0000'0000;
+
+                    return counters.fetch_sub(value, std::memory_order_relaxed) - value;
                 }
 
                 uint32_t incr_weak_ref_count() {
-                    return counters.add_fetch(0x0000'0001'0000'0000, memory_order_relaxed);
+                    constexpr counter_type value = 0x0000'0001'0000'0000;
+                    return counters.fetch_add(value, std::memory_order_relaxed) + value;
                 }
 
                 size_t get_counters() {
-                    return counters.load(memory_order_relaxed);
+                    return counters.load(std::memory_order_relaxed);
                 }
         };
 

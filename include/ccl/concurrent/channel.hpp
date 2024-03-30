@@ -6,11 +6,11 @@
 #ifndef CCL_CONCURRENT_CHANNEL_HPP
 #define CCL_CONCURRENT_CHANNEL_HPP
 
+#include <atomic>
 #include <optional>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/memory/allocator.hpp>
-#include <ccl/atomic.hpp>
 #include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl::concurrent {
@@ -46,12 +46,12 @@ namespace ccl::concurrent {
             /**
              * The index for reading from the ring buffer.
              */
-            atomic<size_type> read_index;
+            std::atomic<size_type> read_index;
 
             /**
              * The index for writing to the ring buffer.
              */
-            atomic<size_type> write_index;
+            std::atomic<size_type> write_index;
 
             /**
              * Allocation flags.
@@ -66,8 +66,8 @@ namespace ccl::concurrent {
                 : alloc{std::move(other)},
                 _data{other._data},
                 _capacity{other._capacity},
-                read_index{std::move(other.read_index)},
-                write_index{std::move(other.write_index)},
+                read_index{other.read_index.load()},
+                write_index{other.write_index.load()},
                 alloc_flags{other.alloc_flags}
             {
                 other._data = nullptr;
@@ -104,15 +104,15 @@ namespace ccl::concurrent {
                 ccl::swap(_data, other._data);
                 ccl::swap(_capacity, other._capacity);
 
-                const uint32_t my_read_index = read_index.load(memory_order_relaxed);
-                const uint32_t other_read_index = other.read_index.load(memory_order_relaxed);
-                const uint32_t my_write_index = write_index.load(memory_order_relaxed);
-                const uint32_t other_write_index = other.write_index.load(memory_order_relaxed);
+                const uint32_t my_read_index = read_index.load(std::memory_order_relaxed);
+                const uint32_t other_read_index = other.read_index.load(std::memory_order_relaxed);
+                const uint32_t my_write_index = write_index.load(std::memory_order_relaxed);
+                const uint32_t other_write_index = other.write_index.load(std::memory_order_relaxed);
 
-                read_index.store(other_read_index, memory_order_relaxed);
-                write_index.store(other_write_index, memory_order_relaxed);
-                other.read_index.store(my_read_index, memory_order_relaxed);
-                other.write_index.store(my_write_index, memory_order_relaxed);
+                read_index.store(other_read_index, std::memory_order_relaxed);
+                write_index.store(other_write_index, std::memory_order_relaxed);
+                other.read_index.store(my_read_index, std::memory_order_relaxed);
+                other.write_index.store(my_write_index, std::memory_order_relaxed);
 
                 ccl::swap(alloc_flags, other.alloc_flags);
 
@@ -135,8 +135,8 @@ namespace ccl::concurrent {
              * @return True if the channel's buffer is full, false if it is not.
              */
             bool is_full() const {
-                const size_type cur_write_index = write_index.load(memory_order_relaxed);
-                const size_type cur_read_index = read_index.load(memory_order_relaxed);
+                const size_type cur_write_index = write_index.load(std::memory_order_relaxed);
+                const size_type cur_read_index = read_index.load(std::memory_order_relaxed);
                 const size_type start_index = min(cur_write_index, cur_read_index);
                 const size_type end_index = max(cur_write_index, cur_read_index);
                 const size_type length = end_index - start_index;
@@ -150,8 +150,8 @@ namespace ccl::concurrent {
              * @return True if the channel's buffer is empty, false if it is not.
              */
             bool is_empty() const {
-                const size_type cur_write_index = write_index.load(memory_order_relaxed);
-                const size_type cur_read_index = read_index.load(memory_order_relaxed);
+                const size_type cur_write_index = write_index.load(std::memory_order_relaxed);
+                const size_type cur_read_index = read_index.load(std::memory_order_relaxed);
 
                 return cur_read_index == cur_write_index;
             }
@@ -173,14 +173,14 @@ namespace ccl::concurrent {
              * @return True if the item was successfully added, false if the buffer is full.
              */
             CCLNODISCARD bool send(const T& item) {
-                const size_type cur_write_index = write_index.load(memory_order_relaxed);
+                const size_type cur_write_index = write_index.load(std::memory_order_relaxed);
 
                 if(is_full()) { CCLUNLIKELY
                     return false;
                 }
 
                 _data[cur_write_index % _capacity] = item;
-                write_index.store(cur_write_index + 1, memory_order_relaxed);
+                write_index.store(cur_write_index + 1, std::memory_order_relaxed);
 
                 return true;
             }
@@ -196,13 +196,13 @@ namespace ccl::concurrent {
                     return std::nullopt;
                 }
 
-                const size_type cur_read_index = read_index.load(memory_order_relaxed);
+                const size_type cur_read_index = read_index.load(std::memory_order_relaxed);
 
                 do_not_optimize(read_index);
                 const T value = std::move(_data[cur_read_index % _capacity]);
                 do_not_optimize(read_index);
 
-                read_index.store(cur_read_index + 1, memory_order_relaxed);
+                read_index.store(cur_read_index + 1, std::memory_order_relaxed);
 
                 return value;
             }

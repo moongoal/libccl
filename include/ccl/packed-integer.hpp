@@ -111,16 +111,6 @@ namespace ccl {
         return a.get() == b.get();
     }
 
-    template<typename T, std::size_t LowPartSize>
-    constexpr bool operator==(const packed_integer<T, LowPartSize> a, const T b) {
-        return a.get() == b;
-    }
-
-    template<typename T, std::size_t LowPartSize>
-    constexpr bool operator==(const T a, const packed_integer<T, LowPartSize> b) {
-        return a == b.get();
-    }
-
     template<std::unsigned_integral T, std::size_t LowPartSize>
     struct hash<packed_integer<T, LowPartSize>> {
         constexpr hash_t operator()(const packed_integer<T, LowPartSize>& value) const {
