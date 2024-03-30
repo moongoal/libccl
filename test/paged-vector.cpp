@@ -8,7 +8,7 @@
 using namespace ccl;
 
 template<typename T, typename Ptr = T*>
-using test_vector = paged_vector<T, Ptr, counting_test_allocator>;
+using test_ring = paged_vector<T, Ptr, counting_test_allocator>;
 
 constexpr uint32_t constructed_value = 0x1234;
 
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "ctor",
         []() {
-            test_vector<int> v;
+            test_ring<int> v;
 
             check(v.capacity() == 0);
             check(v.size() == 0);
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     suite.add_test(
         "push_back",
         []() {
-            test_vector<int> v;
+            test_ring<int> v;
 
             v.push_back(1);
             v.push_back(2);
@@ -77,13 +77,13 @@ int main(int argc, char **argv) {
             check(v[2] == 3);
 
             check(v.size() == 3);
-            check(v.capacity() == test_vector<int>::page_size);
+            check(v.capacity() == test_ring<int>::page_size);
         }
     );
 
     suite.add_test(
         "reserve (less)", [] () {
-            test_vector<int> v;
+            test_ring<int> v;
 
             v.push_back(1);
             v.push_back(2);
@@ -92,67 +92,67 @@ int main(int argc, char **argv) {
             v.reserve(1);
 
             check(v.size() == 3);
-            check(v.capacity() == test_vector<int>::page_size);
+            check(v.capacity() == test_ring<int>::page_size);
         }
     );
 
     suite.add_test(
         "reserve (same, entire page)", [] () {
-            test_vector<int> v;
+            test_ring<int> v;
 
-            for(std::size_t i = 0; i < test_vector<int>::page_size; ++i) {
+            for(std::size_t i = 0; i < test_ring<int>::page_size; ++i) {
                 v.push_back(1);
             }
 
-            check(v.size() == test_vector<int>::page_size);
-            check(v.capacity() == test_vector<int>::page_size);
+            check(v.size() == test_ring<int>::page_size);
+            check(v.capacity() == test_ring<int>::page_size);
 
             v.reserve(v.capacity());
 
-            check(v.size() == test_vector<int>::page_size);
-            check(v.capacity() == test_vector<int>::page_size);
+            check(v.size() == test_ring<int>::page_size);
+            check(v.capacity() == test_ring<int>::page_size);
         }
     );
 
     suite.add_test(
         "reserve (more)", [] () {
-            test_vector<int> v;
+            test_ring<int> v;
 
-            for(std::size_t i = 0; i < test_vector<int>::page_size; ++i) {
+            for(std::size_t i = 0; i < test_ring<int>::page_size; ++i) {
                 v.push_back(1);
             }
 
-            check(v.size() == test_vector<int>::page_size);
-            check(v.capacity() == test_vector<int>::page_size);
+            check(v.size() == test_ring<int>::page_size);
+            check(v.capacity() == test_ring<int>::page_size);
 
             v.reserve(v.capacity() + 1);
 
-            check(v.size() == test_vector<int>::page_size);
-            check(v.capacity() == test_vector<int>::page_size * 2);
+            check(v.size() == test_ring<int>::page_size);
+            check(v.capacity() == test_ring<int>::page_size * 2);
         }
     );
 
     suite.add_test(
         "clear", []() {
-            test_vector<int> v;
+            test_ring<int> v;
 
-            for(std::size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
+            for(std::size_t i = 0; i < test_ring<int>::page_size + 1; ++i) {
                 v.push_back(1);
             }
 
             v.clear();
 
             check(v.size() == 0);
-            check(v.capacity() == test_vector<int>::page_size * 2);
+            check(v.capacity() == test_ring<int>::page_size * 2);
         }
     );
 
     suite.add_test("clear twice", []() {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
-        test_vector<spy> v;
+        test_ring<spy> v;
 
-        for(std::size_t i = 0; i < test_vector<int>::page_size + 1; ++i) {
+        for(std::size_t i = 0; i < test_ring<int>::page_size + 1; ++i) {
             v.push_back(spy { on_destroy });
         }
 
@@ -160,12 +160,12 @@ int main(int argc, char **argv) {
         v.clear();
 
         check(v.size() == 0);
-        check(v.capacity() == test_vector<int>::page_size * 2);
-        equals(destruction_counter, test_vector<int>::page_size + 1);
+        check(v.capacity() == test_ring<int>::page_size * 2);
+        equals(destruction_counter, test_ring<int>::page_size + 1);
     });
 
     suite.add_test("resize (grow within page)", [] () {
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         v.push_back(spy{});
         v.push_back(spy{});
@@ -179,22 +179,22 @@ int main(int argc, char **argv) {
         check(v[3].construction_magic == constructed_value);
 
         check(v.size() == 4);
-        check(v.capacity() == test_vector<spy>::page_size);
+        check(v.capacity() == test_ring<spy>::page_size);
     });
 
     suite.add_test("resize (grow outside of page)", [] () {
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         v.push_back(spy{});
         v.push_back(spy{});
         v.push_back(spy{});
 
-        const std::size_t expected_size = test_vector<spy>::page_size * 3 + 5;
+        const std::size_t expected_size = test_ring<spy>::page_size * 3 + 5;
 
         v.resize(expected_size);
 
         check(v.size() == expected_size);
-        check(v.capacity() == test_vector<spy>::page_size * 4);
+        check(v.capacity() == test_ring<spy>::page_size * 4);
 
         for(const spy& s : v) {
             check(s.construction_magic == constructed_value);
@@ -202,14 +202,14 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (grow from empty, multiple pages)", [] () {
-        test_vector<spy> v;
+        test_ring<spy> v;
 
-        const std::size_t expected_size = test_vector<spy>::page_size * 3 + 5;
+        const std::size_t expected_size = test_ring<spy>::page_size * 3 + 5;
 
         v.resize(expected_size);
 
         check(v.size() == expected_size);
-        check(v.capacity() == test_vector<spy>::page_size * 4);
+        check(v.capacity() == test_ring<spy>::page_size * 4);
 
         for(const spy& s : v) {
             check(s.construction_magic == constructed_value);
@@ -217,14 +217,14 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (grow from empty, single page)", [] () {
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         const std::size_t expected_size = 2;
 
         v.resize(expected_size);
 
         check(v.size() == expected_size);
-        check(v.capacity() == test_vector<spy>::page_size);
+        check(v.capacity() == test_ring<spy>::page_size);
 
         for(const spy& s : v) {
             check(s.construction_magic == constructed_value);
@@ -232,9 +232,9 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (grow from empty, first and last page)", [] () {
-        test_vector<spy> v;
+        test_ring<spy> v;
 
-        const std::size_t expected_size = test_vector<spy>::page_size * 2;
+        const std::size_t expected_size = test_ring<spy>::page_size * 2;
 
         v.resize(expected_size);
 
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("resize (shrink, within first page)", [] () {
         int destruction_counter = 0;
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         v.push_back(spy{});
         v.push_back(spy{});
@@ -261,13 +261,13 @@ int main(int argc, char **argv) {
         v.resize(2);
 
         check(v.size() == 2);
-        check(v.capacity() == test_vector<spy>::page_size);
+        check(v.capacity() == test_ring<spy>::page_size);
         check(destruction_counter == 1);
     });
 
     suite.add_test("resize to 0 (shrink, within first page)", [] () {
         int destruction_counter = 0;
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         v.push_back(spy{});
         v.push_back(spy{});
@@ -280,14 +280,14 @@ int main(int argc, char **argv) {
         v.resize(0);
 
         check(v.size() == 0);
-        check(v.capacity() == test_vector<spy>::page_size);
+        check(v.capacity() == test_ring<spy>::page_size);
         check(destruction_counter == 3);
     });
 
     suite.add_test("resize (shrink, multiple full pages only)", [] () {
-        const std::size_t item_count = test_vector<spy>::page_size * 5;
+        const std::size_t item_count = test_ring<spy>::page_size * 5;
         int destruction_counter = 0;
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         for(std::size_t i = 0; i < item_count; ++i) {
             v.push_back(spy{ [&destruction_counter] () { destruction_counter++; } });
@@ -301,9 +301,9 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("resize (shrink, multiple full pages w/partial last page)", [] () {
-        const std::size_t item_count = test_vector<spy>::page_size * 4 + 5;
+        const std::size_t item_count = test_ring<spy>::page_size * 4 + 5;
         int destruction_counter = 0;
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         for(std::size_t i = 0; i < item_count; ++i) {
             v.push_back(spy{ [&destruction_counter] () { destruction_counter++; } });
@@ -312,13 +312,13 @@ int main(int argc, char **argv) {
         v.resize(2);
 
         check(v.size() == 2);
-        check(v.capacity() == test_vector<spy>::page_size * 5);
+        check(v.capacity() == test_ring<spy>::page_size * 5);
         check(destruction_counter == item_count - 2);
     });
 
     suite.add_test("ctor (copy)", [] () {
         int destruction_counter = 0;
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         v.push_back(spy{});
         v.push_back(spy{});
@@ -328,15 +328,15 @@ int main(int argc, char **argv) {
             x.on_destroy = [&destruction_counter] () { destruction_counter++; };
         }
 
-        test_vector<spy> v2{v};
+        test_ring<spy> v2{v};
 
         check(destruction_counter == 0);
 
         check(v.size() == 3);
-        check(v.capacity() == test_vector<spy>::page_size);
+        check(v.capacity() == test_ring<spy>::page_size);
 
         check(v2.size() == 3);
-        check(v2.capacity() == test_vector<spy>::page_size);
+        check(v2.capacity() == test_ring<spy>::page_size);
 
         check(v2[0].construction_magic == constructed_value);
         check(v2[1].construction_magic == constructed_value);
@@ -348,19 +348,19 @@ int main(int argc, char **argv) {
     suite.add_test("ctor (move)", [] () {
         int destruction_counter = 0;
         const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
-        test_vector<spy> v;
+        test_ring<spy> v;
 
         v.push_back(spy{on_destroy});
         v.push_back(spy{on_destroy});
         v.push_back(spy{on_destroy});
 
-        test_vector<spy> v2{std::move(v)};
+        test_ring<spy> v2{std::move(v)};
 
         check(destruction_counter == 0);
         check(v.pages().data() == nullptr);
 
         check(v2.size() == 3);
-        check(v2.capacity() == test_vector<spy>::page_size);
+        check(v2.capacity() == test_ring<spy>::page_size);
         check(v2.pages().data() != nullptr);
 
         check(v2[0].construction_magic == constructed_value);
@@ -369,8 +369,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (move, empty)", [] () {
-        test_vector<spy> v;
-        test_vector<spy> v2{std::move(v)};
+        test_ring<spy> v;
+        test_ring<spy> v2{std::move(v)};
 
         check(v2.size() == 0);
         check(v2.capacity() == 0);
@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
         const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
 
         {
-            test_vector<spy> v;
+            test_ring<spy> v;
             v.push_back(spy{on_destroy});
             v.push_back(spy{on_destroy});
             v.push_back(spy{on_destroy});
@@ -393,7 +393,7 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "insert", []() {
-            test_vector<int> v;
+            test_ring<int> v;
 
             v.insert(v.begin(), 1);
             v.insert(v.end(), 2);
@@ -407,9 +407,9 @@ int main(int argc, char **argv) {
 
     suite.add_test(
         "insert (multi pages)", []() {
-            test_vector<int> v;
+            test_ring<int> v;
 
-            const std::size_t initial_item_count = test_vector<int>::page_size - 2;
+            const std::size_t initial_item_count = test_ring<int>::page_size - 2;
 
             for(std::size_t i = 0; i < initial_item_count; ++i) {
                 v.push_back(666);
@@ -435,20 +435,20 @@ int main(int argc, char **argv) {
         const auto on_destroy = [&destruction_counter] () { destruction_counter++; };
 
         {
-            test_vector<spy> v;
+            test_ring<spy> v;
 
-            for(std::size_t i = 0; i < test_vector<spy>::page_size * 2; ++i) {
+            for(std::size_t i = 0; i < test_ring<spy>::page_size * 2; ++i) {
                 v.insert(v.end(), spy{ on_destroy });
             }
 
             equals(destruction_counter, 0);
         }
 
-        equals(destruction_counter, test_vector<spy>::page_size * 2);
+        equals(destruction_counter, test_ring<spy>::page_size * 2);
     });
 
     suite.add_test("insert rvalue (invalid iterator)", [] () {
-        test_vector<int> v;
+        test_ring<int> v;
 
         throws<std::out_of_range>(
             [&v] () {
@@ -482,7 +482,7 @@ int main(int argc, char **argv) {
     }, skip_if_exceptions_disabled);
 
     suite.add_test("operator [] (invalid index)", []() {
-        test_vector<int> v;
+        test_ring<int> v;
 
         throws<std::out_of_range>(
             [&] () {
@@ -492,19 +492,19 @@ int main(int argc, char **argv) {
 
         throws<std::out_of_range>(
             [&] () {
-                (*const_cast<const test_vector<int>*>(&v))[0];
+                (*const_cast<const test_ring<int>*>(&v))[0];
             }
         );
     }, skip_if_exceptions_disabled);
 
     suite.add_test("operator = (copy - uninitialized)", [] () {
         vector v{1, 2, 3};
-        test_vector<int> v2;
+        test_ring<int> v2;
 
         v2 = v;
 
         check(v2.size() == 3);
-        check(v2.capacity() == test_vector<int>::page_size);
+        check(v2.capacity() == test_ring<int>::page_size);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
@@ -513,7 +513,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("operator = (copy - initialized)", [] () {
         vector v{1, 2, 3};
-        test_vector<int> v2;
+        test_ring<int> v2;
 
         v2.push_back(5);
         v2.push_back(18);
@@ -521,7 +521,7 @@ int main(int argc, char **argv) {
         v2 = v;
 
         check(v2.size() == 3);
-        check(v2.capacity() == test_vector<int>::page_size);
+        check(v2.capacity() == test_ring<int>::page_size);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
@@ -529,8 +529,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator = (same type, copy)", [] () {
-        test_vector<int> v;
-        test_vector<int> v2{};
+        test_ring<int> v;
+        test_ring<int> v2{};
 
         v.push_back(1);
         v.push_back(2);
@@ -542,7 +542,7 @@ int main(int argc, char **argv) {
         v2 = v;
 
         check(v2.size() == 3);
-        check(v2.capacity() == test_vector<int>::page_size);
+        check(v2.capacity() == test_ring<int>::page_size);
 
         check(v2[0] == 1);
         check(v2[1] == 2);
@@ -550,8 +550,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator = (move)", [] () {
-        test_vector<int> v;
-        test_vector<int> v2;
+        test_ring<int> v;
+        test_ring<int> v2;
 
         v.push_back(1);
         v.push_back(2);
@@ -568,7 +568,7 @@ int main(int argc, char **argv) {
         check(v.pages().data() == nullptr);
 
         check(v2.size() == 3);
-        check(v2.capacity() == test_vector<int>::page_size);
+        check(v2.capacity() == test_ring<int>::page_size);
         check(v2.pages().data() == old_page_data);
 
         check(v2[0] == 1);
@@ -577,7 +577,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (initializer list)", []() {
-        test_vector<int> v{1, 2, 3};
+        test_ring<int> v{1, 2, 3};
 
         check(v[0] == 1);
         check(v[1] == 2);
@@ -587,7 +587,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("ctor (range)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
-        test_vector<int> v{my_list};
+        test_ring<int> v{my_list};
 
         check(v.size() == 5);
         check(v[0] == 1);
@@ -600,7 +600,7 @@ int main(int argc, char **argv) {
     suite.add_test("insert (ranges)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
         std::forward_list<int> my_list2 {6};
-        test_vector<int> v;
+        test_ring<int> v;
 
         v.insert(
             v.begin(),
@@ -623,7 +623,7 @@ int main(int argc, char **argv) {
 
     suite.add_test("insert (ranges - invalid)", [] () {
         std::forward_list<int> my_list {1, 2, 3, 4, 5};
-        test_vector<int> v;
+        test_ring<int> v;
 
         throws<std::out_of_range>([&] () {
             v.insert(
@@ -641,7 +641,7 @@ int main(int argc, char **argv) {
     }, skip_if_exceptions_disabled);
 
     suite.add_test("emplace_at", [] () {
-        test_vector<dummy> v { dummy{1}, dummy{2}, dummy{3} };
+        test_ring<dummy> v { dummy{1}, dummy{2}, dummy{3} };
         v.emplace_at(v.begin() + 1, dummy{4});
 
         check(v[0].value == 2);
@@ -652,8 +652,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("emplace_at (full page)", [] () {
-        test_vector<dummy> v;
-        const std::size_t item_count = test_vector<dummy>::page_size;
+        test_ring<dummy> v;
+        const std::size_t item_count = test_ring<dummy>::page_size;
 
         for(std::size_t i = 0; i < item_count; ++i) {
             v.emplace_at(v.end(), dummy{998});
@@ -662,7 +662,7 @@ int main(int argc, char **argv) {
         v.emplace_at(v.begin() + 1, dummy{4});
 
         equals(v.size(), item_count + 1);
-        equals(v.capacity(), test_vector<dummy>::page_size * 2);
+        equals(v.capacity(), test_ring<dummy>::page_size * 2);
 
         equals(v[v.begin()].value, 999);
         equals(v[v.begin() + 1].value, 5);
@@ -685,7 +685,7 @@ int main(int argc, char **argv) {
     }, skip_if_exceptions_disabled);
 
     suite.add_test("emplace_back", [] () {
-        test_vector<dummy> v;
+        test_ring<dummy> v;
 
         v.push_back(dummy{1});
         v.push_back(dummy{2});
@@ -701,21 +701,21 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("emplace_back page full", [] () {
-        test_vector<dummy> v;
+        test_ring<dummy> v;
 
-        for(std::size_t i = 0; i < test_vector<dummy>::page_size; ++i) {
+        for(std::size_t i = 0; i < test_ring<dummy>::page_size; ++i) {
             v.push_back(dummy{1});
         }
 
         v.emplace_back(dummy{4});
 
-        equals(v.size(), test_vector<dummy>::page_size + 1);
-        equals(v.capacity(), test_vector<dummy>::page_size * 2);
+        equals(v.size(), test_ring<dummy>::page_size + 1);
+        equals(v.capacity(), test_ring<dummy>::page_size * 2);
         equals((v.end() - 1)->value, 5);
     });
 
     suite.add_test("erase (last)", [] () {
-        test_vector<int> v { 1, 2, 3 };
+        test_ring<int> v { 1, 2, 3 };
 
         v.erase(v.begin() + 2, v.end());
 
@@ -726,7 +726,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (first)", [] () {
-        test_vector<int> v { 1, 2, 3 };
+        test_ring<int> v { 1, 2, 3 };
 
         v.erase(v.begin(), v.end() - 2);
 
@@ -737,7 +737,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (middle)", [] () {
-        test_vector<int> v { 1, 2, 3 };
+        test_ring<int> v { 1, 2, 3 };
 
         v.erase(v.begin() + 1, v.end() - 1);
 
@@ -748,7 +748,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (same)", [] () {
-        test_vector<int> v { 1, 2, 3 };
+        test_ring<int> v { 1, 2, 3 };
 
         v.erase(v.begin(), v.begin());
 
@@ -760,7 +760,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (all)", [] () {
-        test_vector<int> v { 1, 2, 3 };
+        test_ring<int> v { 1, 2, 3 };
 
         v.erase(v.begin(), v.end());
 
@@ -769,7 +769,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("erase (invalid iterators)", [] () {
-        test_vector<int> v { 1, 2, 3 };
+        test_ring<int> v { 1, 2, 3 };
 
         throws<std::out_of_range>([&v] () {
             v.erase(v.begin() - 1, v.end());

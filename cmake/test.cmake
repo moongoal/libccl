@@ -317,6 +317,11 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    TEST test_ring test/ring.cpp
+    COVERAGE include/ccl/ring.hpp
+)
+
+add_ccl_test(
     TEST test_memory_pool test/memory-pool.cpp
     COVERAGE include/ccl/memory-pool.hpp
 )

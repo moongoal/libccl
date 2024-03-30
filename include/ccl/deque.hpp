@@ -66,8 +66,7 @@ namespace ccl {
             size_type last = 0;
             pointer _data = nullptr;
             size_type _capacity = 0;
-            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
-
+            allocation_flags _alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             /**
              * Recenter first and last indices.
@@ -86,7 +85,7 @@ namespace ccl {
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
             )
                 : alloc{allocator},
-                alloc_flags{alloc_flags}
+                _alloc_flags{alloc_flags}
             {}
 
             constexpr deque(const deque& other)
@@ -191,7 +190,7 @@ namespace ccl {
 
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
                         actual_new_capacity,
-                        alloc_flags
+                        _alloc_flags
                     );
 
                     const size_type old_size = size();
@@ -329,7 +328,7 @@ namespace ccl {
             }
 
             constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
-            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return _alloc_flags; }
     };
 }
 

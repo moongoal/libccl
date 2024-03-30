@@ -45,7 +45,7 @@ namespace ccl {
             size_type _size = 0;
             size_type _capacity = 0;
             value_type * _data = nullptr;
-            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
+            allocation_flags _alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             /**
              * Make room for insertion by displacing existing items forward.
@@ -80,22 +80,22 @@ namespace ccl {
             explicit constexpr vector(
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator}, alloc_flags{alloc_flags}
-            {}
+            ) noexcept : alloc{allocator}, _alloc_flags{alloc_flags} {}
 
-            constexpr vector(const vector &other) : vector{other.get_allocator(), other.alloc_flags} {
-                alloc_flags = other.alloc_flags;
+            constexpr vector(const vector &other)
+                : vector{other.get_allocator(), other._alloc_flags} {
+                _alloc_flags = other._alloc_flags;
                 reserve(other._size);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
                 _size = other._size;
             }
 
             constexpr vector(vector &&other)
-                : alloc{other.get_allocator()},
+                noexcept : alloc{other.get_allocator()},
                 _size{other._size},
                 _capacity{other._capacity},
                 _data{other._data},
-                alloc_flags{other.alloc_flags}
+                _alloc_flags{other._alloc_flags}
             {
                 other._data = nullptr;
                 other._size = 0;
@@ -106,8 +106,7 @@ namespace ccl {
                 std::initializer_list<T> values,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator} {
-                this->alloc_flags = alloc_flags;
+            ) : alloc{allocator}, _alloc_flags{alloc_flags} {
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
                 _size = values.size();
@@ -135,9 +134,7 @@ namespace ccl {
             void destroy() noexcept {
                 clear();
 
-                if(_data) {
-                    alloc::get_allocator()->deallocate(_data);
-                }
+                alloc::get_allocator()->deallocate(_data);
 
                 _capacity = 0;
                 _data = nullptr;
@@ -147,7 +144,7 @@ namespace ccl {
                 if(other._size > _size || !alloc::is_allocator_stateless()) {
                     destroy();
                     alloc::operator=(other);
-                    alloc_flags = other.alloc_flags;
+                    _alloc_flags = other._alloc_flags;
                     reserve(other._size);
                     std::uninitialized_copy(other.begin(), other.end(), begin());
                 } else {
@@ -172,7 +169,7 @@ namespace ccl {
                 ccl::swap(_size, other._size);
                 ccl::swap(_capacity, other._capacity);
                 ccl::swap(_data, other._data);
-                ccl::swap(alloc_flags, other.alloc_flags);
+                ccl::swap(_alloc_flags, other._alloc_flags);
             }
 
             constexpr size_type size() const noexcept { return _size; }
@@ -185,7 +182,7 @@ namespace ccl {
 
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
                         actual_new_capacity,
-                        alloc_flags
+                        _alloc_flags
                     );
 
                     if(_data) {
@@ -203,7 +200,7 @@ namespace ccl {
                     const size_type new_capacity = increase_capacity<decltype(_capacity)>(1, _size);
                     value_type * const new_data = alloc::get_allocator()->template allocate<value_type>(
                         new_capacity,
-                        alloc_flags
+                        _alloc_flags
                     );
 
                     if(_data) {
@@ -293,9 +290,7 @@ namespace ccl {
             }
 
             constexpr void clear() noexcept {
-                if constexpr(!std::is_trivially_destructible_v<T>) {
-                    std::destroy(begin(), end());
-                }
+                std::destroy(begin(), end());
 
                 _size = 0;
             }
@@ -319,8 +314,6 @@ namespace ccl {
                     } else {
                         std::uninitialized_fill(start, finish, value);
                     }
-                } else if(new_length == 0) {
-                    clear();
                 } else if(new_length < _size) {
                     std::destroy(
                         begin() + new_length,
@@ -372,7 +365,7 @@ namespace ccl {
             constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
 
             constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
-            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return _alloc_flags; }
     };
 }
 

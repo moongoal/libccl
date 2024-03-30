@@ -116,7 +116,7 @@ namespace ccl {
         const typename contiguous_iterator<T>::difference_type n,
         const contiguous_iterator<T> it
     ) noexcept {
-        return contiguous_iterator<T>{it.data() + n};
+        return contiguous_iterator<T>{it.ptr + n};
     }
 }
 
