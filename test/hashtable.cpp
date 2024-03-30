@@ -192,13 +192,13 @@ int main(int argc, char **argv) {
         using my_hashtable = hashtable<int, float, same_hash, ccl::counting_test_allocator>;
 
         my_hashtable x;
-        x.insert(CCL_HASHTABLE_CHUNK_SIZE, 1);
+        x.insert(x.get_chunk_size(), 1);
 
         const auto capacity = x.capacity();
 
         // Adding too many items with the same key hash will trigger
         // a resize.
-        for(int i = 0; i < CCL_HASHTABLE_CHUNK_SIZE; ++i) {
+        for(size_t i = 0; i < x.get_chunk_size(); ++i) {
             x.insert(i, 1);
         }
 
@@ -254,13 +254,13 @@ int main(int argc, char **argv) {
         using my_hashtable = hashtable<int, float, same_hash, ccl::counting_test_allocator>;
 
         my_hashtable x;
-        x.emplace(CCL_HASHTABLE_CHUNK_SIZE, 1);
+        x.emplace(x.get_chunk_size(), 1);
 
         const auto capacity = x.capacity();
 
         // Adding too many items with the same key hash will trigger
         // a resize.
-        for(int i = 0; i < CCL_HASHTABLE_CHUNK_SIZE; ++i) {
+        for(size_t i = 0; i < x.get_chunk_size(); ++i) {
             x.emplace(i, 1);
         }
 
@@ -292,7 +292,7 @@ int main(int argc, char **argv) {
             make_pair(3, 3.f)
         };
 
-        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
+        my_hashtable x { v, get_default_allocator<counting_test_allocator>() };
 
         check(x[1] == 2);
         check(x[2] == 3);
@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
             make_pair(1, 2.f)
         };
 
-        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
+        my_hashtable x { v, get_default_allocator<counting_test_allocator>() };
 
         auto it = x.begin();
 
@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
             make_pair(1, 2.f)
         };
 
-        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
+        my_hashtable x { v, get_default_allocator<counting_test_allocator>() };
 
         const auto it = --x.end();
 
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
             make_pair(3, 3.f)
         };
 
-        my_hashtable x { v,  get_default_allocator<counting_test_allocator>() };
+        my_hashtable x { v, get_default_allocator<counting_test_allocator>() };
 
         x.clear();
 

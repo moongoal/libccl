@@ -128,7 +128,7 @@ Several pre-processor definitions configure behaviour:
 |CCL_HANDLE_VALUE_WIDTH|Handle value width, in bits
 |CCL_ECS_VIEW_MAX_ARCHETYPE_COUNT|Maximum number of archetypes iterable from a view
 |CCL_HASHTABLE_MINIMUM_CAPACITY|Minimum capacity of a hashtable
-|CCL_HASHTABLE_CHUNK_SIZE|Max number of consecutive hashtable slots to look for when inserting, before rehashing into a larger table
+|CCL_HASHTABLE_MINIMUM_CHUNK_SIZE|Minimum number of items storable in a hashtable under the same key
 |CCL_SET_MINIMUM_CAPACITY|Minimum capacity of a set
 |CCL_SET_KEY_CHUNK_SIZE|Max number of consecutive set slots to look for when inserting, before rehashing into a larger set
 |CCL_ALLOCATOR_DEFAULT_ALIGNMENT|Default allocator minimum alignment constraint

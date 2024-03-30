@@ -199,6 +199,18 @@ namespace ccl {
 
             static constexpr size_type minimum_capacity = CCL_HASHTABLE_MINIMUM_CAPACITY;
 
+            static constexpr size_type default_chunk_size = min(
+                minimum_capacity,
+                max<size_type>(
+                    CCL_HASHTABLE_MINIMUM_CHUNK_SIZE,
+                    1u << (
+                        bitcount(std::hardware_constructive_interference_size / sizeof(K))
+                        + (std::hardware_constructive_interference_size % sizeof(K) > 0)
+                        - 1
+                    )
+                )
+            );
+
             explicit constexpr hashtable(
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
@@ -344,7 +356,7 @@ namespace ccl {
 
                     for(auto it = begin(); it < finish && keep_iterating; ++it) {
                         const size_type new_index = compute_key_index(*it->first, new_capacity);
-                        const size_type last_chunk_index = wrap_index(new_index + compute_chunk_size(), new_capacity);
+                        const size_type last_chunk_index = wrap_index(new_index + chunk_size, new_capacity);
                         bool item_added = false;
 
                         for(size_type i = new_index; i != last_chunk_index; i = wrap_index(++i, new_capacity)) {
@@ -387,7 +399,7 @@ namespace ccl {
 
             constexpr void insert(const_key_reference key, const_value_reference value) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
                 size_type first_empty = invalid_size;
 
                 // Check all items in a chunk. If we find the exact key,
@@ -412,14 +424,14 @@ namespace ccl {
 
                 // No slots available in the chunk. Reserve and
                 // rehash.
-                reserve(max<size_type>(1, _capacity << 1));
+                rehash();
                 insert(key, value);
             }
 
             template<typename ...Args>
             constexpr value_reference emplace(const_key_reference key, Args&& ...args) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
                 size_type first_empty = invalid_size;
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
@@ -440,13 +452,13 @@ namespace ccl {
                 }
 
                 // No slots available
-                reserve(_capacity << 1);
+                rehash();
                 return emplace(key, std::forward<Args>(args)...);
             }
 
             constexpr void erase(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -469,7 +481,7 @@ namespace ccl {
 
             CCLNODISCARD constexpr auto& at(const_key_reference key) const {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -484,7 +496,7 @@ namespace ccl {
                 static_assert(std::is_default_constructible_v<V>);
 
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -517,7 +529,7 @@ namespace ccl {
 
             constexpr iterator find(const_key_reference key) {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -530,7 +542,7 @@ namespace ccl {
 
             constexpr const_iterator find(const_key_reference key) const {
                 const size_type index = compute_key_index(key, _capacity);
-                const size_type last_chunk_index = wrap_index(index + compute_chunk_size(), _capacity);
+                const size_type last_chunk_index = wrap_index(index + chunk_size, _capacity);
 
                 for(size_type i = index; i != last_chunk_index; i = wrap_index(++i, _capacity)) {
                     if(slot_map[i] && keys[i] == key) {
@@ -556,8 +568,14 @@ namespace ccl {
 
             constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+            constexpr size_type get_chunk_size() const noexcept { return chunk_size; }
 
         private:
+            void rehash() {
+                chunk_size <<= 1;
+                reserve(max<size_type>(1, _capacity << 1));
+            }
+
             static hash_type hash(const_key_reference x) {
                 return hash_function_type{}(x);
             }
@@ -573,11 +591,8 @@ namespace ccl {
                 return wrap_index(hash(x), capacity);
             }
 
-            constexpr size_type compute_chunk_size() const noexcept {
-                return ccl::max<size_type>(CCL_HASHTABLE_CHUNK_SIZE, _capacity >> 4);
-            }
-
             size_type _capacity = 0;
+            size_type chunk_size = default_chunk_size;
             bitset<allocator_type> slot_map; // Slot availability bit map
             key_pointer keys = nullptr;
             value_pointer values = nullptr;
