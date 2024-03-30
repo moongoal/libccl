@@ -52,23 +52,23 @@ int main(int argc, char **argv) {
     );
 
     suite.add_test(
-        "enqueue/dequeue",
+        "enqueue_back/dequeue_front",
         []() {
             test_ring<int> v{default_capacity};
 
-            v.enqueue(1);
-            v.enqueue(2);
-            v.enqueue(3);
+            v.enqueue_back(1);
+            v.enqueue_back(2);
+            v.enqueue_back(3);
 
             equals(v.size(), 3);
 
-            equals(*v, 1);
-            v.dequeue();
+            equals(v.get_front(), 1);
+            v.dequeue_front();
 
-            equals(*v, 2);
-            v.dequeue();
+            equals(v.get_front(), 2);
+            v.dequeue_front();
 
-            equals(*v, 3);
+            equals(v.get_front(), 3);
 
             equals(v.size(), 1);
             equals(v.capacity(), default_capacity);
@@ -76,24 +76,80 @@ int main(int argc, char **argv) {
     );
 
     suite.add_test(
-        "dequeue (empty)",
+        "enqueue_front/dequeue_back",
+        []() {
+            test_ring<int> v{default_capacity};
+
+            v.enqueue_front(1);
+            v.enqueue_front(2);
+            v.enqueue_front(3);
+
+            equals(v.size(), 3);
+
+            equals(v.get_back(), 1);
+            v.dequeue_back();
+
+            equals(v.get_back(), 2);
+            v.dequeue_back();
+
+            equals(v.get_back(), 3);
+
+            equals(v.size(), 1);
+            equals(v.capacity(), default_capacity);
+        }
+    );
+
+    suite.add_test(
+        "dequeue_front (empty)",
         []() {
             test_ring<int> v{default_capacity};
 
             throws<std::out_of_range>([&v] () {
-                v.dequeue();
+                v.dequeue_front();
             });
         },
         skip_if_exceptions_disabled
     );
 
     suite.add_test(
-        "enqueue (full)",
+        "dequeue_back (empty)",
         []() {
             test_ring<int> v{default_capacity};
 
             throws<std::out_of_range>([&v] () {
-                v.dequeue();
+                v.dequeue_back();
+            });
+        },
+        skip_if_exceptions_disabled
+    );
+
+    suite.add_test(
+        "enqueue_back (full)",
+        []() {
+            test_ring<int> v{default_capacity};
+
+            for(size_t i = 0; i < v.capacity(); ++i) {
+                v.enqueue_back(2);
+            }
+
+            throws<std::out_of_range>([&v] () {
+                v.enqueue_back(2);
+            });
+        },
+        skip_if_exceptions_disabled
+    );
+
+    suite.add_test(
+        "enqueue_front (full)",
+        []() {
+            test_ring<int> v{default_capacity};
+
+            for(size_t i = 0; i < v.capacity(); ++i) {
+                v.enqueue_front(2);
+            }
+
+            throws<std::out_of_range>([&v] () {
+                v.enqueue_front(2);
             });
         },
         skip_if_exceptions_disabled
@@ -107,7 +163,7 @@ int main(int argc, char **argv) {
             equals(v.is_empty(), true);
 
             for(size_t i = 0; i < v.capacity(); ++i) {
-                v.enqueue(2);
+                v.enqueue_back(2);
                 equals(v.is_empty(), false);
             }
         }
@@ -120,7 +176,7 @@ int main(int argc, char **argv) {
 
             for(size_t i = 0; i < v.capacity(); ++i) {
                 equals(v.is_full(), false);
-                v.enqueue(2);
+                v.enqueue_back(2);
             }
 
             equals(v.is_full(), true);
@@ -131,9 +187,9 @@ int main(int argc, char **argv) {
         "clear", []() {
             test_ring<int> v{default_capacity};
 
-            v.enqueue(1);
-            v.enqueue(2);
-            v.enqueue(3);
+            v.enqueue_back(1);
+            v.enqueue_back(2);
+            v.enqueue_back(3);
 
             int * const old_data = v.data();
 
@@ -159,9 +215,9 @@ int main(int argc, char **argv) {
         spy2.on_destroy = dtor;
         spy3.on_destroy = dtor;
 
-        v.enqueue(spy1);
-        v.enqueue(spy2);
-        v.enqueue(spy3);
+        v.enqueue_back(spy1);
+        v.enqueue_back(spy2);
+        v.enqueue_back(spy3);
 
         test_ring<spy> v2{v};
 
@@ -175,14 +231,14 @@ int main(int argc, char **argv) {
 
         differs(v.data(), v2.data());
 
-        equals((*v2).construction_magic, constructed_value);
-        v2.dequeue();
+        equals((v2.get_front()).construction_magic, constructed_value);
+        v2.dequeue_front();
 
-        equals((*v2).construction_magic, constructed_value);
-        v2.dequeue();
+        equals((v2.get_front()).construction_magic, constructed_value);
+        v2.dequeue_front();
 
-        equals((*v2).construction_magic, constructed_value);
-        v2.dequeue();
+        equals((v2.get_front()).construction_magic, constructed_value);
+        v2.dequeue_front();
     });
 
     suite.add_test("ctor (move)", [] () {
@@ -199,9 +255,9 @@ int main(int argc, char **argv) {
         spy2.on_destroy = dtor;
         spy3.on_destroy = dtor;
 
-        v.enqueue(spy1);
-        v.enqueue(spy2);
-        v.enqueue(spy3);
+        v.enqueue_back(spy1);
+        v.enqueue_back(spy2);
+        v.enqueue_back(spy3);
 
         test_ring<spy> v2{std::move(v)};
 
@@ -215,14 +271,14 @@ int main(int argc, char **argv) {
 
         differs(v.data(), v2.data());
 
-        equals((*v2).construction_magic, constructed_value);
-        v2.dequeue();
+        equals((v2.get_front()).construction_magic, constructed_value);
+        v2.dequeue_front();
 
-        equals((*v2).construction_magic, constructed_value);
-        v2.dequeue();
+        equals((v2.get_front()).construction_magic, constructed_value);
+        v2.dequeue_front();
 
-        equals((*v2).construction_magic, constructed_value);
-        v2.dequeue();
+        equals((v2.get_front()).construction_magic, constructed_value);
+        v2.dequeue_front();
     });
 
     suite.add_test("dtor", [] () {
@@ -241,9 +297,9 @@ int main(int argc, char **argv) {
             spy2.on_destroy = dtor;
             spy3.on_destroy = dtor;
 
-            v.enqueue(spy1);
-            v.enqueue(spy2);
-            v.enqueue(spy3);
+            v.enqueue_back(spy1);
+            v.enqueue_back(spy2);
+            v.enqueue_back(spy3);
         }
 
         equals(destruction_counter, 6);
@@ -253,48 +309,48 @@ int main(int argc, char **argv) {
         test_ring<int> v{default_capacity};
         test_ring<int> v2{default_capacity};
 
-        v.enqueue(1);
-        v.enqueue(2);
-        v.enqueue(3);
+        v.enqueue_back(1);
+        v.enqueue_back(2);
+        v.enqueue_back(3);
 
         v2 = v;
 
         equals(v2.size(), 3);
         equals(v2.capacity(), default_capacity);
 
-        equals(*v2, 1);
-        v2.dequeue();
+        equals(v2.get_front(), 1);
+        v2.dequeue_front();
 
-        equals(*v2, 2);
-        v2.dequeue();
+        equals(v2.get_front(), 2);
+        v2.dequeue_front();
 
-        equals(*v2, 3);
+        equals(v2.get_front(), 3);
     });
 
     suite.add_test("operator = (copy - initialized)", [] () {
         test_ring<int> v{default_capacity};
         test_ring<int> v2{default_capacity};
 
-        v.enqueue(1);
-        v.enqueue(2);
-        v.enqueue(3);
+        v.enqueue_back(1);
+        v.enqueue_back(2);
+        v.enqueue_back(3);
 
-        v2.enqueue(4);
-        v2.enqueue(5);
-        v2.enqueue(6);
+        v2.enqueue_back(4);
+        v2.enqueue_back(5);
+        v2.enqueue_back(6);
 
         v2 = v;
 
         equals(v2.size(), 3);
         equals(v2.capacity(), default_capacity);
 
-        equals(*v2, 1);
-        v2.dequeue();
+        equals(v2.get_front(), 1);
+        v2.dequeue_front();
 
-        equals(*v2, 2);
-        v2.dequeue();
+        equals(v2.get_front(), 2);
+        v2.dequeue_front();
 
-        equals(*v2, 3);
+        equals(v2.get_front(), 3);
     });
 
     suite.add_test("operator = (copy - initialized, to larger capacity)", [] () {
@@ -303,38 +359,38 @@ int main(int argc, char **argv) {
         ring<int> v{default_capacity};
         ring<int> v2{default_capacity + 1};
 
-        v.enqueue(1);
-        v.enqueue(2);
-        v.enqueue(3);
+        v.enqueue_back(1);
+        v.enqueue_back(2);
+        v.enqueue_back(3);
 
-        v2.enqueue(4);
-        v2.enqueue(5);
+        v2.enqueue_back(4);
+        v2.enqueue_back(5);
 
         v2 = v;
 
         equals(v2.size(), 3);
         equals(v2.capacity(), default_capacity + 1);
 
-        equals(*v2, 1);
-        v2.dequeue();
+        equals(v2.get_front(), 1);
+        v2.dequeue_front();
 
-        equals(*v2, 2);
-        v2.dequeue();
+        equals(v2.get_front(), 2);
+        v2.dequeue_front();
 
-        equals(*v2, 3);
+        equals(v2.get_front(), 3);
     });
 
     suite.add_test("operator = (move)", [] () {
         test_ring<int> v{default_capacity};
         test_ring<int> v2{default_capacity};
 
-        v.enqueue(1);
-        v.enqueue(2);
-        v.enqueue(3);
+        v.enqueue_back(1);
+        v.enqueue_back(2);
+        v.enqueue_back(3);
 
-        v2.enqueue(4);
-        v2.enqueue(5);
-        v2.enqueue(6);
+        v2.enqueue_back(4);
+        v2.enqueue_back(5);
+        v2.enqueue_back(6);
 
         auto * const old_v_data = v.data();
 
@@ -346,13 +402,13 @@ int main(int argc, char **argv) {
         equals(v2.capacity(), default_capacity);
         equals(v2.data(), old_v_data);
 
-        equals(*v2, 1);
-        v2.dequeue();
+        equals(v2.get_front(), 1);
+        v2.dequeue_front();
 
-        equals(*v2, 2);
-        v2.dequeue();
+        equals(v2.get_front(), 2);
+        v2.dequeue_front();
 
-        equals(*v2, 3);
+        equals(v2.get_front(), 3);
     });
 
     suite.add_test("ctor (range)", [] () {
@@ -360,41 +416,64 @@ int main(int argc, char **argv) {
         test_ring<int> v{my_list};
 
         equals(v.size(), 5);
-        equals(*v, 1);
-        v.dequeue();
+        equals(v.get_front(), 1);
+        v.dequeue_front();
 
-        equals(*v, 2);
-        v.dequeue();
+        equals(v.get_front(), 2);
+        v.dequeue_front();
 
-        equals(*v, 3);
-        v.dequeue();
+        equals(v.get_front(), 3);
+        v.dequeue_front();
 
-        equals(*v, 4);
-        v.dequeue();
+        equals(v.get_front(), 4);
+        v.dequeue_front();
 
-        equals(*v, 5);
+        equals(v.get_front(), 5);
     });
 
     suite.add_test("emplace_back", [] () {
         test_ring<dummy> v {default_capacity};
 
-        v.emplace_enqueue(dummy{1});
-        v.emplace_enqueue(dummy{2});
-        v.emplace_enqueue(dummy{3});
-        v.emplace_enqueue(dummy{4});
+        v.emplace_back(dummy{1});
+        v.emplace_back(dummy{2});
+        v.emplace_back(dummy{3});
+        v.emplace_back(dummy{4});
 
         equals(v.size(), 4);
 
-        equals((*v).value, 2);
-        v.dequeue();
+        equals((v.get_front()).value, 2);
+        v.dequeue_front();
 
-        equals((*v).value, 3);
-        v.dequeue();
+        equals((v.get_front()).value, 3);
+        v.dequeue_front();
 
-        equals((*v).value, 4);
-        v.dequeue();
+        equals((v.get_front()).value, 4);
+        v.dequeue_front();
 
-        equals((*v).value, 5);
+        equals((v.get_front()).value, 5);
+        equals(v.size(), 1);
+    });
+
+    suite.add_test("emplace_front", [] () {
+        test_ring<dummy> v {default_capacity};
+
+        v.emplace_front(dummy{1});
+        v.emplace_front(dummy{2});
+        v.emplace_front(dummy{3});
+        v.emplace_front(dummy{4});
+
+        equals(v.size(), 4);
+
+        equals((v.get_back()).value, 2);
+        v.dequeue_back();
+
+        equals((v.get_back()).value, 3);
+        v.dequeue_back();
+
+        equals((v.get_back()).value, 4);
+        v.dequeue_back();
+
+        equals((v.get_back()).value, 5);
         equals(v.size(), 1);
     });
 

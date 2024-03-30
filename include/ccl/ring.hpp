@@ -34,10 +34,22 @@ namespace ccl {
             value_type * _data;
             allocation_flags _alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
-            constexpr size_type get_write_index() const {
+            constexpr size_type get_enqueue_back_index() const noexcept(!exceptions_enabled) {
                 CCL_THROW_IF(is_full(), std::out_of_range{"Ring is full."});
 
                 return (_read_index + _size) % _capacity;
+            }
+
+            constexpr size_type get_enqueue_front_index() const noexcept(!exceptions_enabled) {
+                CCL_THROW_IF(is_full(), std::out_of_range{"Ring is full."});
+
+                return (_capacity + _read_index - 1) % _capacity;
+            }
+
+            constexpr size_type get_dequeue_front_index() const noexcept(!exceptions_enabled) {
+                CCL_THROW_IF(is_empty(), std::out_of_range{"Ring is empty."});
+
+                return (_read_index + _size - 1) % _capacity;
             }
 
         public:
@@ -45,7 +57,7 @@ namespace ccl {
                 const size_type capacity,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator},
+            ) noexcept : alloc{allocator},
                 _read_index{0},
                 _size{0},
                 _capacity{capacity},
@@ -54,7 +66,7 @@ namespace ccl {
             {}
 
             constexpr ring(const ring &other)
-                : alloc{other.get_allocator()},
+                noexcept : alloc{other.get_allocator()},
                 _read_index{other._read_index},
                 _size{other._size},
                 _capacity{other._capacity},
@@ -80,7 +92,7 @@ namespace ccl {
                 const InputRange& input,
                 allocator_type * const allocator = nullptr,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : ring{
+            ) noexcept : ring{
                     static_cast<size_type>(std::abs(std::ranges::distance(input))),
                     allocator,
                     alloc_flags
@@ -124,7 +136,7 @@ namespace ccl {
                 _size = 0;
             }
 
-            constexpr ring& operator =(const ring &other) {
+            constexpr ring& operator =(const ring &other) noexcept {
                 if(other._capacity > _capacity || !alloc::is_allocator_stateless()) {
                     destroy();
                     alloc::operator=(other);
@@ -148,13 +160,13 @@ namespace ccl {
                 return *this;
             }
 
-            constexpr ring& operator =(ring &&other) {
+            constexpr ring& operator =(ring &&other) noexcept {
                 swap(other);
 
                 return *this;
             }
 
-            constexpr void swap(ring &other) {
+            constexpr void swap(ring &other) noexcept {
                 alloc::swap(other);
 
                 ccl::swap(_read_index, other._read_index);
@@ -173,21 +185,37 @@ namespace ccl {
             constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
             constexpr allocation_flags get_allocation_flags() const noexcept { return _alloc_flags; }
 
-            constexpr void enqueue(const_reference item) noexcept(!exceptions_enabled) {
-                const size_type write_index = get_write_index();
+            constexpr void enqueue_back(const_reference item) noexcept(!exceptions_enabled) {
+                const size_type write_index = get_enqueue_back_index();
 
                 std::construct_at(&_data[write_index], item);
                 _size += 1;
             }
 
-            constexpr void emplace_enqueue(rvalue_reference item) noexcept(!exceptions_enabled) {
-                const size_type write_index = get_write_index();
+            constexpr void enqueue_front(const_reference item) noexcept(!exceptions_enabled) {
+                const size_type write_index = get_enqueue_front_index();
+
+                std::construct_at(&_data[write_index], item);
+                _read_index = write_index;
+                _size += 1;
+            }
+
+            constexpr void emplace_back(rvalue_reference item) noexcept(!exceptions_enabled) {
+                const size_type write_index = get_enqueue_back_index();
 
                 std::construct_at(&_data[write_index], std::move(item));
                 _size += 1;
             }
 
-            constexpr void dequeue() noexcept(!exceptions_enabled) {
+            constexpr void emplace_front(rvalue_reference item) noexcept(!exceptions_enabled) {
+                const size_type write_index = get_enqueue_front_index();
+
+                std::construct_at(&_data[write_index], std::move(item));
+                _read_index = write_index;
+                _size += 1;
+            }
+
+            constexpr void dequeue_front() noexcept(!exceptions_enabled) {
                 CCL_THROW_IF(is_empty(), std::out_of_range{"Ring is empty."});
 
                 const pointer item = &_data[_read_index];
@@ -196,16 +224,21 @@ namespace ccl {
                 _size -= 1;
             }
 
-            constexpr reference operator*() noexcept(!exceptions_enabled) {
+            constexpr void dequeue_back() noexcept(!exceptions_enabled) {
+                const size_type back_read_index = get_dequeue_front_index();
+                const pointer item = &_data[back_read_index];
+                std::destroy(item, item + 1);
+                _size -= 1;
+            }
+
+            constexpr reference get_front() noexcept(!exceptions_enabled) {
                 CCL_THROW_IF(is_empty(), std::out_of_range{"Ring is empty."});
 
                 return _data[_read_index];
             }
 
-            constexpr const_reference operator*() const noexcept(!exceptions_enabled) {
-                CCL_THROW_IF(is_empty(), std::out_of_range{"Ring is empty."});
-
-                return _data[_read_index];
+            constexpr reference get_back() noexcept(!exceptions_enabled) {
+                return _data[get_dequeue_front_index()];
             }
     };
 }
