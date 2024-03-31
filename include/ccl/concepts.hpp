@@ -72,12 +72,13 @@ namespace ccl {
     /**
      * A deleter type.
      *
-     * @tparam D The deleter type.
      * @tparam T The deleted type.
+     * @tparam C The control block type.
+     * @tparam D The deleter type.
      */
-    template<typename D, typename T>
-    concept deleter = requires(D &d, T * t) {
-        d(t);
+    template<typename D, typename T, typename C>
+    concept deleter = requires(D &d, T * t, C &c) {
+        d(t, c);
     };
 
     /**

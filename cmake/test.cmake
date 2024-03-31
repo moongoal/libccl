@@ -271,6 +271,11 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    TEST test_pointer_weak test/pointer/weak.cpp
+    COVERAGE include/ccl/pointer/weak.hpp
+)
+
+add_ccl_test(
     REPORT test_allocator
     TEST test_default_allocator test/memory/default-allocator.cpp
     TEST test_null_allocator test/memory/null-allocator.cpp

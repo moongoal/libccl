@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
                 [&count] () { count -= 1; }
             };
 
-            test_shared_ptr<spy> ptr{raw_ptr};
+            test_shared_ptr<spy> ptr{raw_ptr, test_shared_ptr<spy>::new_tag};
 
             equals(ptr.get(), raw_ptr);
             equals(count, 1);
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
                 [&count] () { count -= 1; }
             };
 
-            test_shared_ptr<spy> ptr{raw_ptr};
+            test_shared_ptr<spy> ptr{raw_ptr, test_shared_ptr<spy>::new_tag};
 
             {
                 test_shared_ptr<spy> ptr2{ptr};
@@ -93,14 +93,14 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("ctor (copy - subclass)", [] () {
-        test_shared_ptr<A> ptr{new A{}};
+        test_shared_ptr<A> ptr{new A{}, test_shared_ptr<A>::new_tag};
         test_shared_ptr<B> ptr2{ptr};
 
         equals(ptr2.use_count(), 2);
     });
 
     suite.add_test("ctor (move - subclass)", [] () {
-        test_shared_ptr<A> ptr{new A{}};
+        test_shared_ptr<A> ptr{new A{}, test_shared_ptr<A>::new_tag};
         test_shared_ptr<B> ptr2{std::move(ptr)};
 
         equals(ptr2.use_count(), 1);
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
                 [&count] () { count -= 1; }
             };
 
-            test_shared_ptr<spy> ptr{raw_ptr};
+            test_shared_ptr<spy> ptr{raw_ptr, test_shared_ptr<spy>::new_tag};
 
             {
                 test_shared_ptr<spy> ptr2{std::move(ptr)};
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
                 [&count] () { count -= 1; }
             };
 
-            test_shared_ptr<spy> ptr{raw_ptr, [&count] (spy * ptr) { count = 100; delete ptr; }};
+            test_shared_ptr<spy> ptr{raw_ptr, [&count] (spy * ptr, shared_ptr_ctrl_block_base&) { count = 100; delete ptr; }};
 
             equals(ptr.get(), raw_ptr);
             equals(count, 1);
@@ -152,22 +152,22 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator ==", [] () {
-        test_shared_ptr<int> ptr1{new int};
+        test_shared_ptr<int> ptr1{new int, test_shared_ptr<int>::new_tag};
         test_shared_ptr<int> ptr2{ptr1};
 
         check(ptr1 == ptr2);
     });
 
     suite.add_test("operator !=", [] () {
-        test_shared_ptr<int> ptr1{new int};
-        test_shared_ptr<int> ptr2{new int};
+        test_shared_ptr<int> ptr1{new int, test_shared_ptr<int>::new_tag};
+        test_shared_ptr<int> ptr2{new int, test_shared_ptr<int>::new_tag};
 
         check(ptr1.get() != ptr2.get());
     });
 
     suite.add_test("operator >", [] () {
-        test_shared_ptr<int> ptr1{new int};
-        test_shared_ptr<int> ptr2{new int};
+        test_shared_ptr<int> ptr1{new int, test_shared_ptr<int>::new_tag};
+        test_shared_ptr<int> ptr2{new int, test_shared_ptr<int>::new_tag};
 
         if(ptr1.get() > ptr2.get()) {
             check(ptr1 > ptr2);
@@ -177,8 +177,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator <", [] () {
-        test_shared_ptr<int> ptr1{new int};
-        test_shared_ptr<int> ptr2{new int};
+        test_shared_ptr<int> ptr1{new int, test_shared_ptr<int>::new_tag};
+        test_shared_ptr<int> ptr2{new int, test_shared_ptr<int>::new_tag};
 
         if(ptr1.get() > ptr2.get()) {
             check(ptr2 < ptr1);
@@ -188,8 +188,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator >=", [] () {
-        test_shared_ptr<int> ptr1{new int};
-        test_shared_ptr<int> ptr2{new int};
+        test_shared_ptr<int> ptr1{new int, test_shared_ptr<int>::new_tag};
+        test_shared_ptr<int> ptr2{new int, test_shared_ptr<int>::new_tag};
         test_shared_ptr<int> ptr1_copy{ptr1};
 
         if(ptr1.get() > ptr2.get()) {
@@ -202,8 +202,8 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator <=", [] () {
-        test_shared_ptr<int> ptr1{new int};
-        test_shared_ptr<int> ptr2{new int};
+        test_shared_ptr<int> ptr1{new int, test_shared_ptr<int>::new_tag};
+        test_shared_ptr<int> ptr2{new int, test_shared_ptr<int>::new_tag};
         test_shared_ptr<int> ptr1_copy{ptr1};
 
         if(ptr1.get() > ptr2.get()) {
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator *", [] () {
-        test_shared_ptr<int> ptr1{new int{5}};
+        test_shared_ptr<int> ptr1{new int{5}, test_shared_ptr<int>::new_tag};
 
         equals(*ptr1, 5);
 
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
     suite.add_test("operator ->", [] () {
         struct S { int x = 5; };
 
-        test_shared_ptr<S> ptr1{new S{}};
+        test_shared_ptr<S> ptr1{new S{}, test_shared_ptr<S>::new_tag};
 
         equals(ptr1->x, 5);
 
@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("operator []", [] () {
-        test_shared_ptr<int[]> ptr{new int[3]};
+        test_shared_ptr<int[]> ptr{new int[3], test_shared_ptr<int[]>::new_tag};
 
         ptr[0] = 1;
         ptr[1] = 2;
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("use_count()", [] () {
-        test_shared_ptr<int[]> ptr{new int[3]};
+        test_shared_ptr<int[]> ptr{new int[3], test_shared_ptr<int[]>::new_tag};
 
         equals(ptr.use_count(), 1);
 
@@ -264,36 +264,12 @@ int main(int argc, char **argv) {
     });
 
     suite.add_test("reset()", [] () {
-        test_shared_ptr<int> ptr{new int};
+        test_shared_ptr<int> ptr{new int, test_shared_ptr<int>::new_tag};
 
         ptr.reset();
 
         equals(ptr.use_count(), 0);
         equals(ptr.get(), nullptr);
-    });
-
-    suite.add_test("reset() (other)", [] () {
-        int count = 0;
-
-        {
-            auto raw_ptr = new spy{
-                [&count] () { count += 1; },
-                [&count] () { count -= 1; }
-            };
-
-            auto raw_ptr2 = new spy{
-                [&count] () { count += 2; },
-                [&count] () { count -= 2; }
-            };
-
-            test_shared_ptr<spy> ptr{raw_ptr};
-
-            ptr.reset(raw_ptr2);
-
-            equals(count, 2);
-        }
-
-        equals(count, 0);
     });
 
     suite.add_test("operator = (copy)", [] () {
@@ -310,8 +286,8 @@ int main(int argc, char **argv) {
                 [&count] () { count -= 2; }
             };
 
-            test_shared_ptr<spy> ptr{raw_ptr};
-            test_shared_ptr<spy> ptr2{raw_ptr2};
+            test_shared_ptr<spy> ptr{raw_ptr, test_shared_ptr<spy>::new_tag};
+            test_shared_ptr<spy> ptr2{raw_ptr2, test_shared_ptr<spy>::new_tag};
 
             ptr = ptr2;
 
@@ -336,8 +312,8 @@ int main(int argc, char **argv) {
                 [&count] () { count -= 2; }
             };
 
-            test_shared_ptr<spy> ptr{raw_ptr};
-            test_shared_ptr<spy> ptr2{raw_ptr2};
+            test_shared_ptr<spy> ptr{raw_ptr, test_shared_ptr<spy>::new_tag};
+            test_shared_ptr<spy> ptr2{raw_ptr2, test_shared_ptr<spy>::new_tag};
 
             ptr = std::move(ptr2);
 

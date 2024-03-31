@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <utility>
+#include <memory>
 #include <ccl/api.hpp>
 #include <ccl/debug.hpp>
 #include <ccl/concepts.hpp>
@@ -19,119 +20,149 @@
 #include <ccl/internal/optional-allocator.hpp>
 
 namespace ccl {
-    namespace internal {
-        class shared_ptr_ctrl_block_base {
-            public:
-                using counter_base_type = uint64_t;
-                using counter_type = std::atomic<counter_base_type>;
+    class shared_ptr_ctrl_block_base {
+        public:
+            using counter_base_type = uint64_t;
+            using counter_type = std::atomic<counter_base_type>;
 
-                static constexpr counter_base_type shared_ref_count_mask = 0xffffffff;
-                static constexpr counter_base_type weak_ref_count_mask = 0x00000000'ffffffff;
-                static constexpr counter_base_type weak_ref_count_shift_width = (sizeof(counter_base_type) * 8) >> 1;
+            static constexpr counter_base_type shared_ref_count_mask = 0xffffffff;
+            static constexpr counter_base_type weak_ref_count_mask =   0xffffffff'00000000;
+            static constexpr counter_base_type weak_ref_count_shift_width = (sizeof(counter_base_type) * 8) >> 1;
+            static constexpr counter_base_type shared_ref_unit_value = 1;
+            static constexpr counter_base_type weak_ref_unit_value = 0x0000'0001'0000'0000;
 
-                static constexpr counter_base_type extract_shared_ref_count(const counter_base_type counters) {
-                    return counters & shared_ref_count_mask;
-                }
+            static constexpr counter_base_type extract_shared_ref_count(const counter_base_type counters) {
+                return counters & shared_ref_count_mask;
+            }
 
-                static constexpr counter_base_type extract_weak_ref_count(const counter_base_type counters) {
-                    return (counters & weak_ref_count_mask) >> weak_ref_count_shift_width;
-                }
+            static constexpr counter_base_type extract_weak_ref_count(const counter_base_type counters) {
+                return (counters & weak_ref_count_mask) >> weak_ref_count_shift_width;
+            }
 
-            private:
-                /**
-                 * An atomic counter merging together shared and weak
-                 * pointer reference counts.
-                 *
-                 * The high 32 bits of this counter will contain the counter
-                 * of weak references, while the low 32 bits will contain the
-                 * counter of shared references.
-                 *
-                 * Since the control block is created with the first shared pointer,
-                 * the counter is initialised to 1 shared / 0 weak references.
-                 */
-                counter_type counters;
+        private:
+            /**
+             * An atomic counter merging together shared and weak
+             * pointer reference counts.
+             *
+             * The high 32 bits of this counter will contain the counter
+             * of weak references, while the low 32 bits will contain the
+             * counter of shared references.
+             *
+             * Since the control block is created with the first shared pointer,
+             * the counter is initialised to 1 shared / 0 weak references.
+             */
+            counter_type counters;
 
-            public:
-                shared_ptr_ctrl_block_base(const shared_ptr_ctrl_block_base &other)
-                    : counters{other.counters.load(std::memory_order_relaxed)}
-                {}
+        public:
+            shared_ptr_ctrl_block_base(const shared_ptr_ctrl_block_base &other)
+                : counters{other.counters.load(std::memory_order_relaxed)}
+            {}
 
-                explicit shared_ptr_ctrl_block_base(const counter_base_type counters = 1) : counters{counters} {}
-                virtual ~shared_ptr_ctrl_block_base() = default;
+            explicit shared_ptr_ctrl_block_base(const counter_base_type counters = 1) : counters{counters} {}
+            virtual ~shared_ptr_ctrl_block_base() = default;
 
-                virtual void invoke_deleter() = 0;
+            virtual void invoke_deleter() = 0;
 
-                uint32_t decr_shared_ref_count() {
-                    return counters.fetch_sub(1, std::memory_order_relaxed) - 1;
-                }
+            counter_base_type decr_shared_ref_count() {
+                return counters.fetch_sub(shared_ref_unit_value, std::memory_order_relaxed) - shared_ref_unit_value;
+            }
 
-                uint32_t incr_shared_ref_count() {
-                    return counters.fetch_add(1, std::memory_order_relaxed) + 1;
-                }
+            counter_base_type incr_shared_ref_count() {
+                return counters.fetch_add(shared_ref_unit_value, std::memory_order_relaxed) + shared_ref_unit_value;
+            }
 
-                uint32_t decr_weak_ref_count() {
-                    constexpr counter_type value = 0x0000'0001'0000'0000;
+            counter_base_type decr_weak_ref_count() {
+                return counters.fetch_sub(weak_ref_unit_value, std::memory_order_relaxed) - weak_ref_unit_value;
+            }
 
-                    return counters.fetch_sub(value, std::memory_order_relaxed) - value;
-                }
+            counter_base_type incr_weak_ref_count() {
+                return counters.fetch_add(weak_ref_unit_value, std::memory_order_relaxed) + weak_ref_unit_value;
+            }
 
-                uint32_t incr_weak_ref_count() {
-                    constexpr counter_type value = 0x0000'0001'0000'0000;
-                    return counters.fetch_add(value, std::memory_order_relaxed) + value;
-                }
+            counter_base_type get_counters() {
+                return counters.load(std::memory_order_relaxed);
+            }
 
-                size_t get_counters() {
-                    return counters.load(std::memory_order_relaxed);
-                }
-        };
+            bool compare_exchange_counters(counter_base_type &expected, const counter_base_type new_value) noexcept {
+                return counters.compare_exchange_weak(expected, new_value);
+            }
 
-        template<typename T, deleter<std::decay_t<std::remove_all_extents_t<T>>> D>
-        class shared_ptr_ctrl_block final : public shared_ptr_ctrl_block_base {
-            public:
-                using pointer = std::decay_t<std::remove_all_extents_t<T>>*;
-                using deleter_type = D;
+            virtual void *get_allocator() noexcept = 0;
+    };
 
-            private:
-                deleter_type deleter;
-                pointer ptr;
-
-            public:
-                shared_ptr_ctrl_block() = delete;
-                shared_ptr_ctrl_block(const pointer ptr, const deleter_type deleter) : deleter{deleter}, ptr{ptr} {}
-                shared_ptr_ctrl_block(const shared_ptr_ctrl_block &other)
-                    : shared_ptr_ctrl_block_base{other},
-                    deleter{other.deleter},
-                    ptr{other.ptr}
-                {}
-
-                void invoke_deleter() override {
-                    CCL_ASSERT(ptr);
-
-                    deleter(ptr);
-                    ptr = nullptr;
-                }
-        };
-    }
-
-    template<typename T, typed_allocator<T> Allocator = allocator>
-    class shared_ptr : public base_ptr<T>, private internal::with_optional_allocator<Allocator> {
+    template<typename T, deleter<std::decay_t<std::remove_all_extents_t<T>>, shared_ptr_ctrl_block_base> D, basic_allocator Allocator = allocator>
+    class shared_ptr_ctrl_block final : public shared_ptr_ctrl_block_base, private internal::with_optional_allocator<Allocator> {
         using alloc = internal::with_optional_allocator<Allocator>;
 
         public:
+            using pointer = std::decay_t<std::remove_all_extents_t<T>>*;
+            using deleter_type = D;
+            using allocator_type = Allocator;
+
+        private:
+            deleter_type deleter;
+            pointer ptr;
+
+        public:
+            shared_ptr_ctrl_block() = delete;
+
+            shared_ptr_ctrl_block(
+                const pointer ptr,
+                const deleter_type deleter,
+                allocator_type * const allocator
+            ) : alloc{allocator}, deleter{deleter}, ptr{ptr} {}
+
+            shared_ptr_ctrl_block(const shared_ptr_ctrl_block &) = delete;
+
+            void invoke_deleter() override {
+                CCL_ASSERT(ptr);
+
+                deleter(ptr, *this);
+                ptr = nullptr;
+            }
+
+            virtual void *get_allocator() noexcept override { return alloc::get_allocator(); }
+    };
+
+    template<typename T, basic_allocator Allocator = allocator>
+    class shared_ptr final : public base_ptr<T> {
+        public:
             using value_type = std::decay_t<std::remove_all_extents_t<T>>;
             using pointer = value_type*;
-            using const_pointer = const value_type *;
+            using const_pointer = const value_type*;
             using reference = value_type&;
             using const_reference = const value_type&;
-            using ctrl_block_type = internal::shared_ptr_ctrl_block_base;
+            using ctrl_block_type = shared_ptr_ctrl_block_base;
             using allocator_type = Allocator;
+
+            struct new_tag_t {};
+
+            /**
+             * Use this tag when constructing a shared pointer to
+             * indicate the memory about to become owned by the
+             * shared pointer object was allocated via `new` and
+             * must thus be deleted via `delete`.
+             */
+            static constexpr new_tag_t new_tag;
 
         private:
             mutable ctrl_block_type *ctrl_block = nullptr;
 
-            static void default_deleter(const pointer ptr) {
-                if constexpr(base_ptr<T>::is_array) {
-                    delete[] ptr;
+            static void default_deleter(const pointer ptr, ctrl_block_type &ctrl_block) {
+                std::destroy_at(ptr);
+
+                allocator_type * const allocator = reinterpret_cast<allocator_type*>(
+                    ctrl_block.get_allocator()
+                );
+
+                allocator->deallocate(ptr);
+            }
+
+            static void default_delete_deleter(const pointer ptr, ctrl_block_type &) {
+                std::destroy_at(ptr);
+
+                if constexpr(std::is_array_v<T>) {
+                    delete [] ptr;
                 } else {
                     delete ptr;
                 }
@@ -155,8 +186,12 @@ namespace ccl {
             void delete_ctrl_block() {
                 CCL_ASSERT(ctrl_block);
 
+                allocator_type * const allocator = reinterpret_cast<allocator_type*>(
+                    ctrl_block->get_allocator()
+                );
+
                 ctrl_block->~ctrl_block_type();
-                alloc::get_allocator()->deallocate(ctrl_block);
+                allocator->deallocate(ctrl_block);
 
                 ctrl_block = nullptr;
             }
@@ -173,16 +208,21 @@ namespace ccl {
                 }
             }
 
-            template<deleter<value_type> Deleter>
+            template<deleter<value_type, ctrl_block_type> Deleter>
             void create_ctrl_block(
+                allocator_type * allocator,
                 const allocation_flags alloc_flags,
-                const Deleter d = default_deleter
+                const Deleter d
             ) {
-                using ctrl_block_type = internal::shared_ptr_ctrl_block<T, Deleter>;
+                using ctrl_block_type = shared_ptr_ctrl_block<T, Deleter, allocator_type>;
 
-                ctrl_block = alloc::get_allocator()->template allocate<ctrl_block_type>(1, alloc_flags);
+                if(!allocator) {
+                    allocator = get_default_allocator<allocator_type>();
+                }
 
-                new (ctrl_block) ctrl_block_type{base_ptr<T>::get(), d};
+                ctrl_block = new (
+                    allocator->allocate(sizeof(ctrl_block_type), alignof(ctrl_block_type), alloc_flags)
+                ) ctrl_block_type{base_ptr<T>::get(), d, allocator};
             }
 
         public:
@@ -216,20 +256,31 @@ namespace ccl {
                 other.set_ctrl_block(nullptr);
             }
 
-            template<deleter<value_type> Deleter>
+            template<deleter<value_type, ctrl_block_type> Deleter>
             shared_ptr(
                 const pointer ptr,
                 const Deleter d,
                 const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
                 allocator_type * const allocator = nullptr
             )
-                : base_ptr<T>{ptr},
-                alloc{allocator}
+                : base_ptr<T>{ptr}
             {
-                create_ctrl_block(alloc_flags, d);
+                create_ctrl_block(allocator, alloc_flags, d);
             }
 
             shared_ptr(const pointer ptr) : shared_ptr{ptr, default_deleter} {}
+            shared_ptr(const pointer ptr, new_tag_t) : shared_ptr{ptr, default_delete_deleter} {}
+
+            // NOTE: This is used internally by the weak pointer implementation
+            // and expects the control block to be already up to date with a new
+            // shared reference when this constructor is called.
+            shared_ptr(
+                const pointer ptr,
+                ctrl_block_type &ctrl_block
+            )
+                : base_ptr<T>{ptr},
+                ctrl_block{&ctrl_block}
+            {}
 
             ~shared_ptr() {
                 if(ctrl_block) { decr_ref_count_and_maybe_delete(); }
@@ -295,7 +346,6 @@ namespace ccl {
                 }
 
                 base_ptr<T>::set(const_cast<pointer>(other.get()));
-                alloc::operator=(other);
                 ctrl_block = other.ctrl_block;
 
                 incr_ref_count();
@@ -315,7 +365,6 @@ namespace ccl {
                     )
                 );
 
-                alloc::operator=(other);
                 ctrl_block = other.ctrl_block;
 
                 incr_ref_count();
@@ -326,21 +375,13 @@ namespace ccl {
             template<typename U>
             shared_ptr& operator=(shared_ptr<U, Allocator> &&other) {
                 base_ptr<T>::operator=(std::move(other));
-                alloc::operator=(std::move(other));
-
                 ccl::swap(ctrl_block, other.ctrl_block);
 
                 return *this;
             }
 
-            template<typename U>
-            void reset(U * const ptr) {
-                *this = shared_ptr{ptr};
-            }
-
             constexpr void swap(shared_ptr &other) noexcept {
                 base_ptr<T>::swap(other);
-                alloc::swap(other);
                 ccl::swap(ctrl_block, other.ctrl_block);
             }
 
@@ -366,18 +407,58 @@ namespace ccl {
     };
 
     template<typename T, typename Allocator>
-    auto operator <=>(const shared_ptr<T, Allocator> &a, const shared_ptr<T, Allocator> &b) {
+    constexpr auto operator <=>(const shared_ptr<T, Allocator> &a, const shared_ptr<T, Allocator> &b) noexcept {
         return a.get() <=> b.get();
     }
 
     template<typename T, typename Allocator>
-    bool operator ==(const shared_ptr<T, Allocator> &a, const shared_ptr<T, Allocator> &b) {
+    constexpr bool operator ==(const shared_ptr<T, Allocator> &a, const shared_ptr<T, Allocator> &b) noexcept {
         return a.get() == b.get();
     }
 
     template<typename T, typename Allocator>
-    bool operator !=(const shared_ptr<T, Allocator> &a, const shared_ptr<T, Allocator> &b) {
+    constexpr bool operator !=(const shared_ptr<T, Allocator> &a, const shared_ptr<T, Allocator> &b) noexcept {
         return a.get() != b.get();
+    }
+
+    /**
+     * Create a new shared pointer by allocating memory via the default allocator
+     * of the given type.
+     *
+     * @tparam T the value type
+     * @tparam Allocator The allocator type. The default allocator of this type will be
+     *  used to allocate both the control block and the data.
+     *
+     * @param alloc_flags Allocation flags for the new value. This does not affect allocation
+     *  of the control block, which will be allocated with the default allocation flags.
+     * @param args The arguments to pass to the constructor.
+     *
+     * @return A new shared pointer.
+     */
+    template<typename T, basic_allocator Allocator = allocator, typename ...Args>
+    shared_ptr<T, Allocator> make_shared_default(const allocation_flags alloc_flags, Args&& ...args) noexcept {
+        return shared_ptr<T, Allocator>{
+            new (get_default_allocator<Allocator>()->allocate(sizeof(T), alignof(T), alloc_flags))
+            T(std::forward<Args>(args)...)
+        };
+    }
+
+    /**
+     * Create a new shared pointer by allocating memory via `new`.
+     *
+     * @tparam T the value type
+     * @tparam Allocator The allocator type. The default allocator of this type will be
+     *  used to allocate the control block.
+     * @param args The arguments to pass to the constructor.
+     *
+     * @return A new shared pointer.
+     */
+    template<typename T, basic_allocator Allocator = allocator, typename ...Args>
+    shared_ptr<T, Allocator> make_shared_new(Args&& ...args) noexcept {
+        return shared_ptr<T, Allocator>{
+            new T(std::forward<Args>(args)...),
+            shared_ptr<T, Allocator>::new_tag
+        };
     }
 }
 
