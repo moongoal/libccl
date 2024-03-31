@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <optional>
+#include <memory>
 #include <ccl/api.hpp>
 #include <ccl/concepts.hpp>
 #include <ccl/memory/allocator.hpp>
