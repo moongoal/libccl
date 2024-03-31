@@ -33,6 +33,7 @@ Unstable: 🔴
 |String|🔴
 |Internationalization Support|🔴
 |Thread communication primitives|🔴
+|Algorithms library|🔴
 
 ## Building
 
