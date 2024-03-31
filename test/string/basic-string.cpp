@@ -1,4 +1,3 @@
-#include <cstring>
 #include <ccl/test/test.hpp>
 #include <ccl/test/counting-test-allocator.hpp>
 #include <ccl/string/basic-string.hpp>

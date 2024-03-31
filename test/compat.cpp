@@ -1,6 +1,5 @@
 #include <string>
 #include <memory>
-#include <typeinfo>
 #include <ccl/test/test.hpp>
 #include <ccl/hash.hpp>
 #include <ccl/compat.hpp>

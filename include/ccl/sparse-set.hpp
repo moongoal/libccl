@@ -57,9 +57,9 @@ namespace ccl {
 
         public:
             constexpr sparse_set(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator}, _data{allocator, alloc_flags}, index_map{allocator, alloc_flags}
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : alloc{allocator}, _data{alloc_flags, allocator}, index_map{alloc_flags, allocator}
             {}
 
             constexpr sparse_set(const sparse_set &other)

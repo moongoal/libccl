@@ -56,7 +56,7 @@ namespace ccl::concurrent {
             /**
              * Allocation flags.
              */
-            allocation_flags alloc_flags;
+            allocation_flags _alloc_flags;
 
         public:
             channel() = delete;
@@ -68,7 +68,7 @@ namespace ccl::concurrent {
                 _capacity{other._capacity},
                 read_index{other.read_index.load()},
                 write_index{other.write_index.load()},
-                alloc_flags{other.alloc_flags}
+                _alloc_flags{other._alloc_flags}
             {
                 other._data = nullptr;
             }
@@ -82,14 +82,14 @@ namespace ccl::concurrent {
              */
             explicit constexpr channel(
                 const size_type capacity,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) : alloc{allocator},
                 _data{alloc::get_allocator()->template allocate<T>(capacity, alloc_flags)},
                 _capacity{capacity},
                 read_index{0},
                 write_index{0},
-                alloc_flags{alloc_flags}
+                _alloc_flags{alloc_flags}
             {
                 CCL_THROW_IF(capacity == 0, std::invalid_argument{"Length must be a positive value."});
 
@@ -114,7 +114,7 @@ namespace ccl::concurrent {
                 other.read_index.store(my_read_index, std::memory_order_relaxed);
                 other.write_index.store(my_write_index, std::memory_order_relaxed);
 
-                ccl::swap(alloc_flags, other.alloc_flags);
+                ccl::swap(_alloc_flags, other._alloc_flags);
 
                 return *this;
             }

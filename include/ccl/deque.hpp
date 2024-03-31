@@ -81,8 +81,8 @@ namespace ccl {
 
         public:
             constexpr deque(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             )
                 : alloc{allocator},
                 _alloc_flags{alloc_flags}

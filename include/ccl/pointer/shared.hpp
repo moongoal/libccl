@@ -174,10 +174,13 @@ namespace ccl {
             }
 
             template<deleter<value_type> Deleter>
-            void create_ctrl_block(const Deleter d = default_deleter) {
+            void create_ctrl_block(
+                const allocation_flags alloc_flags,
+                const Deleter d = default_deleter
+            ) {
                 using ctrl_block_type = internal::shared_ptr_ctrl_block<T, Deleter>;
 
-                ctrl_block = alloc::get_allocator()->template allocate<ctrl_block_type>(1, 0);
+                ctrl_block = alloc::get_allocator()->template allocate<ctrl_block_type>(1, alloc_flags);
 
                 new (ctrl_block) ctrl_block_type{base_ptr<T>::get(), d};
             }
@@ -214,11 +217,16 @@ namespace ccl {
             }
 
             template<deleter<value_type> Deleter>
-            shared_ptr(const pointer ptr, const Deleter d, allocator_type * const allocator = nullptr)
+            shared_ptr(
+                const pointer ptr,
+                const Deleter d,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            )
                 : base_ptr<T>{ptr},
                 alloc{allocator}
             {
-                create_ctrl_block(d);
+                create_ctrl_block(alloc_flags, d);
             }
 
             shared_ptr(const pointer ptr) : shared_ptr{ptr, default_deleter} {}

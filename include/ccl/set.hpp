@@ -184,11 +184,11 @@ namespace ccl {
             static constexpr size_type minimum_capacity = CCL_SET_MINIMUM_CAPACITY;
 
             explicit constexpr set(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) : alloc{allocator},
                 _capacity{0},
-                slot_map{allocator, alloc_flags},
+                slot_map{alloc_flags, allocator},
                 keys{nullptr},
                 alloc_flags{alloc_flags}
             {
@@ -210,9 +210,9 @@ namespace ccl {
             requires std::ranges::input_range<InputRange>
             constexpr set(
                 InputRange&& input,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : set{allocator, alloc_flags} {
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : set{alloc_flags, allocator} {
                 insert_range(input);
             }
 

@@ -212,8 +212,8 @@ namespace ccl {
             );
 
             explicit constexpr hashtable(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) : alloc{allocator}, _capacity{0}, keys{nullptr}, values{nullptr}, alloc_flags{alloc_flags}
             {
                 reserve(minimum_capacity);
@@ -242,8 +242,9 @@ namespace ccl {
             requires std::ranges::input_range<InputRange>
             constexpr hashtable(
                 InputRange&& input,
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
                 allocator_type * const allocator = nullptr
-            ) : hashtable{allocator} {
+            ) : hashtable{alloc_flags, allocator} {
                 std::for_each(
                     input.begin(),
                     input.end(),

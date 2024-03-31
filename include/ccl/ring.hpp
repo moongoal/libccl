@@ -55,8 +55,8 @@ namespace ccl {
         public:
             explicit constexpr ring(
                 const size_type capacity,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator},
                 _read_index{0},
                 _size{0},
@@ -90,12 +90,12 @@ namespace ccl {
             template<std::ranges::input_range InputRange>
             constexpr ring(
                 const InputRange& input,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) noexcept : ring{
                     static_cast<size_type>(std::abs(std::ranges::distance(input))),
-                    allocator,
-                    alloc_flags
+                    alloc_flags,
+                    allocator
                 }
             {
                 if(_capacity > 0) {

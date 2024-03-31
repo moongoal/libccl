@@ -78,12 +78,12 @@ namespace ccl {
 
         public:
             explicit constexpr vector(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator}, _alloc_flags{alloc_flags} {}
 
             constexpr vector(const vector &other)
-                : vector{other.get_allocator(), other._alloc_flags} {
+                : vector{other._alloc_flags, other.get_allocator()} {
                 _alloc_flags = other._alloc_flags;
                 reserve(other._size);
                 std::uninitialized_copy(other.begin(), other.end(), begin());
@@ -104,8 +104,8 @@ namespace ccl {
 
             constexpr vector(
                 std::initializer_list<T> values,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) : alloc{allocator}, _alloc_flags{alloc_flags} {
                 reserve(values.size());
                 std::uninitialized_copy(values.begin(), values.end(), begin());
@@ -115,9 +115,9 @@ namespace ccl {
             template<std::ranges::input_range InputRange>
             constexpr vector(
                 const InputRange& input,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : vector{allocator, alloc_flags} {
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : vector{alloc_flags, allocator} {
                 const size_type input_size = std::abs(std::ranges::distance(input));
 
                 if(input_size > 0) {

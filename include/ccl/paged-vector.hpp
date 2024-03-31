@@ -160,8 +160,8 @@ namespace ccl {
 
         public:
             explicit constexpr page_cloner(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) : alloc{allocator}, alloc_flags{alloc_flags} {}
 
             constexpr pointer clone(const pointer page) const {
@@ -212,7 +212,7 @@ namespace ccl {
             allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
             constexpr void clone_pages_from(const paged_vector& v) {
-                cloner cloner{alloc::get_allocator(), alloc_flags};
+                cloner cloner{alloc_flags, alloc::get_allocator()};
 
                 destroy();
 
@@ -358,10 +358,10 @@ namespace ccl {
 
         public:
             explicit constexpr paged_vector(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) noexcept : alloc{allocator},
-                _pages{allocator, alloc_flags},
+                _pages{alloc_flags, allocator},
                 _size{0},
                 alloc_flags{alloc_flags}
             {}
@@ -384,9 +384,9 @@ namespace ccl {
 
             constexpr paged_vector(
                 std::initializer_list<T> values,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator}, _pages{allocator, alloc_flags}, alloc_flags{alloc_flags} {
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : alloc{allocator}, _pages{alloc_flags, allocator}, alloc_flags{alloc_flags} {
                 reserve(values.size());
                 _size = values.size();
                 std::uninitialized_copy(values.begin(), values.end(), begin());
@@ -395,9 +395,9 @@ namespace ccl {
             template<std::ranges::input_range InputRange>
             constexpr paged_vector(
                 const InputRange& input,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : paged_vector{allocator, alloc_flags} {
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : paged_vector{alloc_flags, allocator} {
                 const size_type input_size = std::abs(std::ranges::distance(input));
 
                 if(input_size > 0) {

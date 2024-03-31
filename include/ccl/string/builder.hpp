@@ -35,9 +35,9 @@ namespace ccl {
 
         public:
             explicit constexpr basic_string_builder(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{allocator, alloc_flags}
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : _data{alloc_flags, allocator}
             {}
 
             explicit constexpr basic_string_builder(
@@ -47,15 +47,15 @@ namespace ccl {
 
             explicit constexpr basic_string_builder(
                 const string_type &s
-            ) : _data{s, s.get_allocator(), s.get_allocation_flags()}
+            ) : _data{s, s.get_allocation_flags(), s.get_allocator()}
             {}
 
             template<size_type N>
             explicit constexpr basic_string_builder(
                 const CharType (&raw)[N],
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : _data{std::span{raw, N - 1}, allocator, alloc_flags}
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : _data{std::span{raw, N - 1}, alloc_flags, allocator}
             {}
 
             constexpr basic_string_builder(const basic_string_builder &other) : _data{other._data} {}
@@ -233,10 +233,10 @@ namespace ccl {
 
             string_type to_string() const {
                 if(_data.is_empty()) {
-                    return string_type{_data.get_allocator(), _data.get_allocation_flags()};
+                    return string_type{_data.get_allocation_flags(), _data.get_allocator()};
                 }
 
-                return string_type{_data.data(), _data.size(), _data.get_allocator(), _data.get_allocation_flags()};
+                return string_type{_data.data(), _data.size(), _data.get_allocation_flags(), _data.get_allocator()};
             }
 
             constexpr void reserve(const size_type length) {

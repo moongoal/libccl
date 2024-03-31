@@ -43,8 +43,8 @@ namespace ccl {
                 typed_allocator<CharType> Allocator2
             > nul_terminated_string(
                 const basic_string<CharType, CharTraits, Allocator2> &str,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) :
                 alloc{allocator},
                 data{

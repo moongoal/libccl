@@ -41,26 +41,26 @@ namespace ccl {
             using char_traits = CharTraits;
 
         private:
-            pointer data = nullptr;
+            pointer _data = nullptr;
             size_type _length = 0;
-            allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
+            allocation_flags _alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS;
 
         public:
              explicit constexpr basic_string(
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ) : alloc{allocator}, alloc_flags{alloc_flags}
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ) : alloc{allocator}, _alloc_flags{alloc_flags}
             {}
 
             constexpr basic_string(
                 const basic_string &other
             ) :
                 alloc{other.get_allocator()},
-                data{other._length ? alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(other._length), other.alloc_flags) : nullptr},
+                _data{other._length ? alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(other._length), other._alloc_flags) : nullptr},
                 _length{other._length},
-                alloc_flags{other.alloc_flags}
+                _alloc_flags{other._alloc_flags}
             {
-                char_traits::copy(data, other.data, _length);
+                char_traits::copy(_data, other._data, _length);
             }
 
             /**
@@ -74,15 +74,15 @@ namespace ccl {
             constexpr basic_string(
                 const_pointer raw,
                 const size_type length,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) :
                 alloc{allocator},
-                data{length ? alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(length), alloc_flags) : nullptr},
+                _data{length ? alloc::get_allocator()->template allocate<value_type>(size_of<value_type>(length), alloc_flags) : nullptr},
                 _length{length},
-                alloc_flags{alloc_flags}
+                _alloc_flags{alloc_flags}
             {
-                char_traits::copy(data, raw, _length);
+                char_traits::copy(_data, raw, _length);
             }
 
             /**
@@ -95,9 +95,9 @@ namespace ccl {
             template<size_type N>
             constexpr basic_string(
                 const CharType (&raw)[N],
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
-            ): basic_string{raw, N - 1, allocator, alloc_flags}
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
+            ): basic_string{raw, N - 1, alloc_flags, allocator}
             {}
 
             constexpr basic_string(basic_string &&other) {
@@ -111,9 +111,9 @@ namespace ccl {
             constexpr auto swap(basic_string &other) noexcept {
                 alloc::swap(other);
 
-                ccl::swap(data, other.data);
+                ccl::swap(_data, other._data);
                 ccl::swap(_length, other._length);
-                ccl::swap(alloc_flags, other.alloc_flags);
+                ccl::swap(_alloc_flags, other._alloc_flags);
             }
 
             /**
@@ -129,7 +129,7 @@ namespace ccl {
              * This function does **not** return a nul-terminated string.
              */
             constexpr const_pointer raw() const noexcept {
-                return data;
+                return _data;
             }
 
             constexpr bool operator==(const basic_string& rhs) const {
@@ -138,7 +138,7 @@ namespace ccl {
                 }
 
                 for(size_type i = 0; i < _length; ++i) {
-                    if(data[i] != rhs.data[i]) {
+                    if(_data[i] != rhs._data[i]) {
                         return false;
                     }
                 }
@@ -150,14 +150,14 @@ namespace ccl {
              * Compares this string with a NUL-terminated string.
              */
             constexpr bool operator==(const_pointer rhs) const {
-                if(!data) {
+                if(!_data) {
                     return char_traits::eq(rhs[0], char_traits::nul());
                 }
 
                 const size_t rhs_len = ::strlen(rhs);
 
                 if(rhs_len == _length) {
-                    return char_traits::compare(rhs, data, _length) == 0;
+                    return char_traits::compare(rhs, _data, _length) == 0;
                 }
 
                 return false;
@@ -178,8 +178,8 @@ namespace ccl {
                 const size_type sz = min(_length, rhs._length);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(data[i], rhs.data[i])) {
-                        return char_traits::lt(data[i], rhs.data[i]);
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(_data[i], rhs._data[i]);
                     }
                 }
 
@@ -190,8 +190,8 @@ namespace ccl {
                 const size_type sz = min(_length, rhs._length);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(data[i], rhs.data[i])) {
-                        return char_traits::lt(data[i], rhs.data[i]);
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(_data[i], rhs._data[i]);
                     }
                 }
 
@@ -202,8 +202,8 @@ namespace ccl {
                 const size_type sz = min(_length, rhs._length);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(data[i], rhs.data[i])) {
-                        return char_traits::lt(rhs.data[i], data[i]);
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(rhs._data[i], _data[i]);
                     }
                 }
 
@@ -214,8 +214,8 @@ namespace ccl {
                 const size_type sz = min(_length, rhs._length);
 
                 for(size_type i = 0; i < sz; ++i) {
-                    if(!char_traits::eq(data[i], rhs.data[i])) {
-                        return char_traits::lt(rhs.data[i], data[i]);
+                    if(!char_traits::eq(_data[i], rhs._data[i])) {
+                        return char_traits::lt(rhs._data[i], _data[i]);
                     }
                 }
 
@@ -226,17 +226,17 @@ namespace ccl {
                 destroy();
 
                 alloc::operator=(rhs.get_allocator());
-                alloc_flags = rhs.get_allocation_flags();
+                _alloc_flags = rhs.get_allocation_flags();
 
-                if(rhs.data) {
-                    data = alloc::get_allocator()->template allocate<value_type>(
+                if(rhs._data) {
+                    _data = alloc::get_allocator()->template allocate<value_type>(
                         size_of<value_type>(rhs.length()),
-                        alloc_flags
+                        _alloc_flags
                     );
 
                     _length = rhs._length;
 
-                    char_traits::copy(data, rhs.data, _length);
+                    char_traits::copy(_data, rhs._data, _length);
                 }
 
                 return *this;
@@ -249,39 +249,39 @@ namespace ccl {
             }
 
             constexpr const_reference operator[](const size_type index) const {
-                return data[index];
+                return _data[index];
             }
 
             constexpr hash_t hash() const {
                 return fnv1a_hash(
                     size_of<value_type>(_length),
-                    reinterpret_cast<const uint8_t*>(data)
+                    reinterpret_cast<const uint8_t*>(_data)
                 );
             }
 
-            constexpr const_iterator begin() const noexcept { return data; }
-            constexpr const_iterator end() const noexcept { return data + _length; }
+            constexpr const_iterator begin() const noexcept { return _data; }
+            constexpr const_iterator end() const noexcept { return _data + _length; }
 
-            constexpr const_iterator cbegin() const noexcept { return data; }
-            constexpr const_iterator cend() const noexcept { return data + _length; }
+            constexpr const_iterator cbegin() const noexcept { return _data; }
+            constexpr const_iterator cend() const noexcept { return _data + _length; }
 
-            constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{data + _length}; }
-            constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{data}; }
+            constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{_data + _length}; }
+            constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{_data}; }
 
-            constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{data + _length}; }
-            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{data}; }
+            constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator{_data + _length}; }
+            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator{_data}; }
 
             void destroy() {
-                if(data) {
-                    alloc::get_allocator()->deallocate(data);
-                    data = nullptr;
+                if(_data) {
+                    alloc::get_allocator()->deallocate(_data);
+                    _data = nullptr;
                     _length = 0;
                 }
             }
 
             constexpr bool is_empty() const noexcept { return _length == 0; }
             constexpr allocator_type* get_allocator() const noexcept { return alloc::get_allocator(); }
-            constexpr allocation_flags get_allocation_flags() const noexcept { return alloc_flags; }
+            constexpr allocation_flags get_allocation_flags() const noexcept { return _alloc_flags; }
 
             /**
              * Copy the contents of this string to a NUL-terminated output.
@@ -292,7 +292,7 @@ namespace ccl {
                 const size_type end = min(_length, out.size() - 1);
 
                 for(size_type i = 0; i < end; ++i) {
-                    char_traits::copy(out.data(), data, end);
+                    char_traits::copy(out.data(), _data, end);
                 }
 
                 out[end] = char_traits::nul();
@@ -305,7 +305,7 @@ namespace ccl {
                     return false;
                 }
 
-                return 0 == char_traits::compare(data, other.data, other._length);
+                return 0 == char_traits::compare(_data, other._data, other._length);
             }
 
             constexpr bool starts_with(const const_pointer other, const size_type other_length) const {
@@ -313,7 +313,7 @@ namespace ccl {
                     return false;
                 }
 
-                return 0 == char_traits::compare(data, other, other_length);
+                return 0 == char_traits::compare(_data, other, other_length);
             }
 
             template<size_type N>
@@ -322,7 +322,7 @@ namespace ccl {
                     return false;
                 }
 
-                return 0 == char_traits::compare(data, other, N - 1);
+                return 0 == char_traits::compare(_data, other, N - 1);
             }
 
             template<
@@ -334,7 +334,7 @@ namespace ccl {
 
                 const size_type delta = _length - other._length;
 
-                return 0 == char_traits::compare(data + delta, other.data, other._length);
+                return 0 == char_traits::compare(_data + delta, other._data, other._length);
             }
 
             constexpr bool ends_with(const const_pointer other, const size_type other_length) const {
@@ -344,7 +344,7 @@ namespace ccl {
 
                 const size_type delta = _length - other_length;
 
-                return 0 == char_traits::compare(data + delta, other, other_length);
+                return 0 == char_traits::compare(_data + delta, other, other_length);
             }
 
             template<size_type N>
@@ -357,15 +357,15 @@ namespace ccl {
 
                 const size_type delta = _length - other_length;
 
-                return 0 == char_traits::compare(data + delta, other, other_length);
+                return 0 == char_traits::compare(_data + delta, other, other_length);
             }
 
             template<
                 typename OtherAllocator
             > constexpr int compare(const basic_string<value_type, char_traits, OtherAllocator> &other) const {
                 const int result = char_traits::compare(
-                    data,
-                    other.data,
+                    _data,
+                    other._data,
                     min(_length, other._length)
                 );
 
@@ -378,12 +378,12 @@ namespace ccl {
 
             static basic_string from_nul_terminated(
                 const const_pointer str,
-                allocator_type * const allocator = nullptr,
-                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS
+                const allocation_flags alloc_flags = CCL_ALLOCATOR_DEFAULT_FLAGS,
+                allocator_type * const allocator = nullptr
             ) {
                 const count_t len = static_cast<count_t>(::strlen(str));
 
-                return basic_string{str, len, allocator, alloc_flags};
+                return basic_string{str, len, alloc_flags, allocator};
             }
     };
 }

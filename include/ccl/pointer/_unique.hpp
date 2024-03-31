@@ -1,3 +1,8 @@
+/**
+ * @internal
+ *
+ * Interface development in progress.
+ */
 #ifndef CCL_POINTER_UNIQUE_HPP
 #define CCL_POINTER_UNIQUE_HPP
 
