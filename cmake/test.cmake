@@ -301,6 +301,11 @@ add_ccl_test(
     COVERAGE include/ccl/concurrent/channel.hpp
 )
 
+add_ccl_test(
+    TEST test_algorithm_search test/algorithm/search.cpp
+    COVERAGE include/algorithm/search.hpp
+)
+
 add_custom_command(
     OUTPUT ${CCL_COVERAGE_DATA_FILE}
     COMMAND llvm-profdata merge ${CCL_COVERAGE_RAW_DATA_FILES} -o ${CCL_COVERAGE_DATA_FILE}
