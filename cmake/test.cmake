@@ -261,6 +261,11 @@ add_ccl_test(
 )
 
 add_ccl_test(
+    TEST test_pool test/pool.cpp
+    COVERAGE include/ccl/pool.hpp
+)
+
+add_ccl_test(
     TEST test_internal_optional_allocator test/internal/optional-allocator.cpp
     COVERAGE include/ccl/internal/optional-allocator.hpp
 )

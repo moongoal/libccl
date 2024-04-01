@@ -24,6 +24,7 @@ Unstable: 🔴
 |Dense Map|🔴
 |Packed Integer|🔴
 |Paged Vector|🔴
+|Pool|🔴
 |Set|🔴
 |Sparse Set|🔴
 |Tagged pointer|🔴
